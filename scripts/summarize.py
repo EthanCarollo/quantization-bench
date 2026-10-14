@@ -16,6 +16,43 @@ BENCHMARKS = (
     "rolebench_generalization",
     "rolebench_role_specific",
 )
+VARIANTS = (
+    {
+        "suffix": "mlx_4bit",
+        "label": "MLX-4-bit",
+        "method": "MLX affine, group 64, 4 bits",
+        "quantization": {"format": "MLX", "mode": "affine", "bits": 4, "group_size": 64},
+        "required": True,
+    },
+    {
+        "suffix": "mlx_8bit",
+        "label": "MLX-8-bit",
+        "method": "MLX affine, group 64, 8 bits",
+        "quantization": {"format": "MLX", "mode": "affine", "bits": 8, "group_size": 64},
+        "required": True,
+    },
+    {
+        "suffix": "gguf_bf16",
+        "label": "GGUF-BF16",
+        "method": "GGUF BF16 (llama.cpp)",
+        "quantization": {"format": "GGUF", "type": "BF16"},
+        "required": False,
+    },
+    {
+        "suffix": "gguf_q8_0",
+        "label": "GGUF-Q8_0",
+        "method": "GGUF Q8_0 (llama.cpp)",
+        "quantization": {"format": "GGUF", "type": "Q8_0"},
+        "required": False,
+    },
+    {
+        "suffix": "gguf_q4_k_m",
+        "label": "GGUF-Q4_K_M",
+        "method": "GGUF Q4_K_M (llama.cpp)",
+        "quantization": {"format": "GGUF", "type": "Q4_K_M"},
+        "required": False,
+    },
+)
 ADDITIONAL_BENCHMARKS = {
     "ifbench": ("prompt_loose_accuracy_100", 300),
     "hle": ("accuracy_100", None),
@@ -27,12 +64,14 @@ def read_jsonl(path: Path) -> list[dict]:
     return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
 
 
-def summarize_pair(model_key: str, bits: int, benchmark: str) -> tuple[float, float]:
-    stem = f"{model_key}_{benchmark}_mlx_{bits}bit"
+def summarize_pair(model_key: str, variant: dict, benchmark: str) -> tuple[float, float] | None:
+    stem = f"{model_key}_{benchmark}_{variant['suffix']}"
     run_path = RESULTS / f"{stem}_runs.jsonl"
     item_path = RESULTS / f"{stem}.jsonl"
     if not run_path.is_file() or not item_path.is_file():
-        raise SystemExit(f"Missing completed benchmark outputs for {stem}")
+        if variant["required"]:
+            raise SystemExit(f"Missing completed benchmark outputs for {stem}")
+        return None
     runs = read_jsonl(run_path)
     items = read_jsonl(item_path)
     if len(runs) != 5 or {row["repetition"] for row in runs} != {1, 2, 3, 4, 5}:
@@ -41,18 +80,32 @@ def summarize_pair(model_key: str, bits: int, benchmark: str) -> tuple[float, fl
         raise SystemExit(f"Expected 50 generated responses for {stem}")
     if any(run["n_examples"] != 10 for run in runs):
         raise SystemExit(f"Expected ten examples in every run for {stem}")
+    if any(
+        run.get("model_key") != model_key
+        or run.get("quantization") != variant["quantization"]
+        for run in runs
+    ):
+        raise SystemExit(f"Model or quantization metadata does not match the scorecard row for {stem}")
     values = [run["macro_rouge_l_f1"] * 100.0 for run in runs]
     return statistics.mean(values), statistics.stdev(values)
 
 
-def summarize_charactereval(model_key: str, bits: int) -> tuple[float, float]:
-    stem = f"{model_key}_charactereval_mlx_{bits}bit"
+def summarize_charactereval(model_key: str, variant: dict) -> tuple[float, float] | None:
+    stem = f"{model_key}_charactereval_{variant['suffix']}"
     path = RESULTS / f"{stem}.jsonl"
     if not path.is_file():
-        raise SystemExit(f"Missing completed CharacterEval outputs for {stem}")
+        if variant["required"]:
+            raise SystemExit(f"Missing completed CharacterEval outputs for {stem}")
+        return None
     items = read_jsonl(path)
     if len(items) != 60 or {row["repetition"] for row in items} != {1, 2, 3, 4, 5}:
         raise SystemExit(f"Expected 60 responses over five repetitions for {stem}")
+    if any(
+        row.get("model_key") != model_key
+        or row.get("quantization") != variant["quantization"]
+        for row in items
+    ):
+        raise SystemExit(f"Model or quantization metadata does not match the scorecard row for {stem}")
     per_run = []
     for repetition in range(1, 6):
         run_items = [row for row in items if row["repetition"] == repetition]
@@ -71,9 +124,9 @@ def summarize_charactereval(model_key: str, bits: int) -> tuple[float, float]:
     return statistics.mean(per_run), statistics.stdev(per_run)
 
 
-def summarize_optional(model_key: str, bits: int, benchmark: str) -> tuple[float, float] | None:
+def summarize_optional(model_key: str, variant: dict, benchmark: str) -> tuple[float, float] | None:
     metric, expected_examples = ADDITIONAL_BENCHMARKS[benchmark]
-    stem = f"{model_key}_{benchmark}_mlx_{bits}bit"
+    stem = f"{model_key}_{benchmark}_{variant['suffix']}"
     path = RESULTS / f"{stem}_runs.jsonl"
     if not path.is_file():
         return None
@@ -83,7 +136,7 @@ def summarize_optional(model_key: str, bits: int, benchmark: str) -> tuple[float
     if any(
         run.get("benchmark") != benchmark
         or run.get("model_key") != model_key
-        or run.get("quantization", {}).get("bits") != bits
+        or run.get("quantization") != variant["quantization"]
         for run in runs
     ):
         return None
@@ -103,13 +156,17 @@ def render_optional(value: tuple[float, float] | None) -> str:
     return "—" if value is None else f"{value[0]:.2f} ± {value[1]:.2f}"
 
 
+def render_score(value: tuple[float, float] | None) -> str:
+    return "—" if value is None else f"{value[0]:.2f} ± {value[1]:.2f}"
+
+
 def main() -> None:
     rows = []
     for model_key, model in REGISTRY.items():
-        for bits in (4, 8):
+        for variant in VARIANTS:
             row = {
-                "quantization": f"MLX-{bits}-bit — {model['display_name']}",
-                "method": f"MLX affine, group 64, {bits} bits",
+                "quantization": f"{variant['label']} — {model['display_name']}",
+                "method": variant["method"],
                 "rolebench_generalization_mean_100": None,
                 "rolebench_generalization_sd_100": None,
                 "rolebench_role_specific_mean_100": None,
@@ -124,17 +181,17 @@ def main() -> None:
                 "livecodebench_pass_at_1_sd_100": None,
                 "parameters": model["parameter_label"],
                 "model_key": model_key,
-                "bits": bits,
+                "variant": variant["suffix"],
             }
             for benchmark in BENCHMARKS:
-                mean, sd = summarize_pair(model_key, bits, benchmark)
-                row[f"{benchmark}_mean_100"] = mean
-                row[f"{benchmark}_sd_100"] = sd
-            mean, sd = summarize_charactereval(model_key, bits)
-            row["charactereval_mean_100"] = mean
-            row["charactereval_sd_100"] = sd
+                result = summarize_pair(model_key, variant, benchmark)
+                if result is not None:
+                    row[f"{benchmark}_mean_100"], row[f"{benchmark}_sd_100"] = result
+            charactereval = summarize_charactereval(model_key, variant)
+            if charactereval is not None:
+                row["charactereval_mean_100"], row["charactereval_sd_100"] = charactereval
             for benchmark in ADDITIONAL_BENCHMARKS:
-                optional = summarize_optional(model_key, bits, benchmark)
+                optional = summarize_optional(model_key, variant, benchmark)
                 prefix = {
                     "ifbench": "ifbench_prompt_accuracy",
                     "hle": "hle_accuracy",
@@ -164,9 +221,21 @@ def main() -> None:
         "|---|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for row in rows:
-        general = f"{row['rolebench_generalization_mean_100']:.2f} ± {row['rolebench_generalization_sd_100']:.2f}"
-        specific = f"{row['rolebench_role_specific_mean_100']:.2f} ± {row['rolebench_role_specific_sd_100']:.2f}"
-        charactereval = f"{row['charactereval_mean_100']:.2f} ± {row['charactereval_sd_100']:.2f}"
+        general = render_score(
+            None if row["rolebench_generalization_mean_100"] is None else (
+                row["rolebench_generalization_mean_100"], row["rolebench_generalization_sd_100"]
+            )
+        )
+        specific = render_score(
+            None if row["rolebench_role_specific_mean_100"] is None else (
+                row["rolebench_role_specific_mean_100"], row["rolebench_role_specific_sd_100"]
+            )
+        )
+        charactereval = render_score(
+            None if row["charactereval_mean_100"] is None else (
+                row["charactereval_mean_100"], row["charactereval_sd_100"]
+            )
+        )
         ifbench = render_optional(
             None if row["ifbench_prompt_accuracy_mean_100"] is None else (
                 row["ifbench_prompt_accuracy_mean_100"], row["ifbench_prompt_accuracy_sd_100"]
@@ -188,7 +257,7 @@ def main() -> None:
         )
     lines += [
         "",
-        "All four variants use MLX affine weight quantization with group size 64. The sampling settings and prompts are held fixed across model variants within each benchmark.",
+        "MLX variants use affine weight quantization with group size 64. GGUF variants use llama.cpp BF16, Q8_0, or Q4_K_M files. Sampling settings and prompts are held fixed across model variants within each benchmark.",
         "",
         "RoleBench ROUGE-L measures wording overlap with one RoleGPT reference, not role-play quality as a percentage. CharacterEval scores come from the authors' human-annotated CharacterRM; they are averaged equally across the 12 dimensions covered by the fixed subset and linearly mapped from 1–5 to 0–100. IFBench reports official prompt-level loose accuracy; HLE reports the official judge accuracy over the text-only subset; LiveCodeBench reports execution-checked pass@1. These scores use different datasets and evaluators and should be compared only within each column.",
         "",
