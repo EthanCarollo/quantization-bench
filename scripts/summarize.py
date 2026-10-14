@@ -4,6 +4,7 @@
 import csv
 import json
 import statistics
+from collections import defaultdict
 from pathlib import Path
 
 
@@ -38,6 +39,32 @@ def summarize_pair(model_key: str, bits: int, benchmark: str) -> tuple[float, fl
     return statistics.mean(values), statistics.stdev(values)
 
 
+def summarize_charactereval(model_key: str, bits: int) -> tuple[float, float]:
+    stem = f"{model_key}_charactereval_mlx_{bits}bit"
+    path = RESULTS / f"{stem}.jsonl"
+    if not path.is_file():
+        raise SystemExit(f"Missing completed CharacterEval outputs for {stem}")
+    items = read_jsonl(path)
+    if len(items) != 60 or {row["repetition"] for row in items} != {1, 2, 3, 4, 5}:
+        raise SystemExit(f"Expected 60 responses over five repetitions for {stem}")
+    per_run = []
+    for repetition in range(1, 6):
+        run_items = [row for row in items if row["repetition"] == repetition]
+        if len(run_items) != 12:
+            raise SystemExit(f"Expected 12 responses in repetition {repetition} for {stem}")
+        by_dimension = defaultdict(list)
+        for item in run_items:
+            scores = item.get("charactereval_scores")
+            if not scores or len(scores) != len(item["metrics"]):
+                raise SystemExit(f"Missing CharacterRM scores for {stem}, item {item['item_id']}")
+            for score in scores:
+                by_dimension[score["metric_en"]].append(score["score_100"])
+        if len(by_dimension) != 12:
+            raise SystemExit(f"Expected all 12 CharacterEval dimensions for {stem}; found {len(by_dimension)}")
+        per_run.append(statistics.mean(statistics.mean(values) for values in by_dimension.values()))
+    return statistics.mean(per_run), statistics.stdev(per_run)
+
+
 def main() -> None:
     rows = []
     for model_key, model in REGISTRY.items():
@@ -49,6 +76,8 @@ def main() -> None:
                 "rolebench_generalization_sd_100": None,
                 "rolebench_role_specific_mean_100": None,
                 "rolebench_role_specific_sd_100": None,
+                "charactereval_mean_100": None,
+                "charactereval_sd_100": None,
                 "parameters": model["parameter_label"],
                 "model_key": model_key,
                 "bits": bits,
@@ -57,6 +86,9 @@ def main() -> None:
                 mean, sd = summarize_pair(model_key, bits, benchmark)
                 row[f"{benchmark}_mean_100"] = mean
                 row[f"{benchmark}_sd_100"] = sd
+            mean, sd = summarize_charactereval(model_key, bits)
+            row["charactereval_mean_100"] = mean
+            row["charactereval_sd_100"] = sd
             rows.append(row)
 
     summary_json = RESULTS / "summary.json"
@@ -72,21 +104,22 @@ def main() -> None:
     lines = [
         "# Role-play benchmark scorecard",
         "",
-        "Each cell is the mean ± sample standard deviation across five run-level means; each run has ten prompts.",
-        "Scores are ROUGE-L F1 multiplied by 100, shown on a 0–100 scale.",
+        "Each cell is the mean ± sample standard deviation across five run-level means; every run uses the fixed prompts for its track.",
+        "RoleBench uses ROUGE-L F1 multiplied by 100; CharacterEval uses CharacterRM mapped to 0–100.",
         "",
-        "| Quantization / model | RoleBench generalization — ROUGE-L /100 | RoleBench role-specific — ROUGE-L /100 | Parameters |",
-        "|---|---:|---:|---:|",
+        "| Quantization / model | RoleBench generalization — ROUGE-L /100 | RoleBench role-specific — ROUGE-L /100 | CharacterEval — CharacterRM /100 | Parameters |",
+        "|---|---:|---:|---:|---:|",
     ]
     for row in rows:
         general = f"{row['rolebench_generalization_mean_100']:.2f} ± {row['rolebench_generalization_sd_100']:.2f}"
         specific = f"{row['rolebench_role_specific_mean_100']:.2f} ± {row['rolebench_role_specific_sd_100']:.2f}"
-        lines.append(f"| {row['quantization']} | {general} | {specific} | {row['parameters']} |")
+        charactereval = f"{row['charactereval_mean_100']:.2f} ± {row['charactereval_sd_100']:.2f}"
+        lines.append(f"| {row['quantization']} | {general} | {specific} | {charactereval} | {row['parameters']} |")
     lines += [
         "",
-        "All four variants use MLX affine weight quantization with group size 64. The sampling settings and ten prompts are held fixed across model variants within each benchmark.",
+        "All four variants use MLX affine weight quantization with group size 64. The sampling settings and prompts are held fixed across model variants within each benchmark.",
         "",
-        "ROUGE-L measures wording overlap with one RoleGPT reference, not role-play quality as a percentage. Scores compare models within each RoleBench track; the two tracks are separate test subsets.",
+        "RoleBench ROUGE-L measures wording overlap with one RoleGPT reference, not role-play quality as a percentage. CharacterEval scores come from the authors' human-annotated CharacterRM; they are averaged equally across the 12 dimensions covered by the fixed subset and linearly mapped from 1–5 to 0–100. The CharacterEval column is a separate dataset and evaluator.",
         "",
     ]
     summary_md.write_text("\n".join(lines), encoding="utf-8")

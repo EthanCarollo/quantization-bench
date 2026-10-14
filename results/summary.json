@@ -6,6 +6,8 @@
     "rolebench_generalization_sd_100": 2.7357230041732277,
     "rolebench_role_specific_mean_100": 14.076843704206905,
     "rolebench_role_specific_sd_100": 0.5723187926309532,
+    "charactereval_mean_100": 62.04435560438368,
+    "charactereval_sd_100": 5.360679199425153,
     "parameters": "2.3B effectifs (5.1B total)",
     "model_key": "gemma4_e2b_it",
     "bits": 4
@@ -17,6 +19,8 @@
     "rolebench_generalization_sd_100": 5.721393877695914,
     "rolebench_role_specific_mean_100": 12.942838694999644,
     "rolebench_role_specific_sd_100": 0.568618636607516,
+    "charactereval_mean_100": 64.2731221516927,
+    "charactereval_sd_100": 4.791385293077978,
     "parameters": "2.3B effectifs (5.1B total)",
     "model_key": "gemma4_e2b_it",
     "bits": 8
@@ -28,6 +32,8 @@
     "rolebench_generalization_sd_100": 1.2530390671433103,
     "rolebench_role_specific_mean_100": 12.350863250177376,
     "rolebench_role_specific_sd_100": 0.614774923973484,
+    "charactereval_mean_100": 56.272379557291664,
+    "charactereval_sd_100": 6.112640379466505,
     "parameters": "4.0B total (3.6B hors embeddings)",
     "model_key": "qwen3_4b",
     "bits": 4
@@ -39,6 +45,8 @@
     "rolebench_generalization_sd_100": 1.7262646193084683,
     "rolebench_role_specific_mean_100": 13.802004901076938,
     "rolebench_role_specific_sd_100": 0.4231988067083685,
+    "charactereval_mean_100": 63.79774305555556,
+    "charactereval_sd_100": 4.144302967676314,
     "parameters": "4.0B total (3.6B hors embeddings)",
     "model_key": "qwen3_4b",
     "bits": 8
