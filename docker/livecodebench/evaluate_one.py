@@ -43,7 +43,7 @@ def build_sample(row):
 def run_child(sample, code, queue):
     try:
         results, metadata = run_test(sample, test=code, debug=False, timeout=TIMEOUT_SECONDS)
-        queue.put({"completed": True, "passed": bool(results) and all(bool(value) for value in results)})
+        queue.put({"completed": True, "passed": bool(results) and all(value is True for value in results)})
     except BaseException as exc:
         queue.put({"completed": False, "passed": False, "grader_error": type(exc).__name__})
 
