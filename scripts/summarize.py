@@ -169,7 +169,12 @@ def render_score(value: tuple[float, float] | None) -> str:
 def main() -> None:
     rows = []
     for model_key, model in REGISTRY.items():
+        supported_variants = set(
+            model.get("scorecard_variants", (variant["suffix"] for variant in VARIANTS))
+        )
         for variant in VARIANTS:
+            if variant["suffix"] not in supported_variants:
+                continue
             row = {
                 "quantization": f"{model['short_name']}@{variant['tag']}",
                 "model_tag": f"{model['short_name']}@{variant['tag']}",

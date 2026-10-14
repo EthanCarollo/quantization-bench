@@ -20,5 +20,29 @@
     "parameter_label": "4.0B total (3.6B hors embeddings)",
     "license": "Apache-2.0",
     "requires_hf_token": false
+  },
+  "ministral_3_3b_instruct_2512": {
+    "model_id": "mistralai/Ministral-3-3B-Instruct-2512",
+    "revision": "b35d4dfe56c142746f54dbd64f579faab2744308",
+    "slug": "ministral-3-3b-instruct-2512",
+    "snapshot_dir": "snapshot-ministral-3-3b-instruct-2512-b35d4dfe",
+    "short_name": "ministral-3-3b",
+    "display_name": "Ministral 3 3B Instruct 2512",
+    "parameter_label": "3.4B language + 0.4B vision",
+    "license": "Apache-2.0",
+    "requires_hf_token": false,
+    "scorecard_variants": ["gguf_bf16", "gguf_q8_0", "gguf_q4_k_m"]
+  },
+  "qwen3_5_4b": {
+    "model_id": "Qwen/Qwen3.5-4B",
+    "revision": "851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a",
+    "slug": "qwen3.5-4b",
+    "snapshot_dir": "snapshot-qwen3-5-4b-851bf6e8",
+    "short_name": "qwen3.5-4b",
+    "display_name": "Qwen3.5-4B",
+    "parameter_label": "5B total (model card)",
+    "license": "Apache-2.0",
+    "requires_hf_token": false,
+    "scorecard_variants": ["gguf_bf16", "gguf_q8_0", "gguf_q4_k_m"]
   }
 }
