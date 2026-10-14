@@ -1,26 +1,46 @@
 [
   {
-    "bits": 4,
-    "method": "MLX affine, group 64; 4.501 reported bits/weight",
-    "n_runs": 5,
-    "n_examples_per_run": 10,
-    "rouge_l_mean": 0.118773923887728,
-    "rouge_l_sample_sd": 0.01920494175688471,
-    "decode_tps_mean": 63.122329861234164,
-    "latency_seconds_mean": 1.4167126367171294,
-    "peak_memory_gib_mean": 2.87601940912,
-    "model_size_gib": 2.455353024415672
+    "quantization": "MLX-4-bit — Gemma 4 E2B IT",
+    "method": "MLX affine, group 64, 4 bits",
+    "rolebench_generalization_mean_100": 30.20355614760612,
+    "rolebench_generalization_sd_100": 2.7357230041732277,
+    "rolebench_role_specific_mean_100": 14.076843704206905,
+    "rolebench_role_specific_sd_100": 0.5723187926309532,
+    "parameters": "2.3B effectifs (5.1B total)",
+    "model_key": "gemma4_e2b_it",
+    "bits": 4
   },
   {
-    "bits": 8,
-    "method": "MLX affine, group 64; 8.500 reported bits/weight",
-    "n_runs": 5,
-    "n_examples_per_run": 10,
-    "rouge_l_mean": 0.2052316729859338,
-    "rouge_l_sample_sd": 0.015512347806023874,
-    "decode_tps_mean": 36.35124782003174,
-    "latency_seconds_mean": 2.440534831655677,
-    "peak_memory_gib_mean": 5.19132376952,
-    "model_size_gib": 4.610565963201225
+    "quantization": "MLX-8-bit — Gemma 4 E2B IT",
+    "method": "MLX affine, group 64, 8 bits",
+    "rolebench_generalization_mean_100": 35.93313537925721,
+    "rolebench_generalization_sd_100": 5.721393877695914,
+    "rolebench_role_specific_mean_100": 12.942838694999644,
+    "rolebench_role_specific_sd_100": 0.568618636607516,
+    "parameters": "2.3B effectifs (5.1B total)",
+    "model_key": "gemma4_e2b_it",
+    "bits": 8
+  },
+  {
+    "quantization": "MLX-4-bit — Qwen3-4B",
+    "method": "MLX affine, group 64, 4 bits",
+    "rolebench_generalization_mean_100": 33.12182141644815,
+    "rolebench_generalization_sd_100": 1.2530390671433103,
+    "rolebench_role_specific_mean_100": 12.350863250177376,
+    "rolebench_role_specific_sd_100": 0.614774923973484,
+    "parameters": "4.0B total (3.6B hors embeddings)",
+    "model_key": "qwen3_4b",
+    "bits": 4
+  },
+  {
+    "quantization": "MLX-8-bit — Qwen3-4B",
+    "method": "MLX affine, group 64, 8 bits",
+    "rolebench_generalization_mean_100": 35.54353749810951,
+    "rolebench_generalization_sd_100": 1.7262646193084683,
+    "rolebench_role_specific_mean_100": 13.802004901076938,
+    "rolebench_role_specific_sd_100": 0.4231988067083685,
+    "parameters": "4.0B total (3.6B hors embeddings)",
+    "model_key": "qwen3_4b",
+    "bits": 8
   }
 ]

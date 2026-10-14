@@ -1,0 +1,16 @@
+{
+  "dataset": "ZenMoore/RoleBench",
+  "dataset_revision": "a57ed54f9613921e4a5f1b63601a558cd5acf971",
+  "license": "Apache-2.0",
+  "benchmark": "RoleBench role-generalization role-specific test subset",
+  "selection": "Python random.Random(42), shuffled selected test file, first example for each distinct role until ten prompts",
+  "source_file_sha256": {
+    "rolebench-eng/role-generalization/role_specific/test.jsonl": "6c4dac115a6af4ec297438baa28d60e299b019333d9fbb74eb53a7cbcfeed864",
+    "profiles-eng/desc.json": "3de3747f40a79a503a4bddbd6a6fc3711c9e4060e6e321e0b6c7bc24f3257862"
+  },
+  "local_file": "data/rolebench-role-specific/rolebench.jsonl",
+  "local_sha256": "ada98667812c71adef1cf2983fe4a99eca62d9c4786c2cd8ce786b47c292646f",
+  "examples": 10,
+  "seed": 42,
+  "reference_field": "generated[0]"
+}

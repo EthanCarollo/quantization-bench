@@ -1,0 +1,22 @@
+{
+  "gemma4_e2b_it": {
+    "model_id": "google/gemma-4-E2B-it",
+    "revision": "3e22461f65e89153144f8adb70e3b8c2cc9845a7",
+    "slug": "gemma-4-e2b-it",
+    "snapshot_dir": "google-gemma-4-e2b-it-3e22461f",
+    "display_name": "Gemma 4 E2B IT",
+    "parameter_label": "2.3B effectifs (5.1B total)",
+    "license": "Gemma Terms of Use",
+    "requires_hf_token": true
+  },
+  "qwen3_4b": {
+    "model_id": "Qwen/Qwen3-4B",
+    "revision": "1cfa9a7208912126459214e8b04321603b3df60c",
+    "slug": "qwen3-4b",
+    "snapshot_dir": "snapshot-qwen3-4b-1cfa9a72",
+    "display_name": "Qwen3-4B",
+    "parameter_label": "4.0B total (3.6B hors embeddings)",
+    "license": "Apache-2.0",
+    "requires_hf_token": false
+  }
+}

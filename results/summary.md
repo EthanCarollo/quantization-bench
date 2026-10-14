@@ -1,14 +1,15 @@
-# Gemma 4 E2B IT — RoleBench mini results
+# Role-play benchmark scorecard
 
-Fixed 10-item RoleBench English role-generalization subset; one unscored warm-up, then five paired sampling seeds per quantization.
-ROUGE-L is the mean of the five per-run macro averages; `±` is sample standard deviation across runs.
-Decode tok/s and response latency are means across all 50 responses per quantization.
+Each cell is the mean ± sample standard deviation across five run-level means; each run has ten prompts.
+Scores are ROUGE-L F1 multiplied by 100, shown on a 0–100 scale.
 
-| Quantization | Method | ROUGE-L F1 (mean ± SD) | Decode tok/s | Latency incl. prefill (s) | Peak MLX memory (GiB) | Model files (GiB) |
-|---|---|---:|---:|---:|---:|---:|
-| 4-bit | MLX affine, group 64; 4.501 reported bits/weight | 0.1188 ± 0.0192 | 63.12 | 1.42 | 2.88 | 2.46 |
-| 8-bit | MLX affine, group 64; 8.500 reported bits/weight | 0.2052 ± 0.0155 | 36.35 | 2.44 | 5.19 | 4.61 |
+| Quantization / model | RoleBench generalization — ROUGE-L /100 | RoleBench role-specific — ROUGE-L /100 | Parameters |
+|---|---:|---:|---:|
+| MLX-4-bit — Gemma 4 E2B IT | 30.20 ± 2.74 | 14.08 ± 0.57 | 2.3B effectifs (5.1B total) |
+| MLX-8-bit — Gemma 4 E2B IT | 35.93 ± 5.72 | 12.94 ± 0.57 | 2.3B effectifs (5.1B total) |
+| MLX-4-bit — Qwen3-4B | 33.12 ± 1.25 | 12.35 ± 0.61 | 4.0B total (3.6B hors embeddings) |
+| MLX-8-bit — Qwen3-4B | 35.54 ± 1.73 | 13.80 ± 0.42 | 4.0B total (3.6B hors embeddings) |
 
-## Interpretation limits
+All four variants use MLX affine weight quantization with group size 64. The sampling settings and ten prompts are held fixed across model variants within each benchmark.
 
-The reference is a single RoleGPT-generated answer. ROUGE-L is deterministic but rewards wording overlap, so this table is a reproducible reference-similarity and local-inference comparison, not a complete or unbiased human assessment of role-play quality. The subset has ten English examples and five random generations per example.
+ROUGE-L measures wording overlap with one RoleGPT reference, not role-play quality as a percentage. Scores compare models within each RoleBench track; the two tracks are separate test subsets.

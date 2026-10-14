@@ -1,3 +1,5 @@
-bits,method,n_runs,n_examples_per_run,rouge_l_mean,rouge_l_sample_sd,decode_tps_mean,latency_seconds_mean,peak_memory_gib_mean,model_size_gib
-4,"MLX affine, group 64; 4.501 reported bits/weight",5,10,0.118773923887728,0.01920494175688471,63.122329861234164,1.4167126367171294,2.87601940912,2.455353024415672
-8,"MLX affine, group 64; 8.500 reported bits/weight",5,10,0.2052316729859338,0.015512347806023874,36.35124782003174,2.440534831655677,5.19132376952,4.610565963201225
+quantization,method,rolebench_generalization_mean_100,rolebench_generalization_sd_100,rolebench_role_specific_mean_100,rolebench_role_specific_sd_100,parameters,model_key,bits
+MLX-4-bit — Gemma 4 E2B IT,"MLX affine, group 64, 4 bits",30.20355614760612,2.7357230041732277,14.076843704206905,0.5723187926309532,2.3B effectifs (5.1B total),gemma4_e2b_it,4
+MLX-8-bit — Gemma 4 E2B IT,"MLX affine, group 64, 8 bits",35.93313537925721,5.721393877695914,12.942838694999644,0.568618636607516,2.3B effectifs (5.1B total),gemma4_e2b_it,8
+MLX-4-bit — Qwen3-4B,"MLX affine, group 64, 4 bits",33.12182141644815,1.2530390671433103,12.350863250177376,0.614774923973484,4.0B total (3.6B hors embeddings),qwen3_4b,4
+MLX-8-bit — Qwen3-4B,"MLX affine, group 64, 8 bits",35.54353749810951,1.7262646193084683,13.802004901076938,0.4231988067083685,4.0B total (3.6B hors embeddings),qwen3_4b,8

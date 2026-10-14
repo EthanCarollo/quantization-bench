@@ -1,5 +1,5 @@
 {
-  "captured_at_utc": "2026-10-14T14:37:48Z",
+  "captured_at_utc": "2026-10-14T15:27:17Z",
   "hardware": {
     "chip": "Apple M4",
     "memory_bytes": 25769803776,
@@ -14,52 +14,103 @@
     "transformers": "5.19.0",
     "rouge_score": "0.1.2"
   },
-  "model": {
-    "id": "google/gemma-4-E2B-it",
-    "revision": "3e22461f65e89153144f8adb70e3b8c2cc9845a7",
-    "source_license": "Apache-2.0",
-    "text_only": true,
-    "quantizations": [
-      {
-        "bits": 4,
-        "format": "MLX",
-        "mode": "affine",
-        "group_size": 64,
-        "non_quantized_dtype": "bfloat16",
-        "reported_effective_bits_per_weight": 4.501,
-        "config_quantization": {
-          "group_size": 64,
+  "models": [
+    {
+      "key": "gemma4_e2b_it",
+      "id": "google/gemma-4-E2B-it",
+      "revision": "3e22461f65e89153144f8adb70e3b8c2cc9845a7",
+      "license": "Gemma Terms of Use",
+      "parameter_label": "2.3B effectifs (5.1B total)",
+      "quantizations": [
+        {
           "bits": 4,
-          "mode": "affine"
+          "format": "MLX",
+          "mode": "affine",
+          "group_size": 64,
+          "non_quantized_dtype": "bfloat16",
+          "reported_effective_bits_per_weight": 4.501,
+          "model_file_size_bytes": 2636415235,
+          "model_file_size_gib": 2.4554
         },
-        "model_file_size_bytes": 2636415235,
-        "model_file_size_gib": 2.4554
+        {
+          "bits": 8,
+          "format": "MLX",
+          "mode": "affine",
+          "group_size": 64,
+          "non_quantized_dtype": "bfloat16",
+          "reported_effective_bits_per_weight": 8.5,
+          "model_file_size_bytes": 4950557507,
+          "model_file_size_gib": 4.6106
+        }
+      ]
+    },
+    {
+      "key": "qwen3_4b",
+      "id": "Qwen/Qwen3-4B",
+      "revision": "1cfa9a7208912126459214e8b04321603b3df60c",
+      "license": "Apache-2.0",
+      "parameter_label": "4.0B total (3.6B hors embeddings)",
+      "quantizations": [
+        {
+          "bits": 4,
+          "format": "MLX",
+          "mode": "affine",
+          "group_size": 64,
+          "non_quantized_dtype": "bfloat16",
+          "reported_effective_bits_per_weight": 4.501,
+          "model_file_size_bytes": 2274515269,
+          "model_file_size_gib": 2.1183
+        },
+        {
+          "bits": 8,
+          "format": "MLX",
+          "mode": "affine",
+          "group_size": 64,
+          "non_quantized_dtype": "bfloat16",
+          "reported_effective_bits_per_weight": 8.5,
+          "model_file_size_bytes": 4285651841,
+          "model_file_size_gib": 3.9913
+        }
+      ]
+    }
+  ],
+  "benchmark": {
+    "name": "RoleBench English fixed subset comparison",
+    "tracks": [
+      {
+        "name": "RoleBench generalization",
+        "benchmark_description": "RoleBench role-generalization generalization test subset",
+        "dataset": "ZenMoore/RoleBench",
+        "dataset_revision": "a57ed54f9613921e4a5f1b63601a558cd5acf971",
+        "license": "Apache-2.0",
+        "examples": 10,
+        "local_sha256": "57a99175bf01a7294049c1e5f2b27c32350b529e9bd9369ab3b61742a2093745",
+        "source_file_sha256": {
+          "rolebench-eng/role-generalization/general/test.jsonl": "ad03a05b0ef5ce8b5315ddc1e878ec73f3b43bbe19cdea337203f9343a8bcf23",
+          "profiles-eng/desc.json": "3de3747f40a79a503a4bddbd6a6fc3711c9e4060e6e321e0b6c7bc24f3257862"
+        },
+        "selection_seed": 42,
+        "reference_field": "generated[0]"
       },
       {
-        "bits": 8,
-        "format": "MLX",
-        "mode": "affine",
-        "group_size": 64,
-        "non_quantized_dtype": "bfloat16",
-        "reported_effective_bits_per_weight": 8.5,
-        "config_quantization": {
-          "group_size": 64,
-          "bits": 8,
-          "mode": "affine"
+        "name": "RoleBench role-specific",
+        "benchmark_description": "RoleBench role-generalization role-specific test subset",
+        "dataset": "ZenMoore/RoleBench",
+        "dataset_revision": "a57ed54f9613921e4a5f1b63601a558cd5acf971",
+        "license": "Apache-2.0",
+        "examples": 10,
+        "local_sha256": "ada98667812c71adef1cf2983fe4a99eca62d9c4786c2cd8ce786b47c292646f",
+        "source_file_sha256": {
+          "rolebench-eng/role-generalization/role_specific/test.jsonl": "6c4dac115a6af4ec297438baa28d60e299b019333d9fbb74eb53a7cbcfeed864",
+          "profiles-eng/desc.json": "3de3747f40a79a503a4bddbd6a6fc3711c9e4060e6e321e0b6c7bc24f3257862"
         },
-        "model_file_size_bytes": 4950557507,
-        "model_file_size_gib": 4.6106
+        "selection_seed": 42,
+        "reference_field": "generated[0]"
       }
-    ]
-  },
-  "benchmark": {
-    "name": "RoleBench English role-generalization mini subset",
-    "dataset": "ZenMoore/RoleBench",
-    "dataset_revision": "a57ed54f9613921e4a5f1b63601a558cd5acf971",
-    "dataset_license": "Apache-2.0",
-    "dataset_local_sha256": "1299896239bba7f070fa9fae65b98475bdc72074d1b20c1f3ce656e2c1bb9009",
-    "examples": 10,
-    "repetitions_per_quantization": 5,
+    ],
+    "examples_per_track": 10,
+    "repetitions_per_model_quantization_track": 5,
+    "measured_responses_per_variant_track": 50,
     "sampling_seeds": [
       42000,
       42001,
@@ -68,7 +119,7 @@
       42004
     ],
     "unscored_warmup_seed": 41999,
-    "metric": "ROUGE-L F1 via rouge-score 0.1.2, no stemming",
+    "metric": "ROUGE-L F1 via rouge-score 0.1.2, no stemming; multiplied by 100 for table display",
     "sampling": {
       "temperature": 1.0,
       "top_p": 0.95,
@@ -76,6 +127,7 @@
       "thinking": false,
       "max_new_tokens": 512
     },
-    "prompt_template_source": "https://github.com/open-compass/opencompass/blob/main/opencompass/configs/datasets/rolebench/role_generalization_eng.py"
+    "prompt_template_source": "https://github.com/open-compass/opencompass/blob/main/opencompass/configs/datasets/rolebench/role_generalization_eng.py",
+    "interpretation_note": "Wording overlap with one RoleGPT reference; not a human role-play quality rating."
   }
 }

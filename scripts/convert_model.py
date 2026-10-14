@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-"""Download a pinned Gemma checkpoint and create a uniform MLX quant."""
+"""Download a pinned HF model and convert it to an MLX affine quantization."""
 
 import argparse
+import json
 import os
 from pathlib import Path
 
@@ -10,25 +11,28 @@ from mlx_lm.convert import convert
 
 
 ROOT = Path(__file__).resolve().parents[1]
-MODEL_ID = "google/gemma-4-E2B-it"
-MODEL_REVISION = "3e22461f65e89153144f8adb70e3b8c2cc9845a7"
+REGISTRY = json.loads((ROOT / "data" / "model_registry.json").read_text(encoding="utf-8"))
 
 
 def main() -> None:
     parser = argparse.ArgumentParser()
+    parser.add_argument("--model", choices=REGISTRY, required=True)
     parser.add_argument("--bits", type=int, choices=(4, 8), required=True)
     args = parser.parse_args()
+
+    config = REGISTRY[args.model]
     token = os.environ.get("HF_TOKEN")
-    if not token:
+    if config["requires_hf_token"] and not token:
         raise SystemExit("Set HF_TOKEN after accepting the Gemma terms on Hugging Face.")
 
-    source_dir = snapshot_download(
-        repo_id=MODEL_ID,
-        revision=MODEL_REVISION,
+    source_dir = ROOT / "models" / config["snapshot_dir"]
+    snapshot_download(
+        repo_id=config["model_id"],
+        revision=config["revision"],
         token=token,
-        local_dir=ROOT / "models" / f"google-gemma-4-e2b-it-{MODEL_REVISION[:8]}",
+        local_dir=source_dir,
     )
-    output_dir = ROOT / "models" / f"gemma-4-e2b-it-mlx-{args.bits}bit"
+    output_dir = ROOT / "models" / f"{config['slug']}-mlx-{args.bits}bit"
     if output_dir.exists():
         raise SystemExit(f"Output already exists: {output_dir}; remove it explicitly to reconvert.")
 
@@ -41,7 +45,10 @@ def main() -> None:
         q_mode="affine",
         dtype="bfloat16",
     )
-    print(f"Created {output_dir} from {MODEL_ID}@{MODEL_REVISION} with MLX affine {args.bits}-bit, group 64.")
+    print(
+        f"Created {output_dir.relative_to(ROOT)} from {config['model_id']}@{config['revision']} "
+        f"with MLX affine {args.bits}-bit, group 64."
+    )
 
 
 if __name__ == "__main__":

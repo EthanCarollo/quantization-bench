@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Aggregate five repeated RoleBench runs into a comparison table."""
+"""Build one scorecard for both RoleBench tracks and all model quantizations."""
 
 import csv
 import json
@@ -9,82 +9,96 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 RESULTS = ROOT / "results"
+REGISTRY = json.loads((ROOT / "data" / "model_registry.json").read_text(encoding="utf-8"))
+BENCHMARKS = (
+    "rolebench_generalization",
+    "rolebench_role_specific",
+)
 
 
 def read_jsonl(path: Path) -> list[dict]:
     return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
 
 
-def main() -> None:
-    summary = []
-    for bits in (4, 8):
-        run_path = RESULTS / f"gemma4_e2b_it_mlx_{bits}bit_runs.jsonl"
-        item_path = RESULTS / f"gemma4_e2b_it_mlx_{bits}bit.jsonl"
-        runs = read_jsonl(run_path)
-        items = read_jsonl(item_path)
-        if len(runs) != 5:
-            raise SystemExit(f"Expected five runs for {bits}-bit; found {len(runs)}.")
-        expected = {1, 2, 3, 4, 5}
-        if {r["repetition"] for r in runs} != expected:
-            raise SystemExit(f"Invalid repetition IDs for {bits}-bit.")
-        per_run = [r["macro_rouge_l_f1"] for r in runs]
-        summary.append(
-            {
-                "bits": bits,
-                "method": f"MLX affine, group 64; {4.501 if bits == 4 else 8.500:.3f} reported bits/weight",
-                "n_runs": len(runs),
-                "n_examples_per_run": runs[0]["n_examples"],
-                "rouge_l_mean": statistics.mean(per_run),
-                "rouge_l_sample_sd": statistics.stdev(per_run),
-                "decode_tps_mean": statistics.mean(r["decode_tps"] for r in items),
-                "latency_seconds_mean": statistics.mean(r["latency_seconds_including_prefill"] for r in items),
-                "peak_memory_gib_mean": statistics.mean(r["peak_memory_gib"] for r in items),
-                "model_size_gib": items[0]["model_size_gib"],
-            }
-        )
+def summarize_pair(model_key: str, bits: int, benchmark: str) -> tuple[float, float]:
+    stem = f"{model_key}_{benchmark}_mlx_{bits}bit"
+    run_path = RESULTS / f"{stem}_runs.jsonl"
+    item_path = RESULTS / f"{stem}.jsonl"
+    if not run_path.is_file() or not item_path.is_file():
+        raise SystemExit(f"Missing completed benchmark outputs for {stem}")
+    runs = read_jsonl(run_path)
+    items = read_jsonl(item_path)
+    if len(runs) != 5 or {row["repetition"] for row in runs} != {1, 2, 3, 4, 5}:
+        raise SystemExit(f"Expected five complete repetitions for {stem}")
+    if len(items) != 50 or {row["repetition"] for row in items} != {1, 2, 3, 4, 5}:
+        raise SystemExit(f"Expected 50 generated responses for {stem}")
+    if any(run["n_examples"] != 10 for run in runs):
+        raise SystemExit(f"Expected ten examples in every run for {stem}")
+    values = [run["macro_rouge_l_f1"] * 100.0 for run in runs]
+    return statistics.mean(values), statistics.stdev(values)
 
-    json_path = RESULTS / "summary.json"
-    csv_path = RESULTS / "summary.csv"
-    md_path = RESULTS / "summary.md"
-    json_path.write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
-    with csv_path.open("w", newline="", encoding="utf-8") as file:
-        writer = csv.DictWriter(file, fieldnames=list(summary[0]), lineterminator="\n")
+
+def main() -> None:
+    rows = []
+    for model_key, model in REGISTRY.items():
+        for bits in (4, 8):
+            row = {
+                "quantization": f"MLX-{bits}-bit — {model['display_name']}",
+                "method": f"MLX affine, group 64, {bits} bits",
+                "rolebench_generalization_mean_100": None,
+                "rolebench_generalization_sd_100": None,
+                "rolebench_role_specific_mean_100": None,
+                "rolebench_role_specific_sd_100": None,
+                "parameters": model["parameter_label"],
+                "model_key": model_key,
+                "bits": bits,
+            }
+            for benchmark in BENCHMARKS:
+                mean, sd = summarize_pair(model_key, bits, benchmark)
+                row[f"{benchmark}_mean_100"] = mean
+                row[f"{benchmark}_sd_100"] = sd
+            rows.append(row)
+
+    summary_json = RESULTS / "summary.json"
+    summary_csv = RESULTS / "summary.csv"
+    summary_md = RESULTS / "summary.md"
+    summary_json.write_text(json.dumps(rows, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    columns = list(rows[0])
+    with summary_csv.open("w", newline="", encoding="utf-8") as file:
+        writer = csv.DictWriter(file, fieldnames=columns, lineterminator="\n")
         writer.writeheader()
-        writer.writerows(summary)
+        writer.writerows(rows)
 
     lines = [
-        "# Gemma 4 E2B IT — RoleBench mini results",
+        "# Role-play benchmark scorecard",
         "",
-        "Fixed 10-item RoleBench English role-generalization subset; one unscored warm-up, then five paired sampling seeds per quantization.",
-        "ROUGE-L is the mean of the five per-run macro averages; `±` is sample standard deviation across runs.",
-        "Decode tok/s and response latency are means across all 50 responses per quantization.",
+        "Each cell is the mean ± sample standard deviation across five run-level means; each run has ten prompts.",
+        "Scores are ROUGE-L F1 multiplied by 100, shown on a 0–100 scale.",
         "",
-        "| Quantization | Method | ROUGE-L F1 (mean ± SD) | Decode tok/s | Latency incl. prefill (s) | Peak MLX memory (GiB) | Model files (GiB) |",
-        "|---|---|---:|---:|---:|---:|---:|",
+        "| Quantization / model | RoleBench generalization — ROUGE-L /100 | RoleBench role-specific — ROUGE-L /100 | Parameters |",
+        "|---|---:|---:|---:|",
     ]
-    for row in summary:
-        lines.append(
-            f"| {row['bits']}-bit | {row['method']} | {row['rouge_l_mean']:.4f} ± {row['rouge_l_sample_sd']:.4f} "
-            f"| {row['decode_tps_mean']:.2f} | {row['latency_seconds_mean']:.2f} "
-            f"| {row['peak_memory_gib_mean']:.2f} | {row['model_size_gib']:.2f} |"
-        )
+    for row in rows:
+        general = f"{row['rolebench_generalization_mean_100']:.2f} ± {row['rolebench_generalization_sd_100']:.2f}"
+        specific = f"{row['rolebench_role_specific_mean_100']:.2f} ± {row['rolebench_role_specific_sd_100']:.2f}"
+        lines.append(f"| {row['quantization']} | {general} | {specific} | {row['parameters']} |")
     lines += [
         "",
-        "## Interpretation limits",
+        "All four variants use MLX affine weight quantization with group size 64. The sampling settings and ten prompts are held fixed across model variants within each benchmark.",
         "",
-        "The reference is a single RoleGPT-generated answer. ROUGE-L is deterministic but rewards wording overlap, so this table is a reproducible reference-similarity and local-inference comparison, not a complete or unbiased human assessment of role-play quality. The subset has ten English examples and five random generations per example.",
+        "ROUGE-L measures wording overlap with one RoleGPT reference, not role-play quality as a percentage. Scores compare models within each RoleBench track; the two tracks are separate test subsets.",
         "",
     ]
-    md_path.write_text("\n".join(lines), encoding="utf-8")
+    summary_md.write_text("\n".join(lines), encoding="utf-8")
 
-    readme = (ROOT / "README.md").read_text(encoding="utf-8")
-    generated = "\n".join(lines[6:10])
+    readme_path = ROOT / "README.md"
+    readme = readme_path.read_text(encoding="utf-8")
     start = "<!-- BENCHMARK_RESULTS_START -->"
     end = "<!-- BENCHMARK_RESULTS_END -->"
     before, rest = readme.split(start, 1)
     _, after = rest.split(end, 1)
-    (ROOT / "README.md").write_text(f"{before}{start}\n\n{generated}\n\n{end}{after}", encoding="utf-8")
-    print(md_path.read_text(encoding="utf-8"))
+    readme_path.write_text(f"{before}{start}\n\n{chr(10).join(lines[5:])}\n{end}{after}", encoding="utf-8")
+    print(summary_md.read_text(encoding="utf-8"))
 
 
 if __name__ == "__main__":
