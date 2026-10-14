@@ -4,7 +4,7 @@ A reproducible comparison of compact open-weight models on role-play and charact
 
 **[Open the interactive results page](https://ethancarollo.github.io/roleplay-bench-results/)** · français / English
 
-The current snapshot compares Gemma 4 E2B IT and Qwen3-4B in MLX 4-bit and 8-bit formats. It reports five-run means and sample standard deviations for two RoleBench tracks and CharacterEval. Other benchmark and GGUF results are still pending; blank scores are not zeros.
+The current snapshot compares Gemma 4 E2B IT and Qwen3-4B in MLX 4-bit and 8-bit formats, plus GGUF BF16, Q8_0, and Q4_K_M variants. Each model–quantization pair has five runs for two RoleBench tracks and CharacterEval; the scorecard reports means and sample standard deviations. IFBench, Humanity’s Last Exam, and LiveCodeBench remain pending; blank scores are not zeros.
 
 The website explains the metrics, protocol, quantization, limitations, and reproduction steps. For raw outputs and machine-readable tables, see [`results/`](results/), especially [`summary.csv`](results/summary.csv), [`summary.json`](results/summary.json), and [`environment.json`](results/environment.json). Dataset revisions and selected examples are documented in [`data/`](data/).
 

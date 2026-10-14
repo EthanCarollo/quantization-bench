@@ -41,6 +41,27 @@
           "reported_effective_bits_per_weight": 8.5,
           "model_file_size_bytes": 4950557507,
           "model_file_size_gib": 4.6106
+        },
+        {
+          "format": "GGUF",
+          "type": "BF16",
+          "runtime": "llama.cpp",
+          "model_file_size_bytes": 9311305152,
+          "model_file_size_gib": 8.6718
+        },
+        {
+          "format": "GGUF",
+          "type": "Q8_0",
+          "runtime": "llama.cpp",
+          "model_file_size_bytes": 4967497152,
+          "model_file_size_gib": 4.6263
+        },
+        {
+          "format": "GGUF",
+          "type": "Q4_K_M",
+          "runtime": "llama.cpp",
+          "model_file_size_bytes": 3427880384,
+          "model_file_size_gib": 3.1925
         }
       ]
     },
@@ -70,6 +91,27 @@
           "reported_effective_bits_per_weight": 8.5,
           "model_file_size_bytes": 4285651841,
           "model_file_size_gib": 3.9913
+        },
+        {
+          "format": "GGUF",
+          "type": "BF16",
+          "runtime": "llama.cpp",
+          "model_file_size_bytes": 8051285280,
+          "model_file_size_gib": 7.4983
+        },
+        {
+          "format": "GGUF",
+          "type": "Q8_0",
+          "runtime": "llama.cpp",
+          "model_file_size_bytes": 4280405280,
+          "model_file_size_gib": 3.9864
+        },
+        {
+          "format": "GGUF",
+          "type": "Q4_K_M",
+          "runtime": "llama.cpp",
+          "model_file_size_bytes": 2497280800,
+          "model_file_size_gib": 2.3258
         }
       ]
     }
@@ -165,14 +207,19 @@
           "aggregation": "For each repetition, average examples within each dimension, then give each of 12 dimensions equal weight."
         },
         "evaluator_runtime": {
-          "hardware": "NVIDIA GeForce RTX 5060 Ti 16GB VRAM; AMD Ryzen 7 9800X3D; 29 GiB RAM",
-          "os": "Ubuntu 26.04.1 LTS x86_64",
-          "python": "3.14.7",
+          "hardware": "NVIDIA GeForce RTX 5060 Ti 16GB VRAM; 15.2 GiB system RAM",
+          "os": "Ubuntu 26.04 LTS x86_64 (WSL2)",
+          "python": "3.14.6",
           "torch": "2.14.0+cu130",
           "cuda": "13.0",
+          "cuda_toolkit": "13.3.73",
           "transformers": "5.17.0",
           "accelerate": "1.15.0",
-          "device_map": "20 of 40 Baichuan layers on GPU; remaining layers on CPU"
+          "device_map": "20 of 40 Baichuan layers on cuda:0; remaining 20 layers, norm, and score head on CPU",
+          "max_memory": {
+            "cuda:0": "14GiB",
+            "cpu": "14GiB"
+          }
         }
       }
     ],
@@ -197,5 +244,67 @@
     },
     "prompt_template_source": "https://github.com/open-compass/opencompass/blob/main/opencompass/configs/datasets/rolebench/role_generalization_eng.py",
     "interpretation_note": "Wording overlap with one RoleGPT reference; not a human role-play quality rating."
+  },
+  "gguf_evaluation": {
+    "captured_at_utc": "2026-10-14T18:06:34Z",
+    "hardware": {
+      "gpu": "NVIDIA GeForce RTX 5060 Ti",
+      "gpu_vram_mib": 16311,
+      "system_ram_gib": 15.2,
+      "os": "Ubuntu 26.04 LTS on WSL2"
+    },
+    "software": {
+      "python": "3.14.6",
+      "torch": "2.14.0+cu130",
+      "pytorch_cuda": "13.0",
+      "cuda_toolkit": "13.3.73",
+      "transformers": "5.17.0",
+      "accelerate": "1.15.0",
+      "llama_cpp": "529ac893e754e95a50469b2122f5efe28dfc08a0"
+    },
+    "build": {
+      "ggml_cuda": true,
+      "gpu_layers": "all",
+      "context_size": 8192
+    },
+    "models": [
+      {
+        "model_key": "gemma4_e2b_it",
+        "quantization": "BF16",
+        "file_size_bytes": 9311305152
+      },
+      {
+        "model_key": "gemma4_e2b_it",
+        "quantization": "Q8_0",
+        "file_size_bytes": 4967497152
+      },
+      {
+        "model_key": "gemma4_e2b_it",
+        "quantization": "Q4_K_M",
+        "file_size_bytes": 3427880384
+      },
+      {
+        "model_key": "qwen3_4b",
+        "quantization": "BF16",
+        "file_size_bytes": 8051285280
+      },
+      {
+        "model_key": "qwen3_4b",
+        "quantization": "Q8_0",
+        "file_size_bytes": 4280405280
+      },
+      {
+        "model_key": "qwen3_4b",
+        "quantization": "Q4_K_M",
+        "file_size_bytes": 2497280800
+      }
+    ],
+    "charactereval_evaluator": {
+      "model_id": "morecry/BaichuanCharRM",
+      "revision": "e953da5f57b86db7adca3a2714b4c3720f5b96a2",
+      "ratings_completed": 990,
+      "gpu_memory_limit": "14GiB",
+      "cpu_memory_limit": "14GiB"
+    }
   }
 }

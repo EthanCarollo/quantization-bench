@@ -18,6 +18,8 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--profiles", type=Path, required=True)
     parser.add_argument("--offload-dir", type=Path, required=True)
+    parser.add_argument("--gpu-memory", default="14GiB", help="Maximum GPU memory assigned to the reward model.")
+    parser.add_argument("--cpu-memory", default="26GiB", help="Maximum host memory assigned to the reward model.")
     parser.add_argument("files", nargs="+", type=Path)
     args = parser.parse_args()
 
@@ -49,7 +51,7 @@ def main() -> None:
         trust_remote_code=True,
         dtype=torch.bfloat16,
         device_map="auto",
-        max_memory={0: "14GiB", "cpu": "26GiB"},
+        max_memory={0: args.gpu_memory, "cpu": args.cpu_memory},
         offload_folder=str(args.offload_dir),
         low_cpu_mem_usage=True,
         use_safetensors=False,

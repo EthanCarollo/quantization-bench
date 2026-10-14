@@ -110,15 +110,15 @@
         <p class="section-intro" data-i18n="method.intro">Modèles et quantifications utilisent les mêmes prompts et paramètres de génération au sein d’un benchmark. Les données brutes, versions des sources et sommes de contrôle sont conservées dans le dépôt.</p>
       </div>
       <div class="method-grid">
-        <article class="method-card method-large"><span class="method-number">A</span><div><h3 data-i18n="method.modelsTitle">Modèles comparés</h3><p data-i18n="method.modelsBody">Google Gemma 4 E2B IT (2,3B paramètres actifs, 5,1B avec embeddings) et Qwen3-4B (4,0B au total). Les poids et jeux de données sont épinglés à des révisions précises. Les modèles sont exécutés en MLX sur Apple Silicon.</p><div class="tag-row"><span>Gemma 4 E2B IT</span><span>Qwen3-4B</span><span>MLX 4-bit / 8-bit</span></div></div></article>
-        <article class="method-card"><span class="method-number">B</span><div><h3 data-i18n="method.quantTitle">Quantification</h3><p data-i18n="method.quantBody">MLX affine, poids quantifiés par groupes de 64; les autres tenseurs restent en bfloat16. Les variantes GGUF prévues sont BF16, Q8_0 et Q4_K_M. Aucun score GGUF n’est publié tant que ses cinq runs ne sont pas complets.</p></div></article>
+        <article class="method-card method-large"><span class="method-number">A</span><div><h3 data-i18n="method.modelsTitle">Modèles comparés</h3><p data-i18n="method.modelsBody">Google Gemma 4 E2B IT (2,3B paramètres actifs, 5,1B avec embeddings) et Qwen3-4B (4,0B au total). Les poids et jeux de données sont épinglés à des révisions précises. MLX tourne sur Apple Silicon; llama.cpp et GGUF tournent sur CUDA.</p><div class="tag-row"><span>Gemma 4 E2B IT</span><span>Qwen3-4B</span><span>MLX 4-bit / 8-bit</span><span>GGUF BF16 / Q8_0 / Q4_K_M</span></div></div></article>
+        <article class="method-card"><span class="method-number">B</span><div><h3 data-i18n="method.quantTitle">Quantification</h3><p data-i18n="method.quantBody">MLX utilise une quantification affine des poids par groupes de 64; les autres tenseurs restent en bfloat16. Les fichiers GGUF BF16, Q8_0 et Q4_K_M sont convertis depuis les révisions épinglées avec llama.cpp.</p></div></article>
         <article class="method-card"><span class="method-number">C</span><div><h3 data-i18n="method.repeatsTitle">Répétitions et incertitude</h3><p data-i18n="method.repeatsBody">Chaque variante a un échauffement non noté puis cinq graines fixes. Le tableau présente la moyenne des scores par run et l’écart-type d’échantillon entre les runs. L’écart-type décrit la variation observée, pas un intervalle de confiance.</p></div></article>
         <article class="method-card"><span class="method-number">D</span><div><h3 data-i18n="method.samplingTitle">Génération</h3><p data-i18n="method.samplingBody">RoleBench et CharacterEval: température 1, top-p 0,95, top-k 64, réflexion désactivée, limite de 512 nouveaux tokens. Les réglages officiels propres à IFBench, HLE et LiveCodeBench s’appliquent lorsqu’ils seront exécutés.</p></div></article>
         <article class="method-card hardware-card"><span class="hardware-icon">⌘</span><div><h3 data-i18n="method.hardwareTitle">Environnement enregistré</h3><p id="environment-summary" data-i18n="method.hardwareLoading">Lecture de l’environnement de génération…</p></div><a href="https://github.com/EthanCarollo/roleplay-bench-results/blob/main/results/environment.json" aria-label="Environment metadata">↗</a></article>
       </div>
       <details class="pending-details">
-        <summary><span data-i18n="pending.title">Les résultats encore attendus</span><span class="summary-count">06 variantes · 03 mesures</span><span class="summary-plus">+</span></summary>
-        <div class="pending-content"><p data-i18n="pending.intro">Le scorecard inclut aussi des emplacements pour des comparaisons non terminées. Une case vide signifie qu’il n’existe pas encore cinq runs valides; elle ne vaut pas zéro.</p><div class="pending-list"><div><strong>GGUF</strong><span data-i18n="pending.gguf">BF16, Q8_0 et Q4_K_M pour chacun des deux modèles</span></div><div><strong>IFBench</strong><span data-i18n="pending.ifbench">300 consignes · exactitude « loose » officielle</span></div><div><strong>Humanity’s Last Exam</strong><span data-i18n="pending.hle">Questions texte uniquement · jeu soumis à accès contrôlé et juge officiel</span></div><div><strong>LiveCodeBench v6</strong><span data-i18n="pending.lcb">1 055 problèmes v6-lite · pass@1 vérifié par exécution</span></div></div></div>
+        <summary><span data-i18n="pending.title">Les résultats encore attendus</span><span class="summary-count" data-i18n="pending.count">03 benchmarks optionnels</span><span class="summary-plus">+</span></summary>
+        <div class="pending-content"><p data-i18n="pending.intro">Ces trois benchmarks supplémentaires restent à exécuter. Une case vide signifie qu’il n’existe pas encore cinq runs valides; elle ne vaut pas zéro.</p><div class="pending-list"><div><strong>IFBench</strong><span data-i18n="pending.ifbench">300 consignes · exactitude « loose » officielle</span></div><div><strong>Humanity’s Last Exam</strong><span data-i18n="pending.hle">Questions texte uniquement · jeu soumis à accès contrôlé et juge officiel</span></div><div><strong>LiveCodeBench v6</strong><span data-i18n="pending.lcb">1 055 problèmes v6-lite · pass@1 vérifié par exécution</span></div></div></div>
       </details>
     </section>
 
@@ -166,6 +166,15 @@ for model in gemma4_e2b_it qwen3_4b; do
   done
 done
 
+# GGUF variants (Linux with CUDA)
+.venv/bin/pip install -r requirements-gguf.txt
+git clone https://github.com/ggml-org/llama.cpp.git "$HOME/.cache/roleplay-bench/llama.cpp"
+git -C "$HOME/.cache/roleplay-bench/llama.cpp" checkout 529ac893e754e95a50469b2122f5efe28dfc08a0
+cmake -S "$HOME/.cache/roleplay-bench/llama.cpp" -B "$HOME/.cache/roleplay-bench/llama.cpp/build" -DGGML_CUDA=ON -DCMAKE_BUILD_TYPE=Release
+cmake --build "$HOME/.cache/roleplay-bench/llama.cpp/build" -j 4 --target llama-server llama-quantize
+.venv/bin/python scripts/convert_gguf_models.py
+.venv/bin/python scripts/run_gguf_benchmarks.py
+
 # HLE's official structured-answer judge (makes API requests).
 for model in gemma4_e2b_it qwen3_4b; do
   for bits in 4 8; do
@@ -186,7 +195,9 @@ python3 -m pip install -r requirements-charactereval-evaluator.txt
 python3 scripts/evaluate_charactereval.py \
   --profiles data/charactereval-mini/character_profiles.json \
   --offload-dir /path/to/charactereval-offload \
-  results/*_charactereval_mlx_*bit.jsonl
+  --gpu-memory 14GiB --cpu-memory 14GiB \
+  results/*_charactereval_mlx_*bit.jsonl \
+  results/*_charactereval_gguf_*.jsonl
 
 .venv/bin/python scripts/summarize.py</code></pre><p class="command-note" data-i18n="reproduce.commandNote">Le script de synthèse régénère le CSV, le JSON et la copie de données utilisée par cette page.</p></details>
           <div class="requirements-row"><span class="requirements-number">02</span><div><h3 data-i18n="reproduce.rawTitle">Données et licences</h3><p data-i18n="reproduce.rawBody">Les exemples retenus, profils, sources épinglées et empreintes sont dans data/. Les réponses générées et scores par exemple sont dans results/. Respectez les licences et attributions des jeux de données sources.</p><div class="resource-links"><a href="https://github.com/EthanCarollo/roleplay-bench-results/tree/main/data" data-i18n="reproduce.dataLink">Données et révisions ↗</a><a href="https://github.com/EthanCarollo/roleplay-bench-results/tree/main/scripts" data-i18n="reproduce.scriptsLink">Scripts du benchmark ↗</a><a href="https://github.com/EthanCarollo/roleplay-bench-results/blob/main/results/summary.json" data-i18n="reproduce.jsonLink">Scorecard JSON ↗</a></div></div></div>

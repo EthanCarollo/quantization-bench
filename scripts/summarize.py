@@ -21,6 +21,7 @@ VARIANTS = (
     {
         "suffix": "mlx_4bit",
         "label": "MLX-4-bit",
+        "tag": "mlx4",
         "method": "MLX affine, group 64, 4 bits",
         "quantization": {"format": "MLX", "mode": "affine", "bits": 4, "group_size": 64},
         "required": True,
@@ -28,6 +29,7 @@ VARIANTS = (
     {
         "suffix": "mlx_8bit",
         "label": "MLX-8-bit",
+        "tag": "mlx8",
         "method": "MLX affine, group 64, 8 bits",
         "quantization": {"format": "MLX", "mode": "affine", "bits": 8, "group_size": 64},
         "required": True,
@@ -35,6 +37,7 @@ VARIANTS = (
     {
         "suffix": "gguf_bf16",
         "label": "GGUF-BF16",
+        "tag": "bf16",
         "method": "GGUF BF16 (llama.cpp)",
         "quantization": {"format": "GGUF", "type": "BF16"},
         "required": False,
@@ -42,6 +45,7 @@ VARIANTS = (
     {
         "suffix": "gguf_q8_0",
         "label": "GGUF-Q8_0",
+        "tag": "q8_0",
         "method": "GGUF Q8_0 (llama.cpp)",
         "quantization": {"format": "GGUF", "type": "Q8_0"},
         "required": False,
@@ -49,6 +53,7 @@ VARIANTS = (
     {
         "suffix": "gguf_q4_k_m",
         "label": "GGUF-Q4_K_M",
+        "tag": "q4_k_m",
         "method": "GGUF Q4_K_M (llama.cpp)",
         "quantization": {"format": "GGUF", "type": "Q4_K_M"},
         "required": False,
@@ -166,7 +171,9 @@ def main() -> None:
     for model_key, model in REGISTRY.items():
         for variant in VARIANTS:
             row = {
-                "quantization": f"{variant['label']} — {model['display_name']}",
+                "quantization": f"{model['short_name']}@{variant['tag']}",
+                "model_tag": f"{model['short_name']}@{variant['tag']}",
+                "model_name": model["display_name"],
                 "method": variant["method"],
                 "rolebench_generalization_mean_100": None,
                 "rolebench_generalization_sd_100": None,
@@ -224,7 +231,7 @@ def main() -> None:
         "Each populated cell is the mean ± sample standard deviation across five run-level means; a dash means that five-run result is not yet available.",
         "RoleBench uses ROUGE-L F1 multiplied by 100; CharacterEval uses CharacterRM mapped to 0–100; IFBench uses loose accuracy; HLE uses text-only judge accuracy; LiveCodeBench uses pass@1.",
         "",
-        "| Quantization / model | RoleBench generalization — ROUGE-L /100 | RoleBench role-specific — ROUGE-L /100 | CharacterEval — CharacterRM /100 | IFBench — loose /100 | HLE text-only — accuracy /100 | LiveCodeBench v6 — pass@1 /100 | Parameters |",
+        "| Model variant | RoleBench generalization — ROUGE-L /100 | RoleBench role-specific — ROUGE-L /100 | CharacterEval — CharacterRM /100 | IFBench — loose /100 | HLE text-only — accuracy /100 | LiveCodeBench v6 — pass@1 /100 | Parameters |",
         "|---|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for row in rows:
@@ -259,7 +266,7 @@ def main() -> None:
             )
         )
         lines.append(
-            f"| {row['quantization']} | {general} | {specific} | {charactereval} | "
+            f"| {row['model_tag']} | {general} | {specific} | {charactereval} | "
             f"{ifbench} | {hle} | {livecodebench} | {row['parameters']} |"
         )
     lines += [
