@@ -2,6 +2,12 @@
 models/
 .cache/
 hf-cache/
+results/*_hle_mlx_*bit.jsonl
+results/*_hle_mlx_*bit_scored.jsonl
+results/*_ifbench_mlx_*bit.jsonl
+results/*_ifbench_mlx_*bit_scored.jsonl
+results/*_livecodebench_v6_mlx_*bit.jsonl
+results/*_livecodebench_v6_mlx_*bit_scored.jsonl
 __pycache__/
 *.py[cod]
 .env

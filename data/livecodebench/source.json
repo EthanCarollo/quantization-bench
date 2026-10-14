@@ -1,0 +1,28 @@
+{
+  "benchmark": "LiveCodeBench code generation v6",
+  "dataset_repository": "livecodebench/code_generation_lite",
+  "dataset_revision": "175d0ac20500fd7aa0813f7a2e6ae7ecad3c76c9",
+  "dataset_config": "release_v6",
+  "dataset_split": "test",
+  "examples": 1055,
+  "dataset_card_license": "cc",
+  "selection": "All rows in release_v6; no sampling.",
+  "parquet_snapshot_download_size_bytes": 4334453467,
+  "official_repository": "https://github.com/LiveCodeBench/LiveCodeBench",
+  "official_repository_revision": "28fef95ea8c9f7a547c8329fcd3d32b92c1fa24",
+  "metric": "Python code-generation pass@1 from five independently seeded one-sample repetitions; execution-based.",
+  "generation": {
+    "temperature": 0.2,
+    "top_p": 0.95,
+    "max_new_tokens": 2000,
+    "thinking": false
+  },
+  "execution": {
+    "official_checker": "lcb_runner/evaluation/testing_util.py",
+    "timeout_seconds": 6,
+    "container_network": "disabled",
+    "container_root_filesystem": "read-only",
+    "container_limitations": "Docker resource limits and no host credentials or dataset mounts"
+  },
+  "upstream_protocol_note": "The upstream runner uses n=10 and reports pass@1/pass@5; this repository's five-repeat protocol averages five one-sample pass rates instead."
+}
