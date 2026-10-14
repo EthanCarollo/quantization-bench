@@ -1,0 +1,16 @@
+{
+  "benchmark": "IFBench",
+  "upstream_repository": "https://github.com/allenai/IFBench",
+  "upstream_revision": "1c40f0c10d9b5c5c2f10a175a28007ebb64f7f4d",
+  "dataset_repository": "allenai/IFBench_test",
+  "dataset_revision": "2e8a48de45ff3bf41242f927254ca81b59ca3ae2",
+  "dataset_split": "train",
+  "examples": 300,
+  "dataset_license": "ODC-BY-1.0",
+  "verifier_license": "Apache-2.0",
+  "selection": "All rows of the pinned official test split; no sampling.",
+  "local_file": "IFBench_test.jsonl",
+  "local_sha256": "d2ada7da94a38cfe406351614c4e686846ed2da6d1b339db95fa5ead19554a4a",
+  "metric": "Prompt-level loose accuracy; official verifier; percentage on a 0-100 scale.",
+  "paper": "https://arxiv.org/abs/2507.02833"
+}

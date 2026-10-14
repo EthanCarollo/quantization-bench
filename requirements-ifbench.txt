@@ -1,0 +1,2 @@
+# Official IFBench verifier implementation, pinned to the source revision in data/ifbench/source.json.
+ifbench @ git+https://github.com/allenai/IFBench.git@1c40f0c10d9b5c5c2f10a175a28007ebb64f7f4d
