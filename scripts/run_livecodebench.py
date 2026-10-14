@@ -87,7 +87,7 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--model", choices=REGISTRY, required=True)
     parser.add_argument("--bits", type=int, choices=(4, 8), required=True)
-    parser.add_argument("--repetitions", type=int, default=5)
+    parser.add_argument("--repetitions", type=int, choices=(5,), default=5)
     parser.add_argument("--max-tokens", type=int, default=2000)
     args = parser.parse_args()
 

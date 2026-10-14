@@ -3,6 +3,7 @@
 
 import csv
 import json
+import math
 import statistics
 from collections import defaultdict
 from pathlib import Path
@@ -79,6 +80,13 @@ def summarize_optional(model_key: str, bits: int, benchmark: str) -> tuple[float
     runs = read_jsonl(path)
     if len(runs) != 5 or {run.get("repetition") for run in runs} != {1, 2, 3, 4, 5}:
         return None
+    if any(
+        run.get("benchmark") != benchmark
+        or run.get("model_key") != model_key
+        or run.get("quantization", {}).get("bits") != bits
+        for run in runs
+    ):
+        return None
     counts = {run.get("n_examples") for run in runs}
     if len(counts) != 1 or None in counts:
         return None
@@ -86,7 +94,7 @@ def summarize_optional(model_key: str, bits: int, benchmark: str) -> tuple[float
     if expected_examples is not None and n_examples != expected_examples:
         return None
     values = [run.get(metric) for run in sorted(runs, key=lambda run: run["repetition"])]
-    if any(not isinstance(value, (int, float)) for value in values):
+    if any(not isinstance(value, (int, float)) or not math.isfinite(value) or not 0 <= value <= 100 for value in values):
         return None
     return statistics.mean(values), statistics.stdev(values)
 

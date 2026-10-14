@@ -35,7 +35,7 @@ IFBench is the authors' exact instruction-following verifier and reports prompt-
 - **IFBench:** all 300 prompts in the pinned official test split; official loose verifier, temperature 0, 4,096-token output cap.
 - **HLE:** all text-only questions in the pinned official test split; official response format and structured judge, temperature 0, 8,192-token output cap. The exact usable count is stored with the run because this dataset is gated and not vendored.
 - **LiveCodeBench v6:** all 1,055 problems from the pinned release_v6-lite split; official prompt/checker, temperature 0.2, top-p 0.95, 2,000-token output cap. Candidate code runs in a disposable Docker sandbox with no network or host mounts.
-- The same ten roles appear in both tracks. Questions and reference answers differ by track.
+- Both RoleBench tracks use the same ten roles; their questions and reference answers differ.
 - Each variant receives one unscored warm-up, then five fixed random seeds for each benchmark. Repetition-level scores use all selected examples in that run.
 - Reported scores are the mean and sample standard deviation of the five run-level macro averages.
 - Sampling is held fixed within each benchmark: RoleBench/CharacterEval use temperature 1.0, top-p 0.95, top-k 64, thinking disabled, maximum 512 new tokens; IFBench uses temperature 0; HLE uses temperature 0; LiveCodeBench uses temperature 0.2 and top-p 0.95. CharacterEval scoring uses the official 4096-token input limit and score transform from the authors' CharacterRM script.
