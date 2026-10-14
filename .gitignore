@@ -1,0 +1,8 @@
+.venv/
+models/
+.cache/
+hf-cache/
+__pycache__/
+*.py[cod]
+.env
+.DS_Store

@@ -1,0 +1,81 @@
+{
+  "captured_at_utc": "2026-10-14T14:37:48Z",
+  "hardware": {
+    "chip": "Apple M4",
+    "memory_bytes": 25769803776,
+    "memory_gib": 24.0,
+    "macos": "26.3.1",
+    "architecture": "arm64"
+  },
+  "software": {
+    "python": "3.13.3",
+    "mlx": "0.32.3",
+    "mlx_lm": "0.32.0",
+    "transformers": "5.19.0",
+    "rouge_score": "0.1.2"
+  },
+  "model": {
+    "id": "google/gemma-4-E2B-it",
+    "revision": "3e22461f65e89153144f8adb70e3b8c2cc9845a7",
+    "source_license": "Apache-2.0",
+    "text_only": true,
+    "quantizations": [
+      {
+        "bits": 4,
+        "format": "MLX",
+        "mode": "affine",
+        "group_size": 64,
+        "non_quantized_dtype": "bfloat16",
+        "reported_effective_bits_per_weight": 4.501,
+        "config_quantization": {
+          "group_size": 64,
+          "bits": 4,
+          "mode": "affine"
+        },
+        "model_file_size_bytes": 2636415235,
+        "model_file_size_gib": 2.4554
+      },
+      {
+        "bits": 8,
+        "format": "MLX",
+        "mode": "affine",
+        "group_size": 64,
+        "non_quantized_dtype": "bfloat16",
+        "reported_effective_bits_per_weight": 8.5,
+        "config_quantization": {
+          "group_size": 64,
+          "bits": 8,
+          "mode": "affine"
+        },
+        "model_file_size_bytes": 4950557507,
+        "model_file_size_gib": 4.6106
+      }
+    ]
+  },
+  "benchmark": {
+    "name": "RoleBench English role-generalization mini subset",
+    "dataset": "ZenMoore/RoleBench",
+    "dataset_revision": "a57ed54f9613921e4a5f1b63601a558cd5acf971",
+    "dataset_license": "Apache-2.0",
+    "dataset_local_sha256": "1299896239bba7f070fa9fae65b98475bdc72074d1b20c1f3ce656e2c1bb9009",
+    "examples": 10,
+    "repetitions_per_quantization": 5,
+    "sampling_seeds": [
+      42000,
+      42001,
+      42002,
+      42003,
+      42004
+    ],
+    "unscored_warmup_seed": 41999,
+    "metric": "ROUGE-L F1 via rouge-score 0.1.2, no stemming",
+    "sampling": {
+      "temperature": 1.0,
+      "top_p": 0.95,
+      "top_k": 64,
+      "thinking": false,
+      "max_new_tokens": 512
+    },
+    "prompt_template_source": "https://github.com/open-compass/opencompass/blob/main/opencompass/configs/datasets/rolebench/role_generalization_eng.py"
+  }
+}

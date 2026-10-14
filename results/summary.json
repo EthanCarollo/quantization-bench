@@ -1,0 +1,26 @@
+[
+  {
+    "bits": 4,
+    "method": "MLX affine, group 64; 4.501 reported bits/weight",
+    "n_runs": 5,
+    "n_examples_per_run": 10,
+    "rouge_l_mean": 0.118773923887728,
+    "rouge_l_sample_sd": 0.01920494175688471,
+    "decode_tps_mean": 63.122329861234164,
+    "latency_seconds_mean": 1.4167126367171294,
+    "peak_memory_gib_mean": 2.87601940912,
+    "model_size_gib": 2.455353024415672
+  },
+  {
+    "bits": 8,
+    "method": "MLX affine, group 64; 8.500 reported bits/weight",
+    "n_runs": 5,
+    "n_examples_per_run": 10,
+    "rouge_l_mean": 0.2052316729859338,
+    "rouge_l_sample_sd": 0.015512347806023874,
+    "decode_tps_mean": 36.35124782003174,
+    "latency_seconds_mean": 2.440534831655677,
+    "peak_memory_gib_mean": 5.19132376952,
+    "model_size_gib": 4.610565963201225
+  }
+]
