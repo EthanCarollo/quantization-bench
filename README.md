@@ -14,4 +14,4 @@ To regenerate the scorecard and the website's data bundle after adding benchmark
 python scripts/summarize.py
 ```
 
-Generation requirements and the full evaluation commands are on the [results page](https://ethancarollo.github.io/quantization-bench/#reproduce).
+Evaluation scripts and environment requirements are in [`scripts/`](scripts/) and the repository's `requirements-*.txt` files.
