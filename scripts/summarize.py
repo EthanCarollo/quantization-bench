@@ -11,6 +11,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 RESULTS = ROOT / "results"
+SITE_DATA = ROOT / "docs" / "data"
 REGISTRY = json.loads((ROOT / "data" / "model_registry.json").read_text(encoding="utf-8"))
 BENCHMARKS = (
     "rolebench_generalization",
@@ -204,7 +205,13 @@ def main() -> None:
     summary_json = RESULTS / "summary.json"
     summary_csv = RESULTS / "summary.csv"
     summary_md = RESULTS / "summary.md"
-    summary_json.write_text(json.dumps(rows, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    summary_json_text = json.dumps(rows, ensure_ascii=False, indent=2) + "\n"
+    summary_json.write_text(summary_json_text, encoding="utf-8")
+    SITE_DATA.mkdir(parents=True, exist_ok=True)
+    (SITE_DATA / "summary.json").write_text(summary_json_text, encoding="utf-8")
+    (SITE_DATA / "environment.json").write_text(
+        (RESULTS / "environment.json").read_text(encoding="utf-8"), encoding="utf-8"
+    )
     columns = list(rows[0])
     with summary_csv.open("w", newline="", encoding="utf-8") as file:
         writer = csv.DictWriter(file, fieldnames=columns, lineterminator="\n")
@@ -264,13 +271,6 @@ def main() -> None:
     ]
     summary_md.write_text("\n".join(lines), encoding="utf-8")
 
-    readme_path = ROOT / "README.md"
-    readme = readme_path.read_text(encoding="utf-8")
-    start = "<!-- BENCHMARK_RESULTS_START -->"
-    end = "<!-- BENCHMARK_RESULTS_END -->"
-    before, rest = readme.split(start, 1)
-    _, after = rest.split(end, 1)
-    readme_path.write_text(f"{before}{start}\n\n{chr(10).join(lines[5:])}\n{end}{after}", encoding="utf-8")
     print(summary_md.read_text(encoding="utf-8"))
 
 

@@ -1,0 +1,201 @@
+{
+  "captured_at_utc": "2026-10-14T15:51:31Z",
+  "hardware": {
+    "chip": "Apple M4",
+    "memory_bytes": 25769803776,
+    "memory_gib": 24.0,
+    "macos": "26.3.1",
+    "architecture": "arm64"
+  },
+  "software": {
+    "python": "3.13.3",
+    "mlx": "0.32.3",
+    "mlx_lm": "0.32.0",
+    "transformers": "5.19.0",
+    "rouge_score": "0.1.2"
+  },
+  "models": [
+    {
+      "key": "gemma4_e2b_it",
+      "id": "google/gemma-4-E2B-it",
+      "revision": "3e22461f65e89153144f8adb70e3b8c2cc9845a7",
+      "license": "Gemma Terms of Use",
+      "parameter_label": "2.3B effectifs (5.1B total)",
+      "quantizations": [
+        {
+          "bits": 4,
+          "format": "MLX",
+          "mode": "affine",
+          "group_size": 64,
+          "non_quantized_dtype": "bfloat16",
+          "reported_effective_bits_per_weight": 4.501,
+          "model_file_size_bytes": 2636415235,
+          "model_file_size_gib": 2.4554
+        },
+        {
+          "bits": 8,
+          "format": "MLX",
+          "mode": "affine",
+          "group_size": 64,
+          "non_quantized_dtype": "bfloat16",
+          "reported_effective_bits_per_weight": 8.5,
+          "model_file_size_bytes": 4950557507,
+          "model_file_size_gib": 4.6106
+        }
+      ]
+    },
+    {
+      "key": "qwen3_4b",
+      "id": "Qwen/Qwen3-4B",
+      "revision": "1cfa9a7208912126459214e8b04321603b3df60c",
+      "license": "Apache-2.0",
+      "parameter_label": "4.0B total (3.6B hors embeddings)",
+      "quantizations": [
+        {
+          "bits": 4,
+          "format": "MLX",
+          "mode": "affine",
+          "group_size": 64,
+          "non_quantized_dtype": "bfloat16",
+          "reported_effective_bits_per_weight": 4.501,
+          "model_file_size_bytes": 2274515269,
+          "model_file_size_gib": 2.1183
+        },
+        {
+          "bits": 8,
+          "format": "MLX",
+          "mode": "affine",
+          "group_size": 64,
+          "non_quantized_dtype": "bfloat16",
+          "reported_effective_bits_per_weight": 8.5,
+          "model_file_size_bytes": 4285651841,
+          "model_file_size_gib": 3.9913
+        }
+      ]
+    }
+  ],
+  "benchmark": {
+    "name": "RoleBench and CharacterEval fixed-subset comparison",
+    "tracks": [
+      {
+        "name": "RoleBench generalization",
+        "benchmark_description": "RoleBench role-generalization generalization test subset",
+        "dataset": "ZenMoore/RoleBench",
+        "dataset_revision": "a57ed54f9613921e4a5f1b63601a558cd5acf971",
+        "license": "Apache-2.0",
+        "examples": 10,
+        "local_sha256": "57a99175bf01a7294049c1e5f2b27c32350b529e9bd9369ab3b61742a2093745",
+        "source_file_sha256": {
+          "rolebench-eng/role-generalization/general/test.jsonl": "ad03a05b0ef5ce8b5315ddc1e878ec73f3b43bbe19cdea337203f9343a8bcf23",
+          "profiles-eng/desc.json": "3de3747f40a79a503a4bddbd6a6fc3711c9e4060e6e321e0b6c7bc24f3257862"
+        },
+        "selection_seed": 42,
+        "reference_field": "generated[0]"
+      },
+      {
+        "name": "RoleBench role-specific",
+        "benchmark_description": "RoleBench role-generalization role-specific test subset",
+        "dataset": "ZenMoore/RoleBench",
+        "dataset_revision": "a57ed54f9613921e4a5f1b63601a558cd5acf971",
+        "license": "Apache-2.0",
+        "examples": 10,
+        "local_sha256": "ada98667812c71adef1cf2983fe4a99eca62d9c4786c2cd8ce786b47c292646f",
+        "source_file_sha256": {
+          "rolebench-eng/role-generalization/role_specific/test.jsonl": "6c4dac115a6af4ec297438baa28d60e299b019333d9fbb74eb53a7cbcfeed864",
+          "profiles-eng/desc.json": "3de3747f40a79a503a4bddbd6a6fc3711c9e4060e6e321e0b6c7bc24f3257862"
+        },
+        "selection_seed": 42,
+        "reference_field": "generated[0]"
+      },
+      {
+        "name": "CharacterEval",
+        "dataset": "morecry/CharacterEval",
+        "dataset_revision": "c3d44a6fc1790cc8c4b2fd7c01f0c72930655e0c",
+        "license": "MIT",
+        "examples": 12,
+        "distinct_roles": 12,
+        "selection_seed": 42,
+        "covered_dimensions": [
+          "Accuracy",
+          "Behavior",
+          "Coherence",
+          "Communication_skills",
+          "Consistency",
+          "Diversity",
+          "Empathy",
+          "Exposure",
+          "Fluency",
+          "Hallucination",
+          "Humanlikeness",
+          "Utterance"
+        ],
+        "source_file_sha256": {
+          "data/test_data.jsonl": "6d9723a1484f1d2739bcf388c7960abe1933b7a5a1fddae0170cc9ea7c66dcd8",
+          "data/character_profiles.json": "d9b4c9f7ab63b89b3c348ae88b43c87872f0f6a5cb06d7f31cbe64a630e6434e",
+          "data/id2metric.jsonl": "df80ee716124a7deacc6f24ee372a4600b719cdaa79f01cefcdfb286359f1801"
+        },
+        "local_sha256": {
+          "examples": "3a25fa73031cb47e74a2d09ad7158ea94e52ba2e8f65297d0259774e06deaad2",
+          "profiles": "3f0e3c3a10a87b08b4a7b88dc52bf3d1c9e595738660f9514b10a5e8e183d3ba"
+        },
+        "repetitions_per_model_quantization": 5,
+        "sampling_seeds": [
+          43000,
+          43001,
+          43002,
+          43003,
+          43004
+        ],
+        "max_new_tokens": 512,
+        "generation_sampling": {
+          "temperature": 1.0,
+          "top_p": 0.95,
+          "top_k": 64,
+          "thinking": false
+        },
+        "evaluator": {
+          "model_id": "morecry/BaichuanCharRM",
+          "revision": "e953da5f57b86db7adca3a2714b4c3720f5b96a2",
+          "native_score_range": [
+            1,
+            5
+          ],
+          "table_score_mapping": "(score - 1) * 25",
+          "max_input_tokens": 4096,
+          "aggregation": "For each repetition, average examples within each dimension, then give each of 12 dimensions equal weight."
+        },
+        "evaluator_runtime": {
+          "hardware": "NVIDIA GeForce RTX 5060 Ti 16GB VRAM; AMD Ryzen 7 9800X3D; 29 GiB RAM",
+          "os": "Ubuntu 26.04.1 LTS x86_64",
+          "python": "3.14.7",
+          "torch": "2.14.0+cu130",
+          "cuda": "13.0",
+          "transformers": "5.17.0",
+          "accelerate": "1.15.0",
+          "device_map": "20 of 40 Baichuan layers on GPU; remaining layers on CPU"
+        }
+      }
+    ],
+    "examples_per_track": 10,
+    "repetitions_per_model_quantization_track": 5,
+    "measured_responses_per_variant_track": 50,
+    "sampling_seeds": [
+      42000,
+      42001,
+      42002,
+      42003,
+      42004
+    ],
+    "unscored_warmup_seed": 41999,
+    "metric": "ROUGE-L F1 via rouge-score 0.1.2, no stemming; multiplied by 100 for table display",
+    "sampling": {
+      "temperature": 1.0,
+      "top_p": 0.95,
+      "top_k": 64,
+      "thinking": false,
+      "max_new_tokens": 512
+    },
+    "prompt_template_source": "https://github.com/open-compass/opencompass/blob/main/opencompass/configs/datasets/rolebench/role_generalization_eng.py",
+    "interpretation_note": "Wording overlap with one RoleGPT reference; not a human role-play quality rating."
+  }
+}

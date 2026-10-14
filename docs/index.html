@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#111c25">
+  <meta name="description" content="A reproducible comparison of compact open-weight models on role-play benchmarks.">
+  <title>Roleplay Bench — Small models, in character</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="site.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main" data-i18n="skip">Aller au contenu</a>
+  <header class="topbar">
+    <a class="wordmark" href="#top" aria-label="Roleplay Bench home"><span class="mark">R<span>·</span>P</span><span>ROLEPLAY<br>BENCH</span></a>
+    <nav class="topnav" aria-label="Navigation principale" data-i18n-aria="nav.aria">
+      <a href="#results" data-i18n="nav.results">Résultats</a>
+      <a href="#method" data-i18n="nav.method">Méthode</a>
+      <a href="#sources" data-i18n="nav.sources">Sources</a>
+      <a href="#reproduce" data-i18n="nav.reproduce">Reproduire</a>
+    </nav>
+    <div class="language-switch" role="group" aria-label="Language / Langue">
+      <button type="button" data-language="fr" aria-pressed="true">FR</button>
+      <span aria-hidden="true">/</span>
+      <button type="button" data-language="en" aria-pressed="false">EN</button>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero" id="top">
+      <div class="hero-grid">
+        <div class="hero-copy">
+          <p class="eyebrow"><span class="pulse"></span><span data-i18n="hero.eyebrow">BENCHMARK OUVERT · RÉSULTATS REPRODUCTIBLES</span></p>
+          <h1 data-i18n="hero.title">Les petits modèles<br><em>ont du répondant.</em></h1>
+          <p class="hero-lede" data-i18n="hero.lede">Une comparaison transparente de modèles compacts quantifiés, évalués sur le jeu de rôle et la cohérence des personnages.</p>
+          <a class="hero-link" href="#results"><span data-i18n="hero.cta">Explorer les résultats</span><span aria-hidden="true">↘</span></a>
+        </div>
+        <div class="hero-score" aria-live="polite">
+          <div class="score-orbit orbit-one"></div><div class="score-orbit orbit-two"></div>
+          <p class="score-kicker" data-i18n="hero.scoreLabel">MEILLEUR SCORE ACTUEL · ROLEBENCH GÉNÉRALISATION</p>
+          <strong id="hero-score-value">—</strong>
+          <p class="score-model" id="hero-score-model">Chargement…</p>
+          <div class="score-foot"><span data-i18n="hero.scoreNote">ROUGE-L · score de recouvrement lexical</span><span class="score-arrow">↗</span></div>
+        </div>
+      </div>
+      <div class="hero-bottom">
+        <p data-i18n="hero.note">Un petit banc d’essai, avec les limites affichées aussi clairement que les scores.</p>
+        <div class="hero-stats">
+          <div><strong id="stat-models">2</strong><span data-i18n="stats.models">modèles</span></div>
+          <div><strong id="stat-variants">4</strong><span data-i18n="stats.variants">variantes évaluées</span></div>
+          <div><strong>5</strong><span data-i18n="stats.repeats">répétitions par variante</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section results-section" id="results">
+      <div class="section-heading">
+        <div><p class="eyebrow dark-eyebrow" data-i18n="results.kicker">01 — LE SCORECARD</p><h2 data-i18n="results.title">Même terrain.<br><em>Trois angles.</em></h2></div>
+        <p class="section-intro" data-i18n="results.intro">Les scores sont des moyennes de cinq exécutions indépendantes, accompagnées de leur écart-type. Choisissez une mesure pour comparer les variantes.</p>
+      </div>
+      <div class="score-panel">
+        <div class="panel-top">
+          <div class="metric-tabs" role="group" aria-label="Mesure à comparer" data-i18n-aria="metric.aria">
+            <button id="tab-general" class="metric-tab active" type="button" aria-controls="metric-panel" aria-pressed="true" data-metric="rolebench_generalization" data-i18n="metric.general">Généralisation</button>
+            <button id="tab-specific" class="metric-tab" type="button" aria-controls="metric-panel" aria-pressed="false" data-metric="rolebench_role_specific" data-i18n="metric.specific">Rôle spécifique</button>
+            <button id="tab-character" class="metric-tab" type="button" aria-controls="metric-panel" aria-pressed="false" data-metric="charactereval" data-i18n="metric.character">CharacterEval</button>
+          </div>
+          <span class="scale-label" data-i18n="results.scale">ÉCHELLE 0–100</span>
+        </div>
+        <div class="chart-area" id="metric-panel" role="region" aria-labelledby="tab-general" tabindex="0">
+          <div class="chart-heading"><div><p class="chart-overline" id="chart-overline">ROLEBENCH · GENERALISATION</p><h3 id="chart-title">Généralisation</h3></div><p class="chart-caption" data-i18n="results.chartCaption">Moyenne ± écart-type · survolez une barre pour les détails.</p></div>
+          <div class="bar-chart" id="bar-chart" aria-live="polite" aria-label="Comparaison des scores" data-i18n-aria="chart.aria"></div>
+          <p class="chart-footnote" data-i18n="results.chartFootnote">Une barre plus longue indique un score plus élevé dans cette mesure uniquement.</p>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <caption data-i18n="results.tableCaption">Résultats par variante, moyenne ± écart-type sur cinq runs</caption>
+            <thead><tr><th scope="col" data-i18n="table.variant">Variante</th><th scope="col" data-i18n="metric.general">Généralisation</th><th scope="col" data-i18n="metric.specific">Rôle spécifique</th><th scope="col" data-i18n="metric.character">CharacterEval</th><th scope="col" data-i18n="table.parameters">Paramètres</th></tr></thead>
+            <tbody id="score-table"></tbody>
+          </table>
+        </div>
+        <div class="table-bottom"><span><span class="legend-dot"></span><span data-i18n="results.fiveRuns">5 runs · moyenne ± écart-type d’échantillon</span></span><a href="https://github.com/EthanCarollo/roleplay-bench-results/blob/main/results/summary.csv" data-i18n="results.csv">Télécharger le CSV ↗</a></div>
+      </div>
+      <div class="interpretation-note"><span class="note-mark">i</span><p data-i18n="results.warning"><strong>À lire avec prudence.</strong> RoleBench mesure le recouvrement lexical avec une seule réponse de référence, pas la qualité du jeu de rôle en pourcentage. CharacterEval utilise un autre jeu de données et un autre évaluateur. Comparez les modèles uniquement à l’intérieur d’une même colonne.</p></div>
+    </section>
+
+    <section class="section findings-section">
+      <div class="section-heading compact-heading">
+        <div><p class="eyebrow dark-eyebrow" data-i18n="findings.kicker">CE QUE DISENT LES DONNÉES</p><h2 data-i18n="findings.title">Pas de gagnant<br><em>sur tous les fronts.</em></h2></div>
+        <p class="section-intro" data-i18n="findings.intro">Les écarts dépendent de la tâche. Ces constats décrivent ce petit sous-ensemble; ils ne prédisent pas les performances générales d’un modèle.</p>
+      </div>
+      <div class="finding-grid" id="finding-grid"></div>
+    </section>
+
+    <section class="benchmarks-section" id="benchmarks">
+      <div class="section benchmark-layout">
+        <div><p class="eyebrow light-eyebrow" data-i18n="benchmarks.kicker">02 — LES MESURES</p><h2 data-i18n="benchmarks.title">Trois façons<br>de rester <em>dans le rôle.</em></h2><p class="benchmark-lede" data-i18n="benchmarks.lede">Chaque colonne répond à une question différente. Les valeurs n’ont pas la même signification d’un benchmark à l’autre.</p></div>
+        <div class="benchmark-cards">
+          <article class="benchmark-card"><span class="card-index">01</span><h3 data-i18n="bench.generalTitle">RoleBench · généralisation</h3><p data-i18n="bench.generalBody">10 prompts de test en anglais sur des rôles fixes. ROUGE-L F1 compare chaque réponse à la première réponse de référence RoleGPT. Cela mesure le chevauchement de formulation, pas une note humaine de qualité.</p><span class="card-meta" data-i18n="bench.generalMeta">10 prompts · 5 runs · graine fixe</span></article>
+          <article class="benchmark-card"><span class="card-index">02</span><h3 data-i18n="bench.specificTitle">RoleBench · rôle spécifique</h3><p data-i18n="bench.specificBody">Les mêmes 10 rôles, mais des questions et références différentes, conçues pour tester les réponses spécifiques au rôle. Les scores de cette piste restent distincts de ceux de généralisation.</p><span class="card-meta" data-i18n="bench.specificMeta">10 prompts · mêmes rôles · questions différentes</span></article>
+          <article class="benchmark-card"><span class="card-index">03</span><h3 data-i18n="bench.characterTitle">CharacterEval · CharacterRM</h3><p data-i18n="bench.characterBody">12 exemples chinois, un personnage par exemple, choisis pour couvrir les 12 dimensions disponibles. Le reward model CharacterRM note les réponses de 1 à 5; le score est transformé linéairement en 0–100 et les dimensions sont pondérées à égalité.</p><span class="card-meta" data-i18n="bench.characterMeta">12 exemples · 12 dimensions · évaluateur entraîné sur des annotations humaines</span></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section method-section" id="method">
+      <div class="section-heading">
+        <div><p class="eyebrow dark-eyebrow" data-i18n="method.kicker">03 — COMMENT LIRE LE PROTOCOLE</p><h2 data-i18n="method.title">Des choix visibles.<br><em>Des comparaisons utiles.</em></h2></div>
+        <p class="section-intro" data-i18n="method.intro">Modèles et quantifications utilisent les mêmes prompts et paramètres de génération au sein d’un benchmark. Les données brutes, versions des sources et sommes de contrôle sont conservées dans le dépôt.</p>
+      </div>
+      <div class="method-grid">
+        <article class="method-card method-large"><span class="method-number">A</span><div><h3 data-i18n="method.modelsTitle">Modèles comparés</h3><p data-i18n="method.modelsBody">Google Gemma 4 E2B IT (2,3B paramètres actifs, 5,1B avec embeddings) et Qwen3-4B (4,0B au total). Les poids et jeux de données sont épinglés à des révisions précises. Les modèles sont exécutés en MLX sur Apple Silicon.</p><div class="tag-row"><span>Gemma 4 E2B IT</span><span>Qwen3-4B</span><span>MLX 4-bit / 8-bit</span></div></div></article>
+        <article class="method-card"><span class="method-number">B</span><div><h3 data-i18n="method.quantTitle">Quantification</h3><p data-i18n="method.quantBody">MLX affine, poids quantifiés par groupes de 64; les autres tenseurs restent en bfloat16. Les variantes GGUF prévues sont BF16, Q8_0 et Q4_K_M. Aucun score GGUF n’est publié tant que ses cinq runs ne sont pas complets.</p></div></article>
+        <article class="method-card"><span class="method-number">C</span><div><h3 data-i18n="method.repeatsTitle">Répétitions et incertitude</h3><p data-i18n="method.repeatsBody">Chaque variante a un échauffement non noté puis cinq graines fixes. Le tableau présente la moyenne des scores par run et l’écart-type d’échantillon entre les runs. L’écart-type décrit la variation observée, pas un intervalle de confiance.</p></div></article>
+        <article class="method-card"><span class="method-number">D</span><div><h3 data-i18n="method.samplingTitle">Génération</h3><p data-i18n="method.samplingBody">RoleBench et CharacterEval: température 1, top-p 0,95, top-k 64, réflexion désactivée, limite de 512 nouveaux tokens. Les réglages officiels propres à IFBench, HLE et LiveCodeBench s’appliquent lorsqu’ils seront exécutés.</p></div></article>
+        <article class="method-card hardware-card"><span class="hardware-icon">⌘</span><div><h3 data-i18n="method.hardwareTitle">Environnement enregistré</h3><p id="environment-summary" data-i18n="method.hardwareLoading">Lecture de l’environnement de génération…</p></div><a href="https://github.com/EthanCarollo/roleplay-bench-results/blob/main/results/environment.json" aria-label="Environment metadata">↗</a></article>
+      </div>
+      <details class="pending-details">
+        <summary><span data-i18n="pending.title">Les résultats encore attendus</span><span class="summary-count">06 variantes · 03 mesures</span><span class="summary-plus">+</span></summary>
+        <div class="pending-content"><p data-i18n="pending.intro">Le scorecard inclut aussi des emplacements pour des comparaisons non terminées. Une case vide signifie qu’il n’existe pas encore cinq runs valides; elle ne vaut pas zéro.</p><div class="pending-list"><div><strong>GGUF</strong><span data-i18n="pending.gguf">BF16, Q8_0 et Q4_K_M pour chacun des deux modèles</span></div><div><strong>IFBench</strong><span data-i18n="pending.ifbench">300 consignes · exactitude « loose » officielle</span></div><div><strong>Humanity’s Last Exam</strong><span data-i18n="pending.hle">Questions texte uniquement · jeu soumis à accès contrôlé et juge officiel</span></div><div><strong>LiveCodeBench v6</strong><span data-i18n="pending.lcb">1 055 problèmes v6-lite · pass@1 vérifié par exécution</span></div></div></div>
+      </details>
+    </section>
+
+    <section class="section sources-section" id="sources">
+      <div class="section-heading compact-heading">
+        <div><p class="eyebrow dark-eyebrow" data-i18n="sources.kicker">SOURCES & ATTRIBUTION</p><h2 data-i18n="sources.title">Les briques<br><em>de l’évaluation.</em></h2></div>
+        <p class="section-intro" data-i18n="sources.intro">Jeux de données, modèles, métriques et évaluateurs renvoient à leurs publications ou implémentations d’origine. Les révisions exactes utilisées ici sont conservées avec les métadonnées du dépôt.</p>
+      </div>
+      <div class="source-grid">
+        <article class="source-card"><span class="source-kind" data-i18n="sources.dataset">JEU DE DONNÉES · APACHE-2.0</span><h3>RoleBench</h3><p data-i18n="sources.rolebench">Jeu de rôle et protocole de référence RoleGPT. La configuration de score suit la piste RoleBench d’OpenCompass.</p><div class="source-links"><a href="https://huggingface.co/datasets/ZenMoore/RoleBench" data-i18n="link.dataset">Données ↗</a><a href="https://arxiv.org/abs/2310.00746">RoleLLM ↗</a><a href="https://github.com/open-compass/opencompass/blob/main/opencompass/configs/datasets/rolebench/role_generalization_eng.py" data-i18n="link.config">Configuration ↗</a></div></article>
+        <article class="source-card"><span class="source-kind" data-i18n="sources.characterKind">JEU ET ÉVALUATEUR · MIT</span><h3>CharacterEval</h3><p data-i18n="sources.character">Le sous-ensemble et le reward model CharacterRM des auteurs. Le score est une moyenne macro sur 12 dimensions.</p><div class="source-links"><a href="https://github.com/morecry/CharacterEval" data-i18n="link.dataset">Données ↗</a><a href="https://aclanthology.org/2024.acl-long.638/" data-i18n="link.paper">Article ACL ↗</a><a href="https://huggingface.co/morecry/BaichuanCharRM">CharacterRM ↗</a></div></article>
+        <article class="source-card"><span class="source-kind" data-i18n="sources.ifbenchKind">JEU DE DONNÉES · ODC-BY-1.0</span><h3>IFBench</h3><p data-i18n="sources.ifbench">Les 300 consignes du split de test officiel et le vérificateur d’instructions des auteurs.</p><div class="source-links"><a href="https://github.com/allenai/IFBench" data-i18n="link.officialCode">Code officiel ↗</a><a href="https://huggingface.co/datasets/allenai/IFBench_test" data-i18n="link.testSplit">Split de test ↗</a></div></article>
+        <article class="source-card"><span class="source-kind" data-i18n="sources.hleKind">JEU À ACCÈS CONTRÔLÉ</span><h3>Humanity’s Last Exam</h3><p data-i18n="sources.hle">Questions texte uniquement; les réponses sont évaluées avec le format et le juge structuré officiels.</p><div class="source-links"><a href="https://huggingface.co/datasets/cais/hle" data-i18n="link.dataset">Jeu HLE ↗</a><a href="https://github.com/CenterforAI-Safety/HLE" data-i18n="link.officialEval">Évaluation officielle ↗</a></div></article>
+        <article class="source-card"><span class="source-kind" data-i18n="sources.lcbKind">JEU DE CODE · V6-LITE</span><h3>LiveCodeBench</h3><p data-i18n="sources.lcb">Problèmes de génération de code de la release v6-lite et vérification par exécution des tests.</p><div class="source-links"><a href="https://github.com/LiveCodeBench/LiveCodeBench" data-i18n="link.project">Projet ↗</a><a href="https://huggingface.co/datasets/livecodebench/code_generation_lite" data-i18n="link.dataset">Données ↗</a></div></article>
+        <article class="source-card"><span class="source-kind" data-i18n="sources.modelsKind">MODÈLES & RUNTIMES</span><h3 data-i18n="sources.modelsTitle">Poids, conversion, quantification</h3><p data-i18n="sources.models">Les identifiants et révisions de modèles sont dans le registre. Les métadonnées d’environnement consignent MLX et llama.cpp.</p><div class="source-links"><a href="https://huggingface.co/google/gemma-4-E2B-it">Gemma 4 ↗</a><a href="https://huggingface.co/Qwen/Qwen3-4B">Qwen3-4B ↗</a><a href="https://github.com/ml-explore/mlx-lm">MLX-LM ↗</a><a href="https://github.com/ggml-org/llama.cpp/tree/529ac893e754e95a50469b2122f5efe28dfc08a0">llama.cpp ↗</a></div></article>
+      </div>
+    </section>
+
+    <section class="reproduce-section" id="reproduce">
+      <div class="section reproduce-layout">
+        <div><p class="eyebrow light-eyebrow" data-i18n="reproduce.kicker">04 — REPRODUIRE</p><h2 data-i18n="reproduce.title">Du dépôt<br>au <em>score.</em></h2><p class="reproduce-lede" data-i18n="reproduce.lede">Le code fixe les révisions, les seeds et les règles d’agrégation. Les fichiers bruts gardent une trace par réponse et par run.</p><a class="text-link" href="https://github.com/EthanCarollo/roleplay-bench-results" data-i18n="reproduce.repo">Parcourir le dépôt ↗</a></div>
+        <div class="reproduce-content">
+          <div class="requirements-row"><span class="requirements-number">01</span><div><h3 data-i18n="reproduce.reqTitle">Préparer l’environnement</h3><p data-i18n="reproduce.reqBody">Génération: macOS, Apple Silicon, Python 3.13. Acceptez les conditions Gemma et définissez HF_TOKEN. HLE demande aussi l’accès au jeu et OPENAI_API_KEY pour le juge. CharacterEval se score à part sur CUDA; LiveCodeBench exécute le code dans Docker isolé.</p></div></div>
+          <details class="command-details"><summary><span data-i18n="reproduce.commands">Afficher les commandes complètes</span><span class="summary-plus">+</span></summary><pre><code>python3.13 -m venv .venv
+.venv/bin/pip install -r requirements.txt
+
+.venv/bin/python scripts/prepare_rolebench_subset.py
+.venv/bin/python scripts/prepare_charactereval_subset.py
+.venv/bin/pip install -r requirements-ifbench.txt
+.venv/bin/pip install -r requirements-hle.txt
+.venv/bin/python scripts/prepare_livecodebench.py
+
+# Accept Gemma's Hugging Face terms and provide HF_TOKEN before conversion.
+# HLE also needs gated dataset access and OPENAI_API_KEY for its judge.
+for model in gemma4_e2b_it qwen3_4b; do
+  for bits in 4 8; do
+    .venv/bin/python scripts/convert_model.py --model "$model" --bits "$bits"
+    for benchmark in rolebench_generalization rolebench_role_specific; do
+      .venv/bin/python scripts/run_benchmark.py --model "$model" --benchmark "$benchmark" --bits "$bits"
+    done
+    .venv/bin/python scripts/run_charactereval.py --model "$model" --bits "$bits"
+    .venv/bin/python scripts/run_ifbench.py --model "$model" --bits "$bits"
+    .venv/bin/python scripts/run_hle.py --model "$model" --bits "$bits"
+    .venv/bin/python scripts/run_livecodebench.py --model "$model" --bits "$bits"
+  done
+done
+
+# HLE's official structured-answer judge (makes API requests).
+for model in gemma4_e2b_it qwen3_4b; do
+  for bits in 4 8; do
+    .venv/bin/python scripts/evaluate_hle.py --model "$model" --bits "$bits"
+  done
+done
+
+# Build the isolated LiveCodeBench checker, then evaluate generated code.
+docker build -f docker/livecodebench/Dockerfile -t roleplay-bench-results/livecodebench-evaluator:28fef95 .
+for model in gemma4_e2b_it qwen3_4b; do
+  for bits in 4 8; do
+    .venv/bin/python scripts/evaluate_livecodebench.py --model "$model" --bits "$bits"
+  done
+done
+
+# On a CUDA host, after copying this repo and generated CharacterEval files:
+python3 -m pip install -r requirements-charactereval-evaluator.txt
+python3 scripts/evaluate_charactereval.py \
+  --profiles data/charactereval-mini/character_profiles.json \
+  --offload-dir /path/to/charactereval-offload \
+  results/*_charactereval_mlx_*bit.jsonl
+
+.venv/bin/python scripts/summarize.py</code></pre><p class="command-note" data-i18n="reproduce.commandNote">Le script de synthèse régénère le CSV, le JSON et la copie de données utilisée par cette page.</p></details>
+          <div class="requirements-row"><span class="requirements-number">02</span><div><h3 data-i18n="reproduce.rawTitle">Données et licences</h3><p data-i18n="reproduce.rawBody">Les exemples retenus, profils, sources épinglées et empreintes sont dans data/. Les réponses générées et scores par exemple sont dans results/. Respectez les licences et attributions des jeux de données sources.</p><div class="resource-links"><a href="https://github.com/EthanCarollo/roleplay-bench-results/tree/main/data" data-i18n="reproduce.dataLink">Données et révisions ↗</a><a href="https://github.com/EthanCarollo/roleplay-bench-results/tree/main/scripts" data-i18n="reproduce.scriptsLink">Scripts du benchmark ↗</a><a href="https://github.com/EthanCarollo/roleplay-bench-results/blob/main/results/summary.json" data-i18n="reproduce.jsonLink">Scorecard JSON ↗</a></div></div></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-top"><a class="wordmark footer-wordmark" href="#top"><span class="mark">R<span>·</span>P</span><span>ROLEPLAY<br>BENCH</span></a><p data-i18n="footer.note">Des résultats documentés. Des comparaisons à leur juste portée.</p><a class="footer-up" href="#top" data-i18n="footer.top">Retour en haut ↑</a></div>
+    <div class="footer-bottom"><span>© 2026 · Ethan Carollo</span><div><a href="https://huggingface.co/datasets/ZenMoore/RoleBench">RoleBench</a><a href="https://github.com/morecry/CharacterEval">CharacterEval</a><a href="https://github.com/EthanCarollo/roleplay-bench-results/blob/main/CONTRIBUTING.md" data-i18n="footer.contributing">Contribuer</a></div><span data-i18n="footer.open">Code et méthode ouverts</span></div>
+  </footer>
+</body>
+</html>
