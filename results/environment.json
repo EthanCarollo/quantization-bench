@@ -297,12 +297,27 @@
         "model_key": "qwen3_4b",
         "quantization": "Q4_K_M",
         "file_size_bytes": 2497280800
+      },
+      {
+        "model_key": "ministral_3_3b_instruct_2512",
+        "quantization": "BF16",
+        "file_size_bytes": 6866224672
+      },
+      {
+        "model_key": "ministral_3_3b_instruct_2512",
+        "quantization": "Q8_0",
+        "file_size_bytes": 3651683872
+      },
+      {
+        "model_key": "ministral_3_3b_instruct_2512",
+        "quantization": "Q4_K_M",
+        "file_size_bytes": 2146502176
       }
     ],
     "charactereval_evaluator": {
       "model_id": "morecry/BaichuanCharRM",
       "revision": "e953da5f57b86db7adca3a2714b4c3720f5b96a2",
-      "ratings_completed": 990,
+      "ratings_completed": 2145,
       "gpu_memory_limit": "14GiB",
       "cpu_memory_limit": "14GiB"
     }
