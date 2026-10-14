@@ -16,7 +16,7 @@
     "livecodebench_pass_at_1_sd_100": null,
     "parameters": "2.3B effectifs (5.1B total)",
     "model_key": "gemma4_e2b_it",
-    "bits": 4
+    "variant": "mlx_4bit"
   },
   {
     "quantization": "MLX-8-bit — Gemma 4 E2B IT",
@@ -35,7 +35,64 @@
     "livecodebench_pass_at_1_sd_100": null,
     "parameters": "2.3B effectifs (5.1B total)",
     "model_key": "gemma4_e2b_it",
-    "bits": 8
+    "variant": "mlx_8bit"
+  },
+  {
+    "quantization": "GGUF-BF16 — Gemma 4 E2B IT",
+    "method": "GGUF BF16 (llama.cpp)",
+    "rolebench_generalization_mean_100": null,
+    "rolebench_generalization_sd_100": null,
+    "rolebench_role_specific_mean_100": null,
+    "rolebench_role_specific_sd_100": null,
+    "charactereval_mean_100": null,
+    "charactereval_sd_100": null,
+    "ifbench_prompt_accuracy_mean_100": null,
+    "ifbench_prompt_accuracy_sd_100": null,
+    "hle_accuracy_mean_100": null,
+    "hle_accuracy_sd_100": null,
+    "livecodebench_pass_at_1_mean_100": null,
+    "livecodebench_pass_at_1_sd_100": null,
+    "parameters": "2.3B effectifs (5.1B total)",
+    "model_key": "gemma4_e2b_it",
+    "variant": "gguf_bf16"
+  },
+  {
+    "quantization": "GGUF-Q8_0 — Gemma 4 E2B IT",
+    "method": "GGUF Q8_0 (llama.cpp)",
+    "rolebench_generalization_mean_100": null,
+    "rolebench_generalization_sd_100": null,
+    "rolebench_role_specific_mean_100": null,
+    "rolebench_role_specific_sd_100": null,
+    "charactereval_mean_100": null,
+    "charactereval_sd_100": null,
+    "ifbench_prompt_accuracy_mean_100": null,
+    "ifbench_prompt_accuracy_sd_100": null,
+    "hle_accuracy_mean_100": null,
+    "hle_accuracy_sd_100": null,
+    "livecodebench_pass_at_1_mean_100": null,
+    "livecodebench_pass_at_1_sd_100": null,
+    "parameters": "2.3B effectifs (5.1B total)",
+    "model_key": "gemma4_e2b_it",
+    "variant": "gguf_q8_0"
+  },
+  {
+    "quantization": "GGUF-Q4_K_M — Gemma 4 E2B IT",
+    "method": "GGUF Q4_K_M (llama.cpp)",
+    "rolebench_generalization_mean_100": null,
+    "rolebench_generalization_sd_100": null,
+    "rolebench_role_specific_mean_100": null,
+    "rolebench_role_specific_sd_100": null,
+    "charactereval_mean_100": null,
+    "charactereval_sd_100": null,
+    "ifbench_prompt_accuracy_mean_100": null,
+    "ifbench_prompt_accuracy_sd_100": null,
+    "hle_accuracy_mean_100": null,
+    "hle_accuracy_sd_100": null,
+    "livecodebench_pass_at_1_mean_100": null,
+    "livecodebench_pass_at_1_sd_100": null,
+    "parameters": "2.3B effectifs (5.1B total)",
+    "model_key": "gemma4_e2b_it",
+    "variant": "gguf_q4_k_m"
   },
   {
     "quantization": "MLX-4-bit — Qwen3-4B",
@@ -54,7 +111,7 @@
     "livecodebench_pass_at_1_sd_100": null,
     "parameters": "4.0B total (3.6B hors embeddings)",
     "model_key": "qwen3_4b",
-    "bits": 4
+    "variant": "mlx_4bit"
   },
   {
     "quantization": "MLX-8-bit — Qwen3-4B",
@@ -73,6 +130,63 @@
     "livecodebench_pass_at_1_sd_100": null,
     "parameters": "4.0B total (3.6B hors embeddings)",
     "model_key": "qwen3_4b",
-    "bits": 8
+    "variant": "mlx_8bit"
+  },
+  {
+    "quantization": "GGUF-BF16 — Qwen3-4B",
+    "method": "GGUF BF16 (llama.cpp)",
+    "rolebench_generalization_mean_100": null,
+    "rolebench_generalization_sd_100": null,
+    "rolebench_role_specific_mean_100": null,
+    "rolebench_role_specific_sd_100": null,
+    "charactereval_mean_100": null,
+    "charactereval_sd_100": null,
+    "ifbench_prompt_accuracy_mean_100": null,
+    "ifbench_prompt_accuracy_sd_100": null,
+    "hle_accuracy_mean_100": null,
+    "hle_accuracy_sd_100": null,
+    "livecodebench_pass_at_1_mean_100": null,
+    "livecodebench_pass_at_1_sd_100": null,
+    "parameters": "4.0B total (3.6B hors embeddings)",
+    "model_key": "qwen3_4b",
+    "variant": "gguf_bf16"
+  },
+  {
+    "quantization": "GGUF-Q8_0 — Qwen3-4B",
+    "method": "GGUF Q8_0 (llama.cpp)",
+    "rolebench_generalization_mean_100": null,
+    "rolebench_generalization_sd_100": null,
+    "rolebench_role_specific_mean_100": null,
+    "rolebench_role_specific_sd_100": null,
+    "charactereval_mean_100": null,
+    "charactereval_sd_100": null,
+    "ifbench_prompt_accuracy_mean_100": null,
+    "ifbench_prompt_accuracy_sd_100": null,
+    "hle_accuracy_mean_100": null,
+    "hle_accuracy_sd_100": null,
+    "livecodebench_pass_at_1_mean_100": null,
+    "livecodebench_pass_at_1_sd_100": null,
+    "parameters": "4.0B total (3.6B hors embeddings)",
+    "model_key": "qwen3_4b",
+    "variant": "gguf_q8_0"
+  },
+  {
+    "quantization": "GGUF-Q4_K_M — Qwen3-4B",
+    "method": "GGUF Q4_K_M (llama.cpp)",
+    "rolebench_generalization_mean_100": null,
+    "rolebench_generalization_sd_100": null,
+    "rolebench_role_specific_mean_100": null,
+    "rolebench_role_specific_sd_100": null,
+    "charactereval_mean_100": null,
+    "charactereval_sd_100": null,
+    "ifbench_prompt_accuracy_mean_100": null,
+    "ifbench_prompt_accuracy_sd_100": null,
+    "hle_accuracy_mean_100": null,
+    "hle_accuracy_sd_100": null,
+    "livecodebench_pass_at_1_mean_100": null,
+    "livecodebench_pass_at_1_sd_100": null,
+    "parameters": "4.0B total (3.6B hors embeddings)",
+    "model_key": "qwen3_4b",
+    "variant": "gguf_q4_k_m"
   }
 ]
