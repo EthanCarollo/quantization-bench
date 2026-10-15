@@ -63,7 +63,7 @@ const messages = {
     "details.sd": "Écart-type d’échantillon s = √[Σ(xᵢ − x̄)² / (5 − 1)], calculé sur les cinq moyennes de run ; pour Δ, sur les cinq différences appariées.",
     "details.reading": "Comparez les modèles à l'intérieur d'un même benchmark : les scores entre colonnes ne sont pas équivalents.",
     "details.claims": "Les pertes annoncées par les éditeurs ne sont pas référencées.",
-    "details.brandCredits": "Logos des familles Gemma (Google), Qwen, Mistral et Liquid AI : <a href=\"https://ai.google.dev/gemma/docs\">Google</a> · <a href=\"https://github.com/QwenLM/qwenlm.github.io\">Qwen</a> · <a href=\"https://mistral.ai/brand/\">Mistral</a> · <a href=\"https://www.liquid.ai/\">Liquid AI</a>. Marques affichées pour identifier les modèles évalués, sans affiliation ni approbation.",
+    "details.brandCredits": "Logos des familles Gemma (Google), Qwen, Mistral et Liquid AI : <a href=\"https://partnermarketinghub.withgoogle.com/brands/google/branding-guidelines/how-to-show-googles-brand/\">Google</a> · <a href=\"https://github.com/QwenLM/qwenlm.github.io\">Qwen</a> · <a href=\"https://mistral.ai/brand/\">Mistral</a> · <a href=\"https://www.liquid.ai/\">Liquid AI</a>. Marques affichées pour identifier les modèles évalués, sans affiliation ni approbation.",
     "details.pending": "Pas encore exécutés :"
   },
   en: {
@@ -130,7 +130,7 @@ const messages = {
     "details.sd": "Sample standard deviation s = √[Σ(xᵢ − x̄)² / (5 − 1)], across the five run means; for Δ, across the five paired differences.",
     "details.reading": "Compare models within one benchmark: scores across columns are not equivalent.",
     "details.claims": "Publisher-reported loss claims are not included.",
-    "details.brandCredits": "Logos for the Gemma (Google), Qwen, Mistral, and Liquid AI model families: <a href=\"https://ai.google.dev/gemma/docs\">Google</a> · <a href=\"https://github.com/QwenLM/qwenlm.github.io\">Qwen</a> · <a href=\"https://mistral.ai/brand/\">Mistral</a> · <a href=\"https://www.liquid.ai/\">Liquid AI</a>. Marks identify the evaluated models; this project is not affiliated with or endorsed by these companies.",
+    "details.brandCredits": "Logos for the Gemma (Google), Qwen, Mistral, and Liquid AI model families: <a href=\"https://partnermarketinghub.withgoogle.com/brands/google/branding-guidelines/how-to-show-googles-brand/\">Google</a> · <a href=\"https://github.com/QwenLM/qwenlm.github.io\">Qwen</a> · <a href=\"https://mistral.ai/brand/\">Mistral</a> · <a href=\"https://www.liquid.ai/\">Liquid AI</a>. Marks identify the evaluated models; this project is not affiliated with or endorsed by these companies.",
     "details.pending": "Not run yet:"
   }
 };
@@ -163,7 +163,7 @@ const benchmarkTabs = {
   personagym: "tab-personagym"
 };
 const modelBrands = {
-  gemma4_e2b_it: { monogram: "G", css: "brand-gemma", label: "Gemma", src: "assets/model-logos/gemma.png" },
+  gemma4_e2b_it: { monogram: "G", css: "brand-gemma", label: "Gemma", src: "assets/model-logos/google-g.png" },
   qwen3_4b: { monogram: "Q", css: "brand-qwen", label: "Qwen", src: "assets/model-logos/qwen.png" },
   qwen3_5_4b: { monogram: "Q", css: "brand-qwen", label: "Qwen", src: "assets/model-logos/qwen.png" },
   ministral_3_3b_instruct_2512: { monogram: "M", css: "brand-ministral", label: "Mistral", src: "assets/model-logos/mistral.png" },
