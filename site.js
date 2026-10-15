@@ -447,6 +447,7 @@ function renderChart() {
     document.querySelector(".ranking-insight").hidden = false;
     document.getElementById("metric-panel").setAttribute("aria-labelledby", benchmarkTabs[activeMetric]);
     chart.classList.remove("delta-view", "score-view", "stddev-visible");
+    chart.classList.add("is-empty");
     document.getElementById("insight-logo").className = "insight-logo model-logo brand-other";
     document.getElementById("insight-logo").textContent = "PG";
     document.getElementById("insight-label").textContent = messages[activeLanguage]["results.personagymCaption"];
@@ -475,11 +476,13 @@ function renderChart() {
   chart.classList.toggle("delta-view", deltaMode);
   chart.classList.toggle("score-view", !deltaMode);
   chart.classList.toggle("stddev-visible", showStdDev);
+  chart.classList.remove("is-empty");
   if (!rows.length) {
     document.querySelector(".ranking-insight").hidden = true;
     const message = selectedModelIds.size
       ? messages[activeLanguage]["results.noMatchingResults"]
       : messages[activeLanguage]["results.noVisibleModels"];
+    chart.classList.add("is-empty");
     chart.innerHTML = '<div class="empty-results">' + escapeHtml(message) + '</div>';
     return;
   }
@@ -498,28 +501,41 @@ function renderChart() {
   document.getElementById("insight-value").textContent = deltaMode
     ? deltaText(best, activeMetric, showStdDev)
     : scoreText(best, activeMetric, showStdDev) + " /100";
-  document.getElementById("bar-chart").innerHTML = rows.map(function (row, index) {
+  chart.innerHTML = rows.map(function (row, index) {
     const value = deltaMode ? row[metric.delta] : row[metric.mean];
     const deviation = showStdDev ? (deltaMode ? row[metric.deltaSd] : row[metric.sd]) : 0;
     const text = deltaMode ? deltaText(row, activeMetric, showStdDev) : scoreText(row, activeMetric, showStdDev);
-    let fill;
+    let fillClass;
+    let start;
+    let size;
+    let errorStart;
+    let errorSize;
     if (deltaMode) {
       const low = Math.max(-range, value - (deviation || 0));
       const high = Math.min(range, value + (deviation || 0));
-      const left = 50 + low / range * 50;
-      const width = (high - low) / range * 50;
-      const valueLeft = value < 0 ? 50 + value / range * 50 : 50;
-      fill = '<div class="bar-fill ' + (value < 0 ? "negative" : value > 0 ? "positive" : "neutral") + '" style="left:' + valueLeft + '%;width:' + Math.abs(value) / range * 50 + '%"></div>' + (showStdDev ? '<span class="uncertainty-range" style="left:' + left + '%;width:' + width + '%"></span>' : "");
+      fillClass = value < 0 ? "negative" : value > 0 ? "positive" : "neutral";
+      start = value < 0 ? 50 : 50 - value / range * 50;
+      size = Math.abs(value) / range * 50;
+      errorStart = 50 - high / range * 50;
+      errorSize = Math.max(0, (high - low) / range * 50);
     } else {
       const low = Math.max(0, value - (deviation || 0));
       const high = Math.min(100, value + (deviation || 0));
-      fill = '<div class="bar-fill ' + brandInfo(row).css + '" style="width:' + Math.max(0, Math.min(100, value)) + '%"></div>' + (showStdDev ? '<span class="uncertainty-range" style="left:' + low + '%;width:' + Math.max(0, high - low) + '%"></span>' : "");
+      fillClass = brandInfo(row).css;
+      start = 100 - Math.max(0, Math.min(100, value));
+      size = Math.max(0, Math.min(100, value));
+      errorStart = 100 - high;
+      errorSize = Math.max(0, high - low);
     }
     const label = escapeHtml(modelTag(row));
     const displayName = escapeHtml(modelDisplayName(row));
     const variant = escapeHtml(variantLabel(row));
-    const score = escapeHtml(text);
-    return '<div class="bar-row ' + (index === 0 ? "is-top " : "") + (deltaMode && value < 0 ? "is-loss" : "") + '"><div class="bar-label">' + modelLogo(row) + '<span class="bar-model-copy"><strong>' + displayName + '</strong><small>' + variant + '</small></span></div><div class="bar-track" role="img" aria-label="' + label + ': ' + score + '">' + fill + '</div><span class="bar-value">' + score + '</span></div>';
+    const fullValue = escapeHtml(text);
+    const chartValue = escapeHtml(deltaMode ? deltaText(row, activeMetric, false).replace(" pp", "") : scoreText(row, activeMetric, false));
+    const valueY = Math.max(5, Math.min(95, deltaMode ? (value < 0 ? 50 + size : start) : start));
+    const barStyle = ' style="--bar-start:' + start + '%;--bar-size:' + size + '%;--value-y:' + valueY + '%;--error-start:' + errorStart + '%;--error-size:' + errorSize + '%"';
+    const errorBar = showStdDev ? '<span class="uncertainty-range"' + barStyle + ' aria-hidden="true"></span>' : "";
+    return '<div class="bar-column ' + (index === 0 ? "is-top " : "") + (deltaMode && value < 0 ? "is-loss" : "") + '"><div class="bar-plot ' + (deltaMode ? "delta-plot" : "score-plot") + '" role="img" aria-label="' + label + ': ' + fullValue + '"><div class="bar-fill ' + fillClass + '"' + barStyle + '></div>' + errorBar + '<span class="bar-value"' + barStyle + '>' + chartValue + '</span></div><div class="bar-brand">' + modelLogo(row) + '</div><div class="bar-column-label" title="' + label + '"><strong>' + displayName + '</strong><small>' + variant + '</small></div></div>';
   }).join("");
 }
 
