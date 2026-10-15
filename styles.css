@@ -176,6 +176,7 @@ h1, h2, h3, p { margin-top: 0; }
 .hero-stats span { color: #c6cdca; font-size: 10px; }
 
 .section { width: min(100%, var(--wrap)); margin: 0 auto; padding: 78px 32px; }
+.results-section { width: 100%; max-width: none; padding-inline: clamp(18px, 2.5vw, 40px); }
 .section-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 24px; margin-bottom: 24px; }
 .section-heading h2 { margin: 0; font-size: clamp(30px, 4vw, 42px); font-weight: 500; line-height: 1.1; letter-spacing: -.05em; }
 .section-intro { margin: 0; color: var(--muted); font-size: 11px; }
@@ -364,6 +365,7 @@ h1, h2, h3, p { margin-top: 0; }
   .hero-bottom { align-items: flex-start; flex-direction: column; gap: 9px; margin-top: 24px; }
   .hero-stats { width: 100%; justify-content: space-between; gap: 10px; }
   .section { padding: 55px 18px; }
+  .results-section { padding-inline: 18px; }
   .section-heading { align-items: flex-start; flex-direction: column; gap: 7px; margin-bottom: 18px; }
   .section-heading h2 { font-size: 34px; }
   .panel-top { align-items: flex-start; flex-direction: column; gap: 8px; padding: 11px 12px; }
