@@ -10,9 +10,9 @@ RoleBench uses ROUGE-L F1 multiplied by 100; CharacterEval uses CharacterRM mapp
 | gemma4-e2b-it@bf16 | 36.05 ± 3.04 | 13.16 ± 0.44 | 66.17 ± 2.77 | — | — | — | 2.3B effectifs (5.1B total) |
 | gemma4-e2b-it@q8_0 | 36.89 ± 2.46 | 13.69 ± 0.70 | 66.65 ± 2.36 | — | — | — | 2.3B effectifs (5.1B total) |
 | gemma4-e2b-it@q4_k_m | 36.95 ± 2.85 | 13.97 ± 0.60 | 64.87 ± 1.50 | — | — | — | 2.3B effectifs (5.1B total) |
-| gemma4-e4b-it@bf16 | 30.45 ± 3.42 | 14.20 ± 0.39 | 63.93 ± 6.44 | — | — | — | 4.5B effectifs (8B avec embeddings) |
-| gemma4-e4b-it@q8_0 | 29.01 ± 3.33 | 13.74 ± 1.01 | 66.07 ± 4.53 | — | — | — | 4.5B effectifs (8B avec embeddings) |
-| gemma4-e4b-it@q4_k_m | 26.85 ± 2.16 | 12.21 ± 0.53 | 66.11 ± 6.35 | — | — | — | 4.5B effectifs (8B avec embeddings) |
+| gemma4-e4b-it@bf16 | 30.45 ± 3.42 | 14.20 ± 0.39 | 63.93 ± 6.44 | 40.33 | — | — | 4.5B effectifs (8B avec embeddings) |
+| gemma4-e4b-it@q8_0 | 29.01 ± 3.33 | 13.74 ± 1.01 | 66.07 ± 4.53 | 39.00 | — | — | 4.5B effectifs (8B avec embeddings) |
+| gemma4-e4b-it@q4_k_m | 26.85 ± 2.16 | 12.21 ± 0.53 | 66.11 ± 6.35 | 37.00 | — | — | 4.5B effectifs (8B avec embeddings) |
 | qwen3-4b@mlx4 | 33.12 ± 1.25 | 12.35 ± 0.61 | 56.27 ± 6.11 | — | — | — | 4.0B total (3.6B hors embeddings) |
 | qwen3-4b@mlx8 | 35.54 ± 1.73 | 13.80 ± 0.42 | 63.80 ± 4.14 | — | — | — | 4.0B total (3.6B hors embeddings) |
 | qwen3-4b@bf16 | 35.61 ± 1.09 | 13.82 ± 0.66 | 60.74 ± 5.09 | — | — | — | 4.0B total (3.6B hors embeddings) |
