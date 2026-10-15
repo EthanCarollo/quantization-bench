@@ -189,7 +189,7 @@ let activeLanguage = localStorage.getItem("quantization-bench-language") === "en
 let summaryRows = [];
 let selectedModelIds = new Set();
 let activeMetric = "rolebench_generalization";
-let activeView = "delta";
+let activeView = "score";
 const stdDevVisibility = {
   rolebench_generalization: false,
   rolebench_role_specific: false,
