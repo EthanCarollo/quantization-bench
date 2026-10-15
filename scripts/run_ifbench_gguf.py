@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run five pinned IFBench repetitions against local llama.cpp GGUF models."""
+"""Run the pinned IFBench test split against local llama.cpp GGUF models."""
 
 import argparse
 import json
@@ -118,17 +118,20 @@ def wait_for_server(process: subprocess.Popen, base_url: str, log_path: Path) ->
     raise TimeoutError(f"llama-server did not become ready within 15 minutes; log: {log_path}")
 
 
-def is_complete(output_path: Path, run_path: Path) -> bool:
+def is_complete(output_path: Path, run_path: Path, repetitions: int) -> bool:
     if not output_path.is_file() or not run_path.is_file():
         return False
     try:
         items = read_jsonl(output_path)
         runs = read_jsonl(run_path)
         return (
-            len(items) == 1500
-            and len(runs) == 5
-            and {row.get("repetition") for row in runs} == {1, 2, 3, 4, 5}
-            and all(sum(row.get("repetition") == rep for row in items) == 300 for rep in range(1, 6))
+            len(items) == 300 * repetitions
+            and len(runs) == repetitions
+            and {row.get("repetition") for row in runs} == set(range(1, repetitions + 1))
+            and all(
+                sum(row.get("repetition") == rep for row in items) == 300
+                for rep in range(1, repetitions + 1)
+            )
         )
     except (OSError, ValueError, TypeError):
         return False
@@ -146,7 +149,7 @@ def run_variant(model_key: str, variant: str, args) -> None:
     stem = f"{model_key}_ifbench_{variant}"
     output_path = ROOT / "results" / f"{stem}.jsonl"
     run_path = ROOT / "results" / f"{stem}_runs.jsonl"
-    if is_complete(output_path, run_path):
+    if is_complete(output_path, run_path, args.repetitions):
         print(f"Already complete: {stem}; skipping.", flush=True)
         return
     if output_path.exists() or run_path.exists():
@@ -182,7 +185,7 @@ def run_variant(model_key: str, variant: str, args) -> None:
                 post_chat(base_url, first_prompt, SEED_BASE - 1)
                 print(f"Warm-up complete for {model_key}@{variant}.", flush=True)
                 with tmp_output.open("w", encoding="utf-8") as output, tmp_run.open("w", encoding="utf-8") as runs_file:
-                    for repetition in range(1, 6):
+                    for repetition in range(1, args.repetitions + 1):
                         seed = SEED_BASE + repetition - 1
                         prompt_scores = []
                         instruction_scores = []
@@ -229,7 +232,7 @@ def run_variant(model_key: str, variant: str, args) -> None:
                             output.flush()
                             if index % 10 == 0 or index == len(rows):
                                 print(
-                                    f"{model_key}@{variant} IFBench run {repetition}/5, "
+                                    f"{model_key}@{variant} IFBench run {repetition}/{args.repetitions}, "
                                     f"item {index}/300: {sum(prompt_scores) / len(prompt_scores) * 100:.1f}% so far, "
                                     f"{elapsed:.1f}s",
                                     flush=True,
@@ -257,7 +260,7 @@ def run_variant(model_key: str, variant: str, args) -> None:
                         runs_file.write(json.dumps(run, separators=(",", ":")) + "\n")
                         runs_file.flush()
                         print(
-                            f"Completed {model_key}@{variant} IFBench run {repetition}/5: "
+                            f"Completed {model_key}@{variant} IFBench run {repetition}/{args.repetitions}: "
                             f"loose accuracy={run['prompt_loose_accuracy_100']:.2f}%",
                             flush=True,
                         )
@@ -280,6 +283,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--model", choices=["all", *REGISTRY], required=True)
     parser.add_argument("--variant", choices=["all", *VARIANTS], default="all")
+    parser.add_argument("--repetitions", type=int, choices=(1, 5), default=1)
     parser.add_argument("--llama-cpp", type=Path, default=DEFAULT_LLAMA_CPP)
     parser.add_argument("--context-size", type=int, default=8192)
     parser.add_argument("--threads", type=int, default=6)
