@@ -293,6 +293,16 @@ function variantLabel(row) {
   return row["variant_label_" + activeLanguage] || row.variant_label || labels[variant] || row.model_tag || row.quantization || variant;
 }
 
+function chartVariantLabel(row) {
+  const label = variantLabel(row);
+  if (row.variant !== "openrouter") return label;
+  if (/xhigh/i.test(label)) return "xhigh";
+  if (/sans raisonnement|non-reasoning/i.test(label)) {
+    return activeLanguage === "fr" ? "sans rais." : "no reasoning";
+  }
+  return label;
+}
+
 function modelConfigId(row) {
   return row.model_tag || row.quantization || [row.model_key, row.variant].join("::");
 }
@@ -529,15 +539,16 @@ function renderChart() {
       errorStart = 100 - high;
       errorSize = Math.max(0, high - low);
     }
-    const label = escapeHtml(modelTag(row));
     const displayName = escapeHtml(modelDisplayName(row));
-    const variant = escapeHtml(variantLabel(row));
+    const variant = escapeHtml(chartVariantLabel(row));
+    const tooltipVariant = escapeHtml(variantLabel(row));
+    const tooltipLabel = escapeHtml(modelDisplayName(row) + " · " + variantLabel(row));
     const fullValue = escapeHtml(text);
     const chartValue = escapeHtml(deltaMode ? deltaText(row, activeMetric, false).replace(" pp", "") : scoreText(row, activeMetric, false));
     const valueY = Math.max(5, Math.min(95, deltaMode ? (value < 0 ? 50 + size : start) : start));
     const barStyle = ' style="--bar-start:' + start + '%;--bar-size:' + size + '%;--value-y:' + valueY + '%;--error-start:' + errorStart + '%;--error-size:' + errorSize + '%"';
     const errorBar = showStdDev ? '<span class="uncertainty-range"' + barStyle + ' aria-hidden="true"></span>' : "";
-    return '<div class="bar-column ' + (index === 0 ? "is-top " : "") + (deltaMode && value < 0 ? "is-loss" : "") + '"><div class="bar-plot ' + (deltaMode ? "delta-plot" : "score-plot") + '" role="img" aria-label="' + label + ': ' + fullValue + '"><div class="bar-fill ' + fillClass + '"' + barStyle + '></div>' + errorBar + '<span class="bar-value"' + barStyle + '>' + chartValue + '</span></div><div class="bar-brand">' + modelLogo(row) + '</div><div class="bar-column-label" title="' + label + '"><strong>' + displayName + '</strong><small>' + variant + '</small></div></div>';
+    return '<div class="bar-column ' + (index === 0 ? "is-top " : "") + (deltaMode && value < 0 ? "is-loss" : "") + '"><div class="bar-plot ' + (deltaMode ? "delta-plot" : "score-plot") + '" role="img" tabindex="0" aria-label="' + tooltipLabel + ': ' + fullValue + '" title="' + tooltipLabel + '"><div class="bar-fill ' + fillClass + '"' + barStyle + '></div>' + errorBar + '<span class="bar-value"' + barStyle + '>' + chartValue + '</span><span class="bar-tooltip" aria-hidden="true"><strong>' + displayName + '</strong><span>' + tooltipVariant + '</span><span>' + fullValue + (deltaMode ? "" : " /100") + '</span></span></div><div class="bar-brand">' + modelLogo(row) + '</div><div class="bar-column-label" title="' + tooltipLabel + '"><strong>' + displayName + '</strong><small>' + variant + '</small></div></div>';
   }).join("");
 }
 
