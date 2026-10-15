@@ -76,6 +76,55 @@ def main() -> None:
             shutil.rmtree(source_dir, ignore_errors=True)
             continue
 
+        if model.get("gguf_source"):
+            source = model["gguf_source"]
+            bf16_path = output_root / f"{model_key}_gguf_bf16.gguf"
+            if bf16_path.exists() and bf16_path.stat().st_size < 1_000_000_000:
+                raise SystemExit(f"GGUF source is incomplete; remove it before retrying: {bf16_path}")
+            if not bf16_path.is_file():
+                print(
+                    f"Downloading pinned BF16 GGUF {source['model_id']}/{source['bf16_file']}@{source['revision']}…",
+                    flush=True,
+                )
+                source_path = Path(
+                    hf_hub_download(
+                        repo_id=source["model_id"],
+                        filename=source["bf16_file"],
+                        revision=source["revision"],
+                        local_dir=str(source_dir),
+                    )
+                )
+                source_path.replace(bf16_path)
+
+            for variant in variants:
+                if variant == "gguf_bf16":
+                    continue
+                output_path = output_root / f"{model_key}_{variant}.gguf"
+                if output_path.is_file():
+                    print(f"Keeping existing {output_path.name}.", flush=True)
+                    continue
+                quant_type = QUANTIZATIONS[variant]
+                print(f"Quantizing {model_key} to {quant_type}…", flush=True)
+                subprocess.run(
+                    [
+                        str(quantizer),
+                        str(bf16_path),
+                        str(output_path),
+                        quant_type,
+                        str(args.threads),
+                    ],
+                    check=True,
+                    cwd=llama_cpp,
+                )
+
+            for variant in variants:
+                path = output_root / f"{model_key}_{variant}.gguf"
+                if not path.is_file() or path.stat().st_size < 1_000_000_000:
+                    raise SystemExit(f"GGUF output is missing or unexpectedly small: {path}")
+                print(f"Ready: {path.relative_to(ROOT)} ({path.stat().st_size:,} bytes)", flush=True)
+            shutil.rmtree(source_dir, ignore_errors=True)
+            continue
+
         print(f"Downloading {model['model_id']}@{model['revision']}…", flush=True)
         snapshot_download(
             repo_id=model["model_id"],
