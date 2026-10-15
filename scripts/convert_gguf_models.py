@@ -3,11 +3,12 @@
 
 import argparse
 import json
+import shutil
 import subprocess
 import sys
 from pathlib import Path
 
-from huggingface_hub import snapshot_download
+from huggingface_hub import hf_hub_download, snapshot_download
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -20,6 +21,7 @@ QUANTIZATIONS = {"gguf_bf16": None, "gguf_q8_0": "Q8_0", "gguf_q4_k_m": "Q4_K_M"
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--model", choices=["all", *REGISTRY], default="all")
+    parser.add_argument("--variant", choices=["all", *QUANTIZATIONS], default="all")
     parser.add_argument("--llama-cpp", type=Path, default=DEFAULT_LLAMA_CPP)
     parser.add_argument("--threads", type=int, default=6)
     args = parser.parse_args()
@@ -40,6 +42,7 @@ def main() -> None:
         raise SystemExit("Build llama.cpp first (including the llama-quantize target).")
 
     model_keys = list(REGISTRY) if args.model == "all" else [args.model]
+    variants = list(QUANTIZATIONS) if args.variant == "all" else [args.variant]
     source_root = ROOT / "models" / "gguf-source"
     output_root = ROOT / "models" / "gguf"
     output_root.mkdir(parents=True, exist_ok=True)
@@ -47,6 +50,32 @@ def main() -> None:
     for model_key in model_keys:
         model = REGISTRY[model_key]
         source_dir = source_root / model_key
+        if model.get("gguf_files"):
+            for variant in variants:
+                output_path = output_root / f"{model_key}_{variant}.gguf"
+                if not output_path.is_file():
+                    filename = model["gguf_files"][variant]
+                    print(
+                        f"Downloading {model['model_id']}/{filename}@{model['revision']}…",
+                        flush=True,
+                    )
+                    source_path = Path(
+                        hf_hub_download(
+                            repo_id=model["model_id"],
+                            filename=filename,
+                            revision=model["revision"],
+                            local_dir=str(source_dir),
+                        )
+                    )
+                    source_path.replace(output_path)
+                else:
+                    print(f"Keeping existing {output_path.name}.", flush=True)
+                if output_path.stat().st_size < 1_000_000_000:
+                    raise SystemExit(f"GGUF output is missing or unexpectedly small: {output_path}")
+                print(f"Ready: {output_path.relative_to(ROOT)} ({output_path.stat().st_size:,} bytes)", flush=True)
+            shutil.rmtree(source_dir, ignore_errors=True)
+            continue
+
         print(f"Downloading {model['model_id']}@{model['revision']}…", flush=True)
         snapshot_download(
             repo_id=model["model_id"],
@@ -73,7 +102,8 @@ def main() -> None:
         else:
             print(f"Keeping existing {bf16_path.name}.", flush=True)
 
-        for variant, quant_type in QUANTIZATIONS.items():
+        for variant in variants:
+            quant_type = QUANTIZATIONS[variant]
             output_path = output_root / f"{model_key}_{variant}.gguf"
             if variant == "gguf_bf16":
                 continue

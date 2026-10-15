@@ -44,5 +44,22 @@
     "license": "Apache-2.0",
     "requires_hf_token": false,
     "scorecard_variants": ["gguf_bf16", "gguf_q8_0", "gguf_q4_k_m"]
+  },
+  "lfm2_5_2_6b": {
+    "model_id": "LiquidAI/LFM2.5-2.6B-GGUF",
+    "revision": "e7caca5d835a3901a8e0d63e94009429bafafdfc",
+    "slug": "lfm2.5-2.6b",
+    "snapshot_dir": "lfm2.5-2.6b-gguf-e7caca5d",
+    "short_name": "lfm2.5-2.6b",
+    "display_name": "LFM2.5-2.6B",
+    "parameter_label": "2.69B total (model card)",
+    "license": "lfm1.0",
+    "requires_hf_token": false,
+    "scorecard_variants": ["gguf_bf16", "gguf_q8_0", "gguf_q4_k_m"],
+    "gguf_files": {
+      "gguf_bf16": "LFM2.5-2.6B-BF16.gguf",
+      "gguf_q8_0": "LFM2.5-2.6B-Q8_0.gguf",
+      "gguf_q4_k_m": "LFM2.5-2.6B-Q4_K_M.gguf"
+    }
   }
 }
