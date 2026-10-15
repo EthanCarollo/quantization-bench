@@ -286,6 +286,9 @@ function modelDisplayName(row) {
 
 function variantLabel(row) {
   const variant = row.variant || "";
+  if (variant === "openrouter") {
+    return row["variant_label_" + activeLanguage] || row.variant_label || "OpenRouter";
+  }
   const labels = {
     gguf_bf16: "GGUF · BF16",
     gguf_q8_0: "GGUF · Q8_0",
@@ -297,15 +300,7 @@ function variantLabel(row) {
 }
 
 function chartVariantLabel(row) {
-  const label = variantLabel(row);
-  if (row.variant !== "openrouter") return label;
-  if (/xhigh/i.test(label)) return "xhigh";
-  if (/deepinfra/i.test(label)) return activeLanguage === "fr" ? "DeepInfra · sans rais." : "DeepInfra · no reasoning";
-  if (/google vertex/i.test(label)) return activeLanguage === "fr" ? "Google Vertex · sans rais." : "Google Vertex · no reasoning";
-  if (/sans raisonnement|non-reasoning/i.test(label)) {
-    return activeLanguage === "fr" ? "sans rais." : "no reasoning";
-  }
-  return label;
+  return variantLabel(row);
 }
 
 function modelConfigId(row) {

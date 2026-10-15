@@ -293,9 +293,10 @@ h1, h2, h3, p { margin-top: 0; }
 .bar-brand { display: flex; align-items: center; justify-content: center; }
 .bar-brand .model-logo { width: 19px; height: 19px; border-radius: 6px; font-size: 8px; }
 .bar-brand .model-logo.has-logo { padding: 0; }
-.bar-column-label { position: relative; display: block; width: 100%; height: 152px; min-height: 0; padding: 0; text-align: center; }
-.bar-column-label strong { position: absolute; top: 61px; left: 50%; display: block; width: max-content; max-width: 122px; overflow: hidden; transform: translate(-50%, -50%) rotate(-90deg); transform-origin: center; color: #354148; font-size: 10px; font-weight: 600; line-height: 1.25; text-overflow: ellipsis; white-space: nowrap; }
-.bar-column-label small { position: absolute; right: 2px; bottom: 4px; left: 2px; display: block; overflow: hidden; max-width: calc(100% - 4px); margin: 0 auto; padding: 3px 4px; transform: none; border: 1px solid #dfe6dd; border-radius: 3px; background: #f0f3ed; color: #42594b; font: 500 8px/1.2 var(--mono); text-overflow: ellipsis; white-space: nowrap; }
+.bar-column-label { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: center; width: 100%; height: 152px; min-height: 0; padding: 0; text-align: center; }
+.bar-column-label strong, .bar-column-label small { position: static; justify-self: center; display: block; width: 122px; max-width: 122px; min-width: 0; overflow: hidden; transform: rotate(-90deg); transform-origin: center; text-overflow: ellipsis; white-space: nowrap; }
+.bar-column-label strong { color: #354148; font-size: 10px; font-weight: 600; line-height: 1.25; }
+.bar-column-label small { margin: 0; padding: 3px 4px; border: 1px solid #dfe6dd; border-radius: 3px; background: #f0f3ed; color: #42594b; font: 500 8px/1.2 var(--mono); }
 .model-logo { display: inline-flex; width: 25px; height: 25px; flex: 0 0 auto; align-items: center; justify-content: center; border: 1px solid transparent; border-radius: 7px; font: 600 10px var(--sans); }
 .model-logo.has-logo { overflow: hidden; border-color: transparent; background: transparent; }
 .model-logo img { display: block; width: 100%; height: 100%; object-fit: contain; }
@@ -399,8 +400,9 @@ h1, h2, h3, p { margin-top: 0; }
   .bar-column { grid-template-rows: 205px 22px 142px; }
   .bar-plot { height: 205px; }
   .bar-column-label { height: 142px; }
-  .bar-column-label strong { top: 55px; max-width: 108px; font-size: 9px; }
-  .bar-column-label small { right: 0; bottom: 3px; left: 0; max-width: 100%; padding: 3px 2px; font-size: 7px; }
+  .bar-column-label strong, .bar-column-label small { width: 108px; max-width: 108px; }
+  .bar-column-label strong { font-size: 9px; }
+  .bar-column-label small { padding: 3px 2px; font-size: 7px; }
   .bar-tooltip { max-width: min(190px, calc(100vw - 30px)); }
   .bar-value { font-size: 7px; }
   .table-wrap table { min-width: 700px; }
