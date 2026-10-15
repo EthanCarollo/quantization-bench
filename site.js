@@ -28,6 +28,8 @@ const messages = {
     "results.scoreCaption": "Score moyen du benchmark sélectionné · points /100",
     "results.legendMean": "Moyenne",
     "results.legendSpread": "Écart-type (±1σ)",
+    "results.showStdDev": "Afficher les écarts-types",
+    "results.hideStdDev": "Masquer les écarts-types",
     "results.scoreInsight": "Score moyen le plus élevé",
     "results.deltaInsight": "Meilleure préservation face au BF16",
     "results.scoreDescription.rolebench_generalization": "ROUGE-L F1 ×100 sur 10 réponses, moyenné sur 5 runs. C’est une similarité de texte, pas un taux de réussite.",
@@ -37,6 +39,8 @@ const messages = {
     "table.model": "Modèle et version",
     "results.runs": "5 runs · moyenne ± écart-type",
     "results.pairedRuns": "5 runs appariés · moyenne ± écart-type",
+    "results.meanOnly": "5 runs · moyenne",
+    "results.pairedMeanOnly": "5 runs appariés · moyenne",
     "results.csv": "CSV ↗",
     "method.title": "Protocole",
     "method.repo": "Détails et données ↗",
@@ -85,6 +89,8 @@ const messages = {
     "results.scoreCaption": "Mean score on the selected benchmark · points /100",
     "results.legendMean": "Mean",
     "results.legendSpread": "Standard deviation (±1 SD)",
+    "results.showStdDev": "Show standard deviations",
+    "results.hideStdDev": "Hide standard deviations",
     "results.scoreInsight": "Highest mean score",
     "results.deltaInsight": "Best preservation against BF16",
     "results.scoreDescription.rolebench_generalization": "ROUGE-L F1 ×100 over 10 responses, averaged across 5 runs. This measures text similarity, not success rate.",
@@ -94,6 +100,8 @@ const messages = {
     "table.model": "Model and variant",
     "results.runs": "5 runs · mean ± sample SD",
     "results.pairedRuns": "5 paired runs · mean ± sample SD",
+    "results.meanOnly": "5 runs · mean",
+    "results.pairedMeanOnly": "5 paired runs · mean",
     "results.csv": "CSV ↗",
     "method.title": "Protocol",
     "method.repo": "Details and data ↗",
@@ -152,6 +160,11 @@ let activeLanguage = localStorage.getItem("quantization-bench-language") === "en
 let summaryRows = [];
 let activeMetric = "rolebench_generalization";
 let activeView = "delta";
+const stdDevVisibility = {
+  rolebench_generalization: false,
+  rolebench_role_specific: false,
+  charactereval: false
+};
 
 function translate() {
   const words = messages[activeLanguage];
@@ -166,9 +179,16 @@ function translate() {
     const text = words[element.dataset.i18nAria];
     if (text !== undefined) element.setAttribute("aria-label", text);
   });
+  const showStdDev = stdDevVisibility[activeMetric];
   document.getElementById("result-runs-label").textContent = activeView === "delta"
-    ? words["results.pairedRuns"]
-    : words["results.runs"];
+    ? words[showStdDev ? "results.pairedRuns" : "results.pairedMeanOnly"]
+    : words[showStdDev ? "results.runs" : "results.meanOnly"];
+  const stdDevButton = document.getElementById("stddev-toggle");
+  const stdDevButtonLabel = words[showStdDev ? "results.hideStdDev" : "results.showStdDev"];
+  stdDevButton.setAttribute("aria-pressed", String(showStdDev));
+  stdDevButton.setAttribute("aria-label", stdDevButtonLabel);
+  document.getElementById("stddev-toggle-label").textContent = stdDevButtonLabel;
+  document.getElementById("legend-sd").hidden = !showStdDev;
   document.querySelectorAll("[data-language]").forEach(function (button) {
     button.setAttribute("aria-pressed", String(button.dataset.language === activeLanguage));
   });
@@ -232,21 +252,22 @@ function modelLogo(row) {
   return '<span class="model-logo ' + brand.css + (brand.src ? ' has-logo' : '') + '" aria-hidden="true">' + image + '</span>';
 }
 
-function scoreText(row, metricKey) {
+function scoreText(row, metricKey, includeStdDev) {
   const metric = metrics[metricKey];
   const mean = row[metric.mean];
   if (typeof mean !== "number") return "—";
+  if (!includeStdDev) return pretty(mean);
   const deviation = typeof row[metric.sd] === "number" ? row[metric.sd] : 0;
   return pretty(mean) + " ± " + pretty(deviation);
 }
 
-function deltaText(row, metricKey) {
+function deltaText(row, metricKey, includeStdDev) {
   const metric = metrics[metricKey];
   const value = row[metric.delta];
   if (typeof value !== "number") return "—";
   const deviation = typeof row[metric.deltaSd] === "number" ? row[metric.deltaSd] : 0;
   const signed = value > 0 ? "+" + pretty(value) : value < 0 ? "−" + pretty(Math.abs(value)) : pretty(0);
-  return signed + " ± " + pretty(deviation) + " pp";
+  return signed + (includeStdDev ? " ± " + pretty(deviation) : "") + " pp";
 }
 
 function scoredRows(metricKey) {
@@ -262,18 +283,20 @@ function deltaRows(metricKey) {
 function renderChart() {
   const metric = metrics[activeMetric];
   const deltaMode = activeView === "delta";
+  const showStdDev = stdDevVisibility[activeMetric];
   const rows = (deltaMode ? deltaRows(activeMetric) : scoredRows(activeMetric)).sort(function (a, b) {
     return deltaMode ? b[metric.delta] - a[metric.delta] : b[metric.mean] - a[metric.mean];
   });
   const range = Math.max(1, ...rows.map(function (row) {
     const value = deltaMode ? row[metric.delta] : row[metric.mean];
-    const deviation = deltaMode ? row[metric.deltaSd] : row[metric.sd];
+    const deviation = showStdDev ? (deltaMode ? row[metric.deltaSd] : row[metric.sd]) : 0;
     return deltaMode ? Math.abs(value || 0) + (deviation || 0) : 100;
   }));
   document.getElementById("metric-panel").setAttribute("aria-labelledby", benchmarkTabs[activeMetric]);
   const chart = document.getElementById("bar-chart");
   chart.classList.toggle("delta-view", deltaMode);
   chart.classList.toggle("score-view", !deltaMode);
+  chart.classList.toggle("stddev-visible", showStdDev);
   if (rows.length) {
     const best = rows[0];
     const brand = brandInfo(best);
@@ -286,15 +309,17 @@ function renderChart() {
     document.getElementById("insight-title").textContent = modelDisplayName(best) + " · " + variantLabel(best);
     const descriptionKey = deltaMode ? "results.deltaDescription" : "results.scoreDescription." + activeMetric;
     document.getElementById("insight-description").textContent = messages[activeLanguage][descriptionKey];
-    document.getElementById("insight-value").textContent = deltaMode ? deltaText(best, activeMetric) : scoreText(best, activeMetric) + " /100";
+    document.getElementById("insight-value").textContent = deltaMode
+      ? deltaText(best, activeMetric, showStdDev)
+      : scoreText(best, activeMetric, showStdDev) + " /100";
   } else {
     document.getElementById("insight-title").textContent = "—";
     document.getElementById("insight-value").textContent = "—";
   }
   document.getElementById("bar-chart").innerHTML = rows.map(function (row, index) {
     const value = deltaMode ? row[metric.delta] : row[metric.mean];
-    const deviation = deltaMode ? row[metric.deltaSd] : row[metric.sd];
-    const text = deltaMode ? deltaText(row, activeMetric) : scoreText(row, activeMetric);
+    const deviation = showStdDev ? (deltaMode ? row[metric.deltaSd] : row[metric.sd]) : 0;
+    const text = deltaMode ? deltaText(row, activeMetric, showStdDev) : scoreText(row, activeMetric, showStdDev);
     let fill;
     if (deltaMode) {
       const low = Math.max(-range, value - (deviation || 0));
@@ -302,11 +327,11 @@ function renderChart() {
       const left = 50 + low / range * 50;
       const width = (high - low) / range * 50;
       const valueLeft = value < 0 ? 50 + value / range * 50 : 50;
-      fill = '<div class="bar-fill ' + (value < 0 ? "negative" : value > 0 ? "positive" : "neutral") + '" style="left:' + valueLeft + '%;width:' + Math.abs(value) / range * 50 + '%"></div><span class="uncertainty-range" style="left:' + left + '%;width:' + width + '%"></span>';
+      fill = '<div class="bar-fill ' + (value < 0 ? "negative" : value > 0 ? "positive" : "neutral") + '" style="left:' + valueLeft + '%;width:' + Math.abs(value) / range * 50 + '%"></div>' + (showStdDev ? '<span class="uncertainty-range" style="left:' + left + '%;width:' + width + '%"></span>' : "");
     } else {
       const low = Math.max(0, value - (deviation || 0));
       const high = Math.min(100, value + (deviation || 0));
-      fill = '<div class="bar-fill ' + brandInfo(row).css + '" style="width:' + Math.max(0, Math.min(100, value)) + '%"></div><span class="uncertainty-range" style="left:' + low + '%;width:' + Math.max(0, high - low) + '%"></span>';
+      fill = '<div class="bar-fill ' + brandInfo(row).css + '" style="width:' + Math.max(0, Math.min(100, value)) + '%"></div>' + (showStdDev ? '<span class="uncertainty-range" style="left:' + low + '%;width:' + Math.max(0, high - low) + '%"></span>' : "");
     }
     const label = escapeHtml(modelTag(row));
     const displayName = escapeHtml(modelDisplayName(row));
@@ -329,7 +354,9 @@ function renderTable() {
     const label = escapeHtml(modelTag(row));
     const displayName = escapeHtml(modelDisplayName(row));
     const variant = escapeHtml(variantLabel(row));
-    const value = activeView === "delta" ? deltaText : scoreText;
+    const value = activeView === "delta"
+      ? function (item, metricKey) { return deltaText(item, metricKey, stdDevVisibility[metricKey]); }
+      : function (item, metricKey) { return scoreText(item, metricKey, stdDevVisibility[metricKey]); };
     return '<tr class="' + (index === 0 ? "is-top" : "") + '"><td><div class="table-model">' + modelLogo(row) + '<span><strong class="model-name">' + displayName + '</strong><small>' + variant + ' · ' + label + '</small></span>' + (index === 0 ? '<span class="rank-badge">#1</span>' : '') + '</div></td><td>' + value(row, "rolebench_generalization") + '</td><td>' + value(row, "rolebench_role_specific") + '</td><td>' + value(row, "charactereval") + '</td></tr>';
   }).join("");
 }
@@ -388,6 +415,10 @@ document.querySelectorAll("[data-view]").forEach(function (button) {
     activeView = button.dataset.view;
     renderAll();
   });
+});
+document.getElementById("stddev-toggle").addEventListener("click", function () {
+  stdDevVisibility[activeMetric] = !stdDevVisibility[activeMetric];
+  renderAll();
 });
 
 Promise.all([

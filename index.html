@@ -67,6 +67,10 @@
             <button type="button" data-view="delta" aria-pressed="true" data-i18n="view.delta">Δ vs BF16</button>
             <button type="button" data-view="score" aria-pressed="false" data-i18n="view.score">Score</button>
           </div>
+          <button class="stddev-toggle" id="stddev-toggle" type="button" aria-pressed="false" aria-controls="bar-chart score-table">
+            <span class="stddev-symbol" aria-hidden="true">σ</span>
+            <span id="stddev-toggle-label" data-i18n="results.showStdDev">Afficher les écarts-types</span>
+          </button>
           <span class="scale-label" id="scale-label">± points</span>
         </div>
         <div class="chart-area" id="metric-panel" role="region" aria-labelledby="tab-general" tabindex="0">
@@ -82,7 +86,7 @@
           </div>
           <div class="chart-legend" aria-label="Légende du graphique">
             <span><i class="legend-mean" aria-hidden="true"></i><span data-i18n="results.legendMean">Moyenne</span></span>
-            <span><i class="legend-spread" aria-hidden="true"></i><span data-i18n="results.legendSpread">Écart-type (±1σ)</span></span>
+            <span id="legend-sd" hidden><i class="legend-spread" aria-hidden="true"></i><span data-i18n="results.legendSpread">Écart-type (±1σ)</span></span>
           </div>
           <div class="bar-chart" id="bar-chart" aria-live="polite" aria-label="Comparaison des scores" data-i18n-aria="chart.aria"></div>
         </div>
