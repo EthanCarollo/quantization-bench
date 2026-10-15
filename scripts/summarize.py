@@ -158,6 +158,25 @@ def summarize_optional(model_key: str, variant: dict, benchmark: str) -> tuple[f
     return statistics.mean(values), statistics.stdev(values)
 
 
+def site_run_scores(model_key: str, variant: dict, benchmark: str) -> list[float]:
+    """Return the five site metrics in repetition order for paired deltas."""
+    if benchmark == "charactereval":
+        items = read_jsonl(RESULTS / f"{model_key}_charactereval_{variant['suffix']}.jsonl")
+        scores = []
+        for repetition in range(1, 6):
+            by_dimension = defaultdict(list)
+            for item in items:
+                if item["repetition"] != repetition:
+                    continue
+                for score in item["charactereval_scores"]:
+                    by_dimension[score["metric_en"]].append(score["score_100"])
+            scores.append(statistics.mean(statistics.mean(values) for values in by_dimension.values()))
+        return scores
+
+    runs = read_jsonl(RESULTS / f"{model_key}_{benchmark}_{variant['suffix']}_runs.jsonl")
+    return [run["macro_rouge_l_f1"] * 100.0 for run in sorted(runs, key=lambda run: run["repetition"])]
+
+
 def render_optional(value: tuple[float, float] | None) -> str:
     return "—" if value is None else f"{value[0]:.2f} ± {value[1]:.2f}"
 
@@ -213,6 +232,35 @@ def main() -> None:
                 if optional is not None:
                     row[f"{prefix}_mean_100"], row[f"{prefix}_sd_100"] = optional
             rows.append(row)
+
+    # Compare GGUF quantizations with the same model's GGUF BF16 runs. MLX rows
+    # stay blank: this dataset has no MLX BF16 reference, so that delta would
+    # mix quantization and runtime/format changes.
+    variants_by_suffix = {variant["suffix"]: variant for variant in VARIANTS}
+    site_benchmarks = (*BENCHMARKS, "charactereval")
+    for row in rows:
+        variant = variants_by_suffix[row["variant"]]
+        is_gguf = variant["suffix"].startswith("gguf_")
+        baseline = variants_by_suffix["gguf_bf16"]
+        for benchmark in site_benchmarks:
+            prefix = f"{benchmark}_delta_vs_bf16"
+            mean_key, sd_key = f"{prefix}_mean_pp", f"{prefix}_sd_pp"
+            row[mean_key] = None
+            row[sd_key] = None
+            if not is_gguf:
+                continue
+            if variant["suffix"] == "gguf_bf16":
+                row[mean_key], row[sd_key] = 0.0, 0.0
+                continue
+            if row[f"{benchmark}_mean_100"] is None:
+                continue
+            quantized_runs = site_run_scores(row["model_key"], variant, benchmark)
+            baseline_runs = site_run_scores(row["model_key"], baseline, benchmark)
+            if len(quantized_runs) != len(baseline_runs) or len(quantized_runs) != 5:
+                raise SystemExit(f"Expected five paired runs for {row['model_key']} {variant['suffix']} {benchmark}")
+            deltas = [quantized - reference for quantized, reference in zip(quantized_runs, baseline_runs)]
+            row[mean_key] = statistics.mean(deltas)
+            row[sd_key] = statistics.stdev(deltas)
 
     summary_json = RESULTS / "summary.json"
     summary_csv = RESULTS / "summary.csv"

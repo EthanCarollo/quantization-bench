@@ -18,7 +18,13 @@
     "livecodebench_pass_at_1_sd_100": null,
     "parameters": "2.3B effectifs (5.1B total)",
     "model_key": "gemma4_e2b_it",
-    "variant": "mlx_4bit"
+    "variant": "mlx_4bit",
+    "rolebench_generalization_delta_vs_bf16_mean_pp": null,
+    "rolebench_generalization_delta_vs_bf16_sd_pp": null,
+    "rolebench_role_specific_delta_vs_bf16_mean_pp": null,
+    "rolebench_role_specific_delta_vs_bf16_sd_pp": null,
+    "charactereval_delta_vs_bf16_mean_pp": null,
+    "charactereval_delta_vs_bf16_sd_pp": null
   },
   {
     "quantization": "gemma4-e2b-it@mlx8",
@@ -39,7 +45,13 @@
     "livecodebench_pass_at_1_sd_100": null,
     "parameters": "2.3B effectifs (5.1B total)",
     "model_key": "gemma4_e2b_it",
-    "variant": "mlx_8bit"
+    "variant": "mlx_8bit",
+    "rolebench_generalization_delta_vs_bf16_mean_pp": null,
+    "rolebench_generalization_delta_vs_bf16_sd_pp": null,
+    "rolebench_role_specific_delta_vs_bf16_mean_pp": null,
+    "rolebench_role_specific_delta_vs_bf16_sd_pp": null,
+    "charactereval_delta_vs_bf16_mean_pp": null,
+    "charactereval_delta_vs_bf16_sd_pp": null
   },
   {
     "quantization": "gemma4-e2b-it@bf16",
@@ -60,7 +72,13 @@
     "livecodebench_pass_at_1_sd_100": null,
     "parameters": "2.3B effectifs (5.1B total)",
     "model_key": "gemma4_e2b_it",
-    "variant": "gguf_bf16"
+    "variant": "gguf_bf16",
+    "rolebench_generalization_delta_vs_bf16_mean_pp": 0.0,
+    "rolebench_generalization_delta_vs_bf16_sd_pp": 0.0,
+    "rolebench_role_specific_delta_vs_bf16_mean_pp": 0.0,
+    "rolebench_role_specific_delta_vs_bf16_sd_pp": 0.0,
+    "charactereval_delta_vs_bf16_mean_pp": 0.0,
+    "charactereval_delta_vs_bf16_sd_pp": 0.0
   },
   {
     "quantization": "gemma4-e2b-it@q8_0",
@@ -81,7 +99,13 @@
     "livecodebench_pass_at_1_sd_100": null,
     "parameters": "2.3B effectifs (5.1B total)",
     "model_key": "gemma4_e2b_it",
-    "variant": "gguf_q8_0"
+    "variant": "gguf_q8_0",
+    "rolebench_generalization_delta_vs_bf16_mean_pp": 0.8379914089730512,
+    "rolebench_generalization_delta_vs_bf16_sd_pp": 1.6209045896910204,
+    "rolebench_role_specific_delta_vs_bf16_mean_pp": 0.5274528370141219,
+    "rolebench_role_specific_delta_vs_bf16_sd_pp": 0.4492497140314143,
+    "charactereval_delta_vs_bf16_mean_pp": 0.47987196180555713,
+    "charactereval_delta_vs_bf16_sd_pp": 2.9565594686861805
   },
   {
     "quantization": "gemma4-e2b-it@q4_k_m",
@@ -102,7 +126,13 @@
     "livecodebench_pass_at_1_sd_100": null,
     "parameters": "2.3B effectifs (5.1B total)",
     "model_key": "gemma4_e2b_it",
-    "variant": "gguf_q4_k_m"
+    "variant": "gguf_q4_k_m",
+    "rolebench_generalization_delta_vs_bf16_mean_pp": 0.8963623787003776,
+    "rolebench_generalization_delta_vs_bf16_sd_pp": 3.5355301142859106,
+    "rolebench_role_specific_delta_vs_bf16_mean_pp": 0.8122139203496677,
+    "rolebench_role_specific_delta_vs_bf16_sd_pp": 0.9454520708164978,
+    "charactereval_delta_vs_bf16_mean_pp": -1.2952507866753478,
+    "charactereval_delta_vs_bf16_sd_pp": 2.981502984727683
   },
   {
     "quantization": "qwen3-4b@mlx4",
@@ -123,7 +153,13 @@
     "livecodebench_pass_at_1_sd_100": null,
     "parameters": "4.0B total (3.6B hors embeddings)",
     "model_key": "qwen3_4b",
-    "variant": "mlx_4bit"
+    "variant": "mlx_4bit",
+    "rolebench_generalization_delta_vs_bf16_mean_pp": null,
+    "rolebench_generalization_delta_vs_bf16_sd_pp": null,
+    "rolebench_role_specific_delta_vs_bf16_mean_pp": null,
+    "rolebench_role_specific_delta_vs_bf16_sd_pp": null,
+    "charactereval_delta_vs_bf16_mean_pp": null,
+    "charactereval_delta_vs_bf16_sd_pp": null
   },
   {
     "quantization": "qwen3-4b@mlx8",
@@ -144,7 +180,13 @@
     "livecodebench_pass_at_1_sd_100": null,
     "parameters": "4.0B total (3.6B hors embeddings)",
     "model_key": "qwen3_4b",
-    "variant": "mlx_8bit"
+    "variant": "mlx_8bit",
+    "rolebench_generalization_delta_vs_bf16_mean_pp": null,
+    "rolebench_generalization_delta_vs_bf16_sd_pp": null,
+    "rolebench_role_specific_delta_vs_bf16_mean_pp": null,
+    "rolebench_role_specific_delta_vs_bf16_sd_pp": null,
+    "charactereval_delta_vs_bf16_mean_pp": null,
+    "charactereval_delta_vs_bf16_sd_pp": null
   },
   {
     "quantization": "qwen3-4b@bf16",
@@ -165,7 +207,13 @@
     "livecodebench_pass_at_1_sd_100": null,
     "parameters": "4.0B total (3.6B hors embeddings)",
     "model_key": "qwen3_4b",
-    "variant": "gguf_bf16"
+    "variant": "gguf_bf16",
+    "rolebench_generalization_delta_vs_bf16_mean_pp": 0.0,
+    "rolebench_generalization_delta_vs_bf16_sd_pp": 0.0,
+    "rolebench_role_specific_delta_vs_bf16_mean_pp": 0.0,
+    "rolebench_role_specific_delta_vs_bf16_sd_pp": 0.0,
+    "charactereval_delta_vs_bf16_mean_pp": 0.0,
+    "charactereval_delta_vs_bf16_sd_pp": 0.0
   },
   {
     "quantization": "qwen3-4b@q8_0",
@@ -186,7 +234,13 @@
     "livecodebench_pass_at_1_sd_100": null,
     "parameters": "4.0B total (3.6B hors embeddings)",
     "model_key": "qwen3_4b",
-    "variant": "gguf_q8_0"
+    "variant": "gguf_q8_0",
+    "rolebench_generalization_delta_vs_bf16_mean_pp": 0.21873485624855818,
+    "rolebench_generalization_delta_vs_bf16_sd_pp": 1.1401665084856136,
+    "rolebench_role_specific_delta_vs_bf16_mean_pp": -0.15417521673461962,
+    "rolebench_role_specific_delta_vs_bf16_sd_pp": 0.6723389422537166,
+    "charactereval_delta_vs_bf16_mean_pp": -1.1992730034722228,
+    "charactereval_delta_vs_bf16_sd_pp": 5.376650606222154
   },
   {
     "quantization": "qwen3-4b@q4_k_m",
@@ -207,7 +261,13 @@
     "livecodebench_pass_at_1_sd_100": null,
     "parameters": "4.0B total (3.6B hors embeddings)",
     "model_key": "qwen3_4b",
-    "variant": "gguf_q4_k_m"
+    "variant": "gguf_q4_k_m",
+    "rolebench_generalization_delta_vs_bf16_mean_pp": -0.43104125112450903,
+    "rolebench_generalization_delta_vs_bf16_sd_pp": 2.7859099358999804,
+    "rolebench_role_specific_delta_vs_bf16_mean_pp": 0.11720052596814874,
+    "rolebench_role_specific_delta_vs_bf16_sd_pp": 0.8440491284040059,
+    "charactereval_delta_vs_bf16_mean_pp": -2.428249782986113,
+    "charactereval_delta_vs_bf16_sd_pp": 7.3464770084875415
   },
   {
     "quantization": "ministral-3-3b@bf16",
@@ -228,7 +288,13 @@
     "livecodebench_pass_at_1_sd_100": null,
     "parameters": "3.4B language + 0.4B vision",
     "model_key": "ministral_3_3b_instruct_2512",
-    "variant": "gguf_bf16"
+    "variant": "gguf_bf16",
+    "rolebench_generalization_delta_vs_bf16_mean_pp": 0.0,
+    "rolebench_generalization_delta_vs_bf16_sd_pp": 0.0,
+    "rolebench_role_specific_delta_vs_bf16_mean_pp": 0.0,
+    "rolebench_role_specific_delta_vs_bf16_sd_pp": 0.0,
+    "charactereval_delta_vs_bf16_mean_pp": 0.0,
+    "charactereval_delta_vs_bf16_sd_pp": 0.0
   },
   {
     "quantization": "ministral-3-3b@q8_0",
@@ -249,7 +315,13 @@
     "livecodebench_pass_at_1_sd_100": null,
     "parameters": "3.4B language + 0.4B vision",
     "model_key": "ministral_3_3b_instruct_2512",
-    "variant": "gguf_q8_0"
+    "variant": "gguf_q8_0",
+    "rolebench_generalization_delta_vs_bf16_mean_pp": 0.11077862136686711,
+    "rolebench_generalization_delta_vs_bf16_sd_pp": 1.0467762037867852,
+    "rolebench_role_specific_delta_vs_bf16_mean_pp": -0.0661813518254096,
+    "rolebench_role_specific_delta_vs_bf16_sd_pp": 0.8648805377090173,
+    "charactereval_delta_vs_bf16_mean_pp": -3.425174289279512,
+    "charactereval_delta_vs_bf16_sd_pp": 2.6032884800883136
   },
   {
     "quantization": "ministral-3-3b@q4_k_m",
@@ -270,7 +342,13 @@
     "livecodebench_pass_at_1_sd_100": null,
     "parameters": "3.4B language + 0.4B vision",
     "model_key": "ministral_3_3b_instruct_2512",
-    "variant": "gguf_q4_k_m"
+    "variant": "gguf_q4_k_m",
+    "rolebench_generalization_delta_vs_bf16_mean_pp": -1.0154974609239147,
+    "rolebench_generalization_delta_vs_bf16_sd_pp": 2.163371877879347,
+    "rolebench_role_specific_delta_vs_bf16_mean_pp": -0.12932750224757647,
+    "rolebench_role_specific_delta_vs_bf16_sd_pp": 0.825755508669294,
+    "charactereval_delta_vs_bf16_mean_pp": 2.8761969672309036,
+    "charactereval_delta_vs_bf16_sd_pp": 8.90892007263317
   },
   {
     "quantization": "qwen3.5-4b@bf16",
@@ -291,7 +369,13 @@
     "livecodebench_pass_at_1_sd_100": null,
     "parameters": "5B total (model card)",
     "model_key": "qwen3_5_4b",
-    "variant": "gguf_bf16"
+    "variant": "gguf_bf16",
+    "rolebench_generalization_delta_vs_bf16_mean_pp": 0.0,
+    "rolebench_generalization_delta_vs_bf16_sd_pp": 0.0,
+    "rolebench_role_specific_delta_vs_bf16_mean_pp": 0.0,
+    "rolebench_role_specific_delta_vs_bf16_sd_pp": 0.0,
+    "charactereval_delta_vs_bf16_mean_pp": 0.0,
+    "charactereval_delta_vs_bf16_sd_pp": 0.0
   },
   {
     "quantization": "qwen3.5-4b@q8_0",
@@ -312,7 +396,13 @@
     "livecodebench_pass_at_1_sd_100": null,
     "parameters": "5B total (model card)",
     "model_key": "qwen3_5_4b",
-    "variant": "gguf_q8_0"
+    "variant": "gguf_q8_0",
+    "rolebench_generalization_delta_vs_bf16_mean_pp": 3.0967563589509086,
+    "rolebench_generalization_delta_vs_bf16_sd_pp": 5.288223575415004,
+    "rolebench_role_specific_delta_vs_bf16_mean_pp": 0.06410218433436796,
+    "rolebench_role_specific_delta_vs_bf16_sd_pp": 0.7731576823665811,
+    "charactereval_delta_vs_bf16_mean_pp": -1.83403862847222,
+    "charactereval_delta_vs_bf16_sd_pp": 4.234774699881133
   },
   {
     "quantization": "qwen3.5-4b@q4_k_m",
@@ -333,7 +423,13 @@
     "livecodebench_pass_at_1_sd_100": null,
     "parameters": "5B total (model card)",
     "model_key": "qwen3_5_4b",
-    "variant": "gguf_q4_k_m"
+    "variant": "gguf_q4_k_m",
+    "rolebench_generalization_delta_vs_bf16_mean_pp": -0.29363398426103976,
+    "rolebench_generalization_delta_vs_bf16_sd_pp": 1.9181686173589316,
+    "rolebench_role_specific_delta_vs_bf16_mean_pp": 0.4715386757141193,
+    "rolebench_role_specific_delta_vs_bf16_sd_pp": 0.6365168782147023,
+    "charactereval_delta_vs_bf16_mean_pp": -4.278157552083331,
+    "charactereval_delta_vs_bf16_sd_pp": 0.40032177993424317
   },
   {
     "quantization": "lfm2.5-2.6b@bf16",
@@ -354,7 +450,13 @@
     "livecodebench_pass_at_1_sd_100": null,
     "parameters": "2.69B total (model card)",
     "model_key": "lfm2_5_2_6b",
-    "variant": "gguf_bf16"
+    "variant": "gguf_bf16",
+    "rolebench_generalization_delta_vs_bf16_mean_pp": 0.0,
+    "rolebench_generalization_delta_vs_bf16_sd_pp": 0.0,
+    "rolebench_role_specific_delta_vs_bf16_mean_pp": 0.0,
+    "rolebench_role_specific_delta_vs_bf16_sd_pp": 0.0,
+    "charactereval_delta_vs_bf16_mean_pp": 0.0,
+    "charactereval_delta_vs_bf16_sd_pp": 0.0
   },
   {
     "quantization": "lfm2.5-2.6b@q8_0",
@@ -375,7 +477,13 @@
     "livecodebench_pass_at_1_sd_100": null,
     "parameters": "2.69B total (model card)",
     "model_key": "lfm2_5_2_6b",
-    "variant": "gguf_q8_0"
+    "variant": "gguf_q8_0",
+    "rolebench_generalization_delta_vs_bf16_mean_pp": 0.2928406199763124,
+    "rolebench_generalization_delta_vs_bf16_sd_pp": 3.2064036837847825,
+    "rolebench_role_specific_delta_vs_bf16_mean_pp": 0.5747694956012399,
+    "rolebench_role_specific_delta_vs_bf16_sd_pp": 0.9033453655237872,
+    "charactereval_delta_vs_bf16_mean_pp": -3.0024719238281237,
+    "charactereval_delta_vs_bf16_sd_pp": 7.258163623922406
   },
   {
     "quantization": "lfm2.5-2.6b@q4_k_m",
@@ -396,6 +504,12 @@
     "livecodebench_pass_at_1_sd_100": null,
     "parameters": "2.69B total (model card)",
     "model_key": "lfm2_5_2_6b",
-    "variant": "gguf_q4_k_m"
+    "variant": "gguf_q4_k_m",
+    "rolebench_generalization_delta_vs_bf16_mean_pp": 0.6126446382277291,
+    "rolebench_generalization_delta_vs_bf16_sd_pp": 2.312645239945415,
+    "rolebench_role_specific_delta_vs_bf16_mean_pp": -0.003081831557316761,
+    "rolebench_role_specific_delta_vs_bf16_sd_pp": 0.9148035893093761,
+    "charactereval_delta_vs_bf16_mean_pp": -5.515814887152777,
+    "charactereval_delta_vs_bf16_sd_pp": 7.56459777057789
   }
 ]
