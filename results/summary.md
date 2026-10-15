@@ -21,6 +21,9 @@ RoleBench uses ROUGE-L F1 multiplied by 100; CharacterEval uses CharacterRM mapp
 | qwen3.5-4b@bf16 | 15.47 ± 3.51 | 12.28 ± 0.25 | 67.67 ± 4.92 | — | — | — | 5B total (model card) |
 | qwen3.5-4b@q8_0 | 18.57 ± 8.05 | 12.34 ± 0.69 | 65.84 ± 2.62 | — | — | — | 5B total (model card) |
 | qwen3.5-4b@q4_k_m | 15.18 ± 3.05 | 12.75 ± 0.68 | 63.39 ± 5.27 | — | — | — | 5B total (model card) |
+| lfm2.5-2.6b@bf16 | 18.95 ± 3.63 | 11.04 ± 0.62 | 48.13 ± 6.04 | — | — | — | 2.69B total (model card) |
+| lfm2.5-2.6b@q8_0 | 19.24 ± 0.93 | 11.61 ± 0.62 | 45.12 ± 4.88 | — | — | — | 2.69B total (model card) |
+| lfm2.5-2.6b@q4_k_m | 19.56 ± 3.69 | 11.03 ± 0.58 | 42.61 ± 10.99 | — | — | — | 2.69B total (model card) |
 
 MLX variants use affine weight quantization with group size 64. GGUF variants use llama.cpp BF16, Q8_0, or Q4_K_M files. Sampling settings and prompts are held fixed across model variants within each benchmark.
 

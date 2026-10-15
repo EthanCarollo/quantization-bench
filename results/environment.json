@@ -246,7 +246,7 @@
     "interpretation_note": "Wording overlap with one RoleGPT reference; not a human role-play quality rating."
   },
   "gguf_evaluation": {
-    "captured_at_utc": "2026-10-14T18:06:34Z",
+    "captured_at_utc": "2026-10-15T08:25:49Z",
     "hardware": {
       "gpu": "NVIDIA GeForce RTX 5060 Ti",
       "gpu_vram_mib": 16311,
@@ -327,12 +327,27 @@
         "model_key": "qwen3_5_4b",
         "quantization": "Q4_K_M",
         "file_size_bytes": 2783446848
+      },
+      {
+        "model_key": "lfm2_5_2_6b",
+        "quantization": "BF16",
+        "file_size_bytes": 5403158528
+      },
+      {
+        "model_key": "lfm2_5_2_6b",
+        "quantization": "Q8_0",
+        "file_size_bytes": 2874779648
+      },
+      {
+        "model_key": "lfm2_5_2_6b",
+        "quantization": "Q4_K_M",
+        "file_size_bytes": 1674455040
       }
     ],
     "charactereval_evaluator": {
       "model_id": "morecry/BaichuanCharRM",
       "revision": "e953da5f57b86db7adca3a2714b4c3720f5b96a2",
-      "ratings_completed": 2640,
+      "ratings_completed": 3135,
       "gpu_memory_limit": "14GiB",
       "cpu_memory_limit": "14GiB"
     }
