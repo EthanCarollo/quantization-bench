@@ -234,8 +234,8 @@ document.querySelectorAll("[data-metric]").forEach(function (button) {
 });
 
 Promise.all([
-  fetch("data/summary.json").then(function (response) { if (!response.ok) throw new Error("summary"); return response.json(); }),
-  fetch("data/environment.json").then(function (response) { if (!response.ok) throw new Error("environment"); return response.json(); })
+  fetch("site-data/summary.json").then(function (response) { if (!response.ok) throw new Error("summary"); return response.json(); }),
+  fetch("site-data/environment.json").then(function (response) { if (!response.ok) throw new Error("environment"); return response.json(); })
 ]).then(function (data) {
   summaryRows = data[0];
   renderEnvironment(data[1]);

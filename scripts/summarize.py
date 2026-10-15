@@ -11,7 +11,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 RESULTS = ROOT / "results"
-SITE_DATA = ROOT / "docs" / "data"
+SITE_DATA = ROOT / "site-data"
 REGISTRY = json.loads((ROOT / "data" / "model_registry.json").read_text(encoding="utf-8"))
 BENCHMARKS = (
     "rolebench_generalization",
