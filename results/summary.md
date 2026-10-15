@@ -18,9 +18,9 @@ RoleBench uses ROUGE-L F1 multiplied by 100; CharacterEval uses CharacterRM mapp
 | ministral-3-3b@bf16 | 14.66 ± 5.63 | 10.84 ± 0.35 | 51.69 ± 7.48 | — | — | — | 3.4B language + 0.4B vision |
 | ministral-3-3b@q8_0 | 14.77 ± 5.96 | 10.78 ± 0.58 | 48.27 ± 9.11 | — | — | — | 3.4B language + 0.4B vision |
 | ministral-3-3b@q4_k_m | 13.64 ± 3.62 | 10.71 ± 0.60 | 54.57 ± 3.62 | — | — | — | 3.4B language + 0.4B vision |
-| qwen3.5-4b@bf16 | — | — | — | — | — | — | 5B total (model card) |
-| qwen3.5-4b@q8_0 | — | — | — | — | — | — | 5B total (model card) |
-| qwen3.5-4b@q4_k_m | — | — | — | — | — | — | 5B total (model card) |
+| qwen3.5-4b@bf16 | 15.47 ± 3.51 | 12.28 ± 0.25 | 67.67 ± 4.92 | — | — | — | 5B total (model card) |
+| qwen3.5-4b@q8_0 | 18.57 ± 8.05 | 12.34 ± 0.69 | 65.84 ± 2.62 | — | — | — | 5B total (model card) |
+| qwen3.5-4b@q4_k_m | 15.18 ± 3.05 | 12.75 ± 0.68 | 63.39 ± 5.27 | — | — | — | 5B total (model card) |
 
 MLX variants use affine weight quantization with group size 64. GGUF variants use llama.cpp BF16, Q8_0, or Q4_K_M files. Sampling settings and prompts are held fixed across model variants within each benchmark.
 

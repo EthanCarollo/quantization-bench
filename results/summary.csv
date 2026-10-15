@@ -12,6 +12,6 @@ qwen3-4b@q4_k_m,qwen3-4b@q4_k_m,Qwen3-4B,GGUF Q4_K_M (llama.cpp),35.180518860480
 ministral-3-3b@bf16,ministral-3-3b@bf16,Ministral 3 3B Instruct 2512,GGUF BF16 (llama.cpp),14.660256737039402,5.632288104502478,10.84297346491915,0.3515055817291135,51.692962646484375,7.4827640377934355,,,,,,,3.4B language + 0.4B vision,ministral_3_3b_instruct_2512,gguf_bf16
 ministral-3-3b@q8_0,ministral-3-3b@q8_0,Ministral 3 3B Instruct 2512,GGUF Q8_0 (llama.cpp),14.77103535840627,5.958913685263906,10.77679211309374,0.5755646748929091,48.267788357204864,9.113308001157906,,,,,,,3.4B language + 0.4B vision,ministral_3_3b_instruct_2512,gguf_q8_0
 ministral-3-3b@q4_k_m,ministral-3-3b@q4_k_m,Ministral 3 3B Instruct 2512,GGUF Q4_K_M (llama.cpp),13.644759276115488,3.619733315093571,10.713645962671572,0.5997196384504095,54.56915961371528,3.6200152202212474,,,,,,,3.4B language + 0.4B vision,ministral_3_3b_instruct_2512,gguf_q4_k_m
-qwen3.5-4b@bf16,qwen3.5-4b@bf16,Qwen3.5-4B,GGUF BF16 (llama.cpp),,,,,,,,,,,,,5B total (model card),qwen3_5_4b,gguf_bf16
-qwen3.5-4b@q8_0,qwen3.5-4b@q8_0,Qwen3.5-4B,GGUF Q8_0 (llama.cpp),,,,,,,,,,,,,5B total (model card),qwen3_5_4b,gguf_q8_0
-qwen3.5-4b@q4_k_m,qwen3.5-4b@q4_k_m,Qwen3.5-4B,GGUF Q4_K_M (llama.cpp),,,,,,,,,,,,,5B total (model card),qwen3_5_4b,gguf_q4_k_m
+qwen3.5-4b@bf16,qwen3.5-4b@bf16,Qwen3.5-4B,GGUF BF16 (llama.cpp),15.470370486811092,3.513654143340337,12.278700572997435,0.2539488556406457,67.67293294270833,4.922157956361726,,,,,,,5B total (model card),qwen3_5_4b,gguf_bf16
+qwen3.5-4b@q8_0,qwen3.5-4b@q8_0,Qwen3.5-4B,GGUF Q8_0 (llama.cpp),18.567126845762,8.048456278038866,12.342802757331802,0.6939574479536478,65.83889431423611,2.623687518344352,,,,,,,5B total (model card),qwen3_5_4b,gguf_q8_0
+qwen3.5-4b@q4_k_m,qwen3.5-4b@q4_k_m,Qwen3.5-4B,GGUF Q4_K_M (llama.cpp),15.176736502550051,3.0533250968619248,12.750239248711553,0.682235651473001,63.394775390625,5.268467648709608,,,,,,,5B total (model card),qwen3_5_4b,gguf_q4_k_m
