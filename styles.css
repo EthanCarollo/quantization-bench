@@ -201,6 +201,7 @@ h1, h2, h3, p { margin-top: 0; }
 .chart-caption { margin: 0 0 13px; color: #8b9394; font-size: 10px; }
 .ranking-insight { display: grid; grid-template-columns: 38px minmax(0, 1fr) auto; align-items: center; gap: 13px; padding: 13px 15px; border: 1px solid #e8e9df; background: #f8f9f4; }
 .insight-logo { width: 36px !important; height: 36px !important; border-radius: 10px !important; font-size: 15px !important; }
+.insight-logo.has-logo { padding: 2px; }
 .insight-copy { display: grid; min-width: 0; gap: 2px; }
 .insight-kicker { color: #788078; font: 9px var(--mono); letter-spacing: .04em; text-transform: uppercase; }
 .insight-copy strong { overflow: hidden; color: var(--ink); font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
@@ -218,6 +219,8 @@ h1, h2, h3, p { margin-top: 0; }
 .bar-row.is-top { background: #f8f9f4; }
 .bar-label { display: flex; min-width: 0; align-items: center; gap: 9px; }
 .model-logo { display: inline-flex; width: 25px; height: 25px; flex: 0 0 auto; align-items: center; justify-content: center; border: 1px solid transparent; border-radius: 7px; font: 600 10px var(--sans); }
+.model-logo.has-logo { overflow: hidden; border-color: transparent; background: transparent; }
+.model-logo img { display: block; width: 100%; height: 100%; object-fit: contain; }
 .brand-gemma { border-color: #d3e1d2; background: #edf4ec; color: #4d7857; }
 .brand-qwen { border-color: #d4ddf4; background: #edf1fc; color: #536cad; }
 .brand-ministral { border-color: #f1d8ca; background: #fbefe8; color: #b96137; }

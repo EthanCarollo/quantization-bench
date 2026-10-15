@@ -30,7 +30,9 @@ const messages = {
     "results.legendSpread": "Écart-type (±1σ)",
     "results.scoreInsight": "Score moyen le plus élevé",
     "results.deltaInsight": "Meilleure préservation face au BF16",
-    "results.scoreDescription": "Première place dans ce benchmark. Les autres benchmarks mesurent des choses différentes.",
+    "results.scoreDescription.rolebench_generalization": "ROUGE-L F1 ×100 sur 10 réponses, moyenné sur 5 runs. C’est une similarité de texte, pas un taux de réussite.",
+    "results.scoreDescription.rolebench_role_specific": "ROUGE-L F1 ×100 sur 10 réponses liées à un rôle, moyenné sur 5 runs. C’est une similarité de texte, pas un taux de réussite.",
+    "results.scoreDescription.charactereval": "CharacterRM ×100 sur 12 exemples, moyenné sur 5 runs.",
     "results.deltaDescription": "Variation quantifié − BF16 apparié. Une valeur plus haute signifie une meilleure préservation.",
     "table.model": "Modèle et version",
     "results.runs": "5 runs · moyenne ± écart-type",
@@ -51,6 +53,7 @@ const messages = {
     "details.sd": "Écart-type d’échantillon s = √[Σ(xᵢ − x̄)² / (5 − 1)], calculé sur les cinq moyennes de run ; pour Δ, sur les cinq différences appariées.",
     "details.reading": "Comparez les modèles à l'intérieur d'un même benchmark : les scores entre colonnes ne sont pas équivalents.",
     "details.claims": "Les pertes annoncées par les éditeurs ne sont pas référencées.",
+    "details.brandCredits": "Logos des familles Gemma (Google), Qwen, Mistral et Liquid AI : <a href=\"https://ai.google.dev/gemma/docs\">Google</a> · <a href=\"https://github.com/QwenLM/qwenlm.github.io\">Qwen</a> · <a href=\"https://mistral.ai/brand/\">Mistral</a> · <a href=\"https://www.liquid.ai/\">Liquid AI</a>. Marques affichées pour identifier les modèles évalués, sans affiliation ni approbation.",
     "details.pending": "Pas encore exécutés :"
   },
   en: {
@@ -84,7 +87,9 @@ const messages = {
     "results.legendSpread": "Standard deviation (±1 SD)",
     "results.scoreInsight": "Highest mean score",
     "results.deltaInsight": "Best preservation against BF16",
-    "results.scoreDescription": "Ranked within this benchmark. The other benchmarks measure different things.",
+    "results.scoreDescription.rolebench_generalization": "ROUGE-L F1 ×100 over 10 responses, averaged across 5 runs. This measures text similarity, not success rate.",
+    "results.scoreDescription.rolebench_role_specific": "ROUGE-L F1 ×100 over 10 role-specific responses, averaged across 5 runs. This measures text similarity, not success rate.",
+    "results.scoreDescription.charactereval": "CharacterRM ×100 over 12 examples, averaged across 5 runs.",
     "results.deltaDescription": "Quantized − paired BF16 change. A higher value means better preservation.",
     "table.model": "Model and variant",
     "results.runs": "5 runs · mean ± sample SD",
@@ -105,6 +110,7 @@ const messages = {
     "details.sd": "Sample standard deviation s = √[Σ(xᵢ − x̄)² / (5 − 1)], across the five run means; for Δ, across the five paired differences.",
     "details.reading": "Compare models within one benchmark: scores across columns are not equivalent.",
     "details.claims": "Publisher-reported loss claims are not included.",
+    "details.brandCredits": "Logos for the Gemma (Google), Qwen, Mistral, and Liquid AI model families: <a href=\"https://ai.google.dev/gemma/docs\">Google</a> · <a href=\"https://github.com/QwenLM/qwenlm.github.io\">Qwen</a> · <a href=\"https://mistral.ai/brand/\">Mistral</a> · <a href=\"https://www.liquid.ai/\">Liquid AI</a>. Marks identify the evaluated models; this project is not affiliated with or endorsed by these companies.",
     "details.pending": "Not run yet:"
   }
 };
@@ -136,11 +142,11 @@ const benchmarkTabs = {
   charactereval: "tab-character"
 };
 const modelBrands = {
-  gemma4_e2b_it: { monogram: "G", css: "brand-gemma", label: "Gemma" },
-  qwen3_4b: { monogram: "Q", css: "brand-qwen", label: "Qwen" },
-  qwen3_5_4b: { monogram: "Q", css: "brand-qwen", label: "Qwen" },
-  ministral_3_3b_instruct_2512: { monogram: "M", css: "brand-ministral", label: "Ministral" },
-  lfm2_5_2_6b: { monogram: "L", css: "brand-lfm", label: "LFM" }
+  gemma4_e2b_it: { monogram: "G", css: "brand-gemma", label: "Gemma", src: "assets/model-logos/gemma.png" },
+  qwen3_4b: { monogram: "Q", css: "brand-qwen", label: "Qwen", src: "assets/model-logos/qwen.png" },
+  qwen3_5_4b: { monogram: "Q", css: "brand-qwen", label: "Qwen", src: "assets/model-logos/qwen.png" },
+  ministral_3_3b_instruct_2512: { monogram: "M", css: "brand-ministral", label: "Mistral", src: "assets/model-logos/mistral.png" },
+  lfm2_5_2_6b: { monogram: "L", css: "brand-lfm", label: "Liquid AI", src: "assets/model-logos/liquid-icon.svg" }
 };
 let activeLanguage = localStorage.getItem("quantization-bench-language") === "en" ? "en" : "fr";
 let summaryRows = [];
@@ -222,7 +228,8 @@ function variantLabel(row) {
 
 function modelLogo(row) {
   const brand = brandInfo(row);
-  return '<span class="model-logo ' + brand.css + '" aria-hidden="true">' + escapeHtml(brand.monogram) + '</span>';
+  const image = brand.src ? '<img src="' + escapeHtml(brand.src) + '" alt="" loading="lazy">' : escapeHtml(brand.monogram);
+  return '<span class="model-logo ' + brand.css + (brand.src ? ' has-logo' : '') + '" aria-hidden="true">' + image + '</span>';
 }
 
 function scoreText(row, metricKey) {
@@ -271,11 +278,14 @@ function renderChart() {
     const best = rows[0];
     const brand = brandInfo(best);
     const insightLogo = document.getElementById("insight-logo");
-    insightLogo.className = "insight-logo model-logo " + brand.css;
-    insightLogo.textContent = brand.monogram;
+    insightLogo.className = "insight-logo model-logo " + brand.css + (brand.src ? " has-logo" : "");
+    insightLogo.innerHTML = brand.src
+      ? '<img src="' + escapeHtml(brand.src) + '" alt="">'
+      : escapeHtml(brand.monogram);
     document.getElementById("insight-label").textContent = messages[activeLanguage][deltaMode ? "results.deltaInsight" : "results.scoreInsight"];
     document.getElementById("insight-title").textContent = modelDisplayName(best) + " · " + variantLabel(best);
-    document.getElementById("insight-description").textContent = messages[activeLanguage][deltaMode ? "results.deltaDescription" : "results.scoreDescription"];
+    const descriptionKey = deltaMode ? "results.deltaDescription" : "results.scoreDescription." + activeMetric;
+    document.getElementById("insight-description").textContent = messages[activeLanguage][descriptionKey];
     document.getElementById("insight-value").textContent = deltaMode ? deltaText(best, activeMetric) : scoreText(best, activeMetric) + " /100";
   } else {
     document.getElementById("insight-title").textContent = "—";
