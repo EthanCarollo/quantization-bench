@@ -4,11 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#111c25">
-  <meta name="description" content="Measured benchmark score changes by GGUF quantization, compared with BF16 baselines.">
+  <meta name="description" content="Roleplay, code, and general benchmark results for language models.">
   <title>Quantization Bench — Results</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <link rel="stylesheet" href="styles.css?v=benchmark-222e4e1">
-  <script defer src="site.js?v=benchmark-222e4e1"></script>
+  <link rel="stylesheet" href="styles.css?v=benchmark-categories">
+  <script defer src="site.js?v=benchmark-categories"></script>
 </head>
 <body>
   <a class="skip-link" href="#main" data-i18n="skip">Aller au contenu</a>
@@ -58,11 +58,21 @@
       </div>
       <div class="score-panel">
         <div class="panel-top">
+          <div class="category-tabs" role="group" aria-label="Catégorie de benchmarks" data-i18n-aria="results.categories.aria">
+            <button class="category-tab active" type="button" data-category="roleplay" aria-pressed="true" data-i18n="results.categories.roleplay">Roleplay</button>
+            <button class="category-tab" type="button" data-category="code" aria-pressed="false" data-i18n="results.categories.code">Code</button>
+            <button class="category-tab" type="button" data-category="all" aria-pressed="false" data-i18n="results.categories.all">All</button>
+          </div>
           <div class="metric-tabs" role="group" aria-label="Benchmark" data-i18n-aria="metric.aria">
             <button id="tab-general" class="metric-tab active" type="button" aria-controls="metric-panel" aria-pressed="true" data-metric="rolebench_generalization">RoleBench Generalization</button>
             <button id="tab-specific" class="metric-tab" type="button" aria-controls="metric-panel" aria-pressed="false" data-metric="rolebench_role_specific">RoleBench Role-Specific</button>
             <button id="tab-character" class="metric-tab" type="button" aria-controls="metric-panel" aria-pressed="false" data-metric="charactereval">CharacterEval</button>
             <button id="tab-personagym" class="metric-tab" type="button" aria-controls="metric-panel" aria-pressed="false" data-metric="personagym">PersonaGym</button>
+            <button id="tab-livecodebench" class="metric-tab" type="button" aria-controls="metric-panel" aria-pressed="false" data-metric="livecodebench_v6" hidden>LiveCodeBench</button>
+            <button id="tab-automationbench" class="metric-tab" type="button" aria-controls="metric-panel" aria-pressed="false" data-metric="automationbench" hidden>AutomationBench</button>
+            <button id="tab-toolsandbox" class="metric-tab" type="button" aria-controls="metric-panel" aria-pressed="false" data-metric="toolsandbox" hidden>ToolSandbox</button>
+            <button id="tab-ifbench" class="metric-tab" type="button" aria-controls="metric-panel" aria-pressed="false" data-metric="ifbench" hidden>IFBench</button>
+            <button id="tab-hle" class="metric-tab" type="button" aria-controls="metric-panel" aria-pressed="false" data-metric="hle" hidden>Humanity’s Last Exam</button>
           </div>
           <div class="model-filter" id="model-filter">
             <button class="model-filter-toggle" id="model-filter-toggle" type="button" aria-expanded="false" aria-controls="model-filter-popover">
@@ -113,7 +123,7 @@
         <div class="table-wrap">
           <table>
             <caption class="sr-only">Benchmark results by model and quantization</caption>
-            <thead><tr><th scope="col" data-i18n="table.model">Modèle et version</th><th scope="col">RoleBench Generalization</th><th scope="col">RoleBench Role-Specific</th><th scope="col">CharacterEval</th></tr></thead>
+            <thead><tr><th scope="col" data-i18n="table.model">Modèle et version</th><th id="table-metric-heading" scope="col">RoleBench Generalization</th></tr></thead>
             <tbody id="score-table"></tbody>
           </table>
         </div>
@@ -129,7 +139,7 @@
       <div class="fact-grid">
         <article class="fact-card"><span data-i18n="method.models">Modèles</span><strong data-i18n="method.modelsSummary">7 familles de modèles</strong></article>
         <article class="fact-card"><span data-i18n="method.formats">Formats</span><strong>MLX · 4 / 8-bit<br>GGUF · BF16 / Q8_0 / Q4_K_M<br>OpenRouter · modèles hébergés</strong></article>
-        <article class="fact-card"><span data-i18n="method.scoring">Scores</span><strong>ROUGE-L F1<br>CharacterRM</strong></article>
+        <article class="fact-card"><span data-i18n="method.scoring">Scores</span><strong>ROUGE-L F1<br>CharacterRM<br>Accuracy · pass@1</strong></article>
         <article class="fact-card"><span data-i18n="method.environment">Environnements</span><strong id="environment-summary">MLX · GGUF</strong></article>
       </div>
       <details class="method-details">
@@ -139,12 +149,18 @@
           <p><strong>RoleBench Role-Specific</strong> — <span data-i18n="details.specific">10 prompts liés à un rôle · ROUGE-L F1.</span></p>
           <p><strong>CharacterEval</strong> — <span data-i18n="details.character">12 exemples · CharacterRM · note de 1–5 ramenée à 0–100.</span></p>
           <p><strong>PersonaGym</strong> — <span data-i18n="details.personagym">200 personas · 10 000 questions · action attendue, justification, style linguistique, cohérence et toxicité. PersonaScore et sous-scores de 1 à 5, produits par des modèles-juges. Ce benchmark n’a pas encore été exécuté pour les modèles de cette page.</span> <a href="https://github.com/vsamuel2003/PersonaGym">Code et données ↗</a></p>
+          <p><strong>LiveCodeBench</strong> — <span data-i18n="details.livecodebench">Problèmes de programmation récents · code exécuté dans des tests · pass@1.</span> <a href="https://livecodebench.github.io/">Benchmark ↗</a></p>
+          <p><strong>AutomationBench</strong> — <span data-i18n="details.automationbench">600 tâches d’agents réparties dans six domaines, avec 47 outils SaaS simulés · réussite stricte des tâches.</span> <a href="https://github.com/zapier/AutomationBench">Code et données ↗</a></p>
+          <p><strong>ToolSandbox</strong> — <span data-i18n="details.toolsandbox">Tâches d’utilisation d’outils à plusieurs tours · environnements avec état · jalons intermédiaires.</span> <a href="https://github.com/apple-aiml-research/ToolSandbox">Code et données ↗</a></p>
+          <p><strong>IFBench</strong> — <span data-i18n="details.ifbench">300 prompts · validateurs d’instructions automatiques · exactitude souple au niveau du prompt.</span> <a href="https://github.com/allenai/IFBench">Code et données ↗</a></p>
+          <p><strong>Humanity’s Last Exam</strong> — <span data-i18n="details.hle">Questions expertes multimodales · sous-ensemble texte · réponses évaluées selon le protocole officiel.</span> <a href="https://github.com/centerforaisafety/hle">Code et protocole ↗</a></p>
+          <p data-i18n="details.allCategory">All donne accès à tous les benchmarks. Les scores restent séparés, car leurs tâches et leurs échelles sont différentes.</p>
           <p data-i18n="details.protocol">Δ = quantized GGUF score − same-model BF16 score · 5 paired runs.</p>
           <p data-i18n="details.sd">Écart-type calculé sur cinq moyennes de run ; pour Δ, sur les cinq différences appariées.</p>
           <p data-i18n="details.reading">Comparez les modèles à l'intérieur d'un même benchmark : les scores entre colonnes ne sont pas équivalents.</p>
           <p data-i18n="details.claims">Les pertes annoncées par les éditeurs ne sont pas référencées.</p>
           <p data-i18n="details.brandCredits">Logos des familles Gemma (Google), Qwen, Mistral et Liquid AI : <a href="https://ai.google.dev/gemma/docs">Google</a> · <a href="https://github.com/QwenLM/qwenlm.github.io">Qwen</a> · <a href="https://mistral.ai/brand/">Mistral</a> · <a href="https://www.liquid.ai/">Liquid AI</a>. Marques affichées pour identifier les modèles évalués, sans affiliation ni approbation.</p>
-          <p class="pending-note"><span data-i18n="details.pending">Not run yet:</span> IFBench · Humanity’s Last Exam · LiveCodeBench · PersonaGym</p>
+          <p class="pending-note"><span data-i18n="details.pending">Not run yet:</span> IFBench · Humanity’s Last Exam · LiveCodeBench · AutomationBench · ToolSandbox · PersonaGym</p>
           <div class="detail-links"><a href="https://huggingface.co/datasets/ZenMoore/RoleBench">RoleBench ↗</a><a href="https://github.com/morecry/CharacterEval">CharacterEval ↗</a><a href="https://github.com/EthanCarollo/quantization-bench/blob/main/results/summary.json">JSON ↗</a></div>
         </div>
       </details>

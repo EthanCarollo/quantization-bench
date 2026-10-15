@@ -6,18 +6,22 @@ const messages = {
     "nav.repo": "Dépôt ↗",
     "nav.aria": "Navigation principale",
     "metric.aria": "Benchmark à comparer",
+    "results.categories.aria": "Catégorie de benchmarks",
+    "results.categories.roleplay": "Roleplay",
+    "results.categories.code": "Code",
+    "results.categories.all": "All",
     "chart.aria": "Comparaison des résultats",
     "view.aria": "Affichage des résultats",
     "view.delta": "Δ vs BF16",
     "view.score": "Score",
     "page.title": "Quantization Bench — Résultats",
-    "page.description": "Écart mesuré par quantification sur les benchmarks, comparé à une référence BF16.",
+    "page.description": "Résultats des modèles sur des benchmarks de roleplay, de code et généralistes.",
     "hero.eyebrow": "QUANTIFICATION DE MODÈLES OUVERTS",
     "hero.title": "Quantization<br><em>Bench</em>",
     "hero.lede": "La perte mesurée, benchmark par benchmark.",
     "hero.cta": "Voir les résultats",
     "hero.scoreLabel": "DELTA MOYEN · GGUF Q4_K_M VS BF16",
-    "hero.scoreNote": "3 BENCHMARKS MESURÉS · PERSONAGYM À VENIR",
+    "hero.scoreNote": "3 BENCHMARKS MESURÉS · 6 À ÉVALUER",
     "hero.summary": "Δ vs BF16 · 5 runs appariés",
     "stats.models": "modèles",
     "stats.variants": "variantes",
@@ -43,6 +47,11 @@ const messages = {
     "results.scoreDescription.rolebench_generalization": "ROUGE-L F1 ×100 sur 10 réponses, moyenné sur 5 runs. C’est une similarité de texte, pas un taux de réussite.",
     "results.scoreDescription.rolebench_role_specific": "ROUGE-L F1 ×100 sur 10 réponses liées à un rôle, moyenné sur 5 runs. C’est une similarité de texte, pas un taux de réussite.",
     "results.scoreDescription.charactereval": "CharacterRM ×100 sur 12 exemples, moyenné sur 5 runs.",
+    "results.scoreDescription.ifbench": "Exactitude souple par prompt sur les 300 consignes IFBench, moyennée sur 5 runs.",
+    "results.scoreDescription.hle": "Exactitude sur le sous-ensemble texte de Humanity’s Last Exam, évaluée par le juge officiel.",
+    "results.scoreDescription.livecodebench_v6": "Pass@1 vérifié par exécution sur LiveCodeBench v6.",
+    "results.scoreDescription.automationbench": "Taux de tâches AutomationBench terminées correctement avec des outils simulés.",
+    "results.scoreDescription.toolsandbox": "Réussite aux tâches ToolSandbox dans des scénarios d’utilisation d’outils à plusieurs tours.",
     "results.deltaDescription": "Variation quantifié − BF16 apparié. Une valeur plus haute signifie une meilleure préservation.",
     "table.model": "Modèle et version",
     "results.runs": "5 runs · moyenne ± écart-type",
@@ -54,6 +63,17 @@ const messages = {
     "results.personagymDescription": "Le protocole complet couvre 200 personas et 10 000 questions, avec cinq axes de score et des modèles-juges. Aucun résultat n’est affiché avant d’avoir exécuté cette évaluation.",
     "results.personagymLink": "Voir le benchmark officiel ↗",
     "results.personagymTablePending": "Pas encore de résultats PersonaGym pour ces modèles.",
+    "results.pendingHeading": "Pas encore de résultats pour ce benchmark",
+    "results.pendingStatus": "Aucune mesure terminée n’est publiée pour les modèles de cette page.",
+    "results.notRunLabel": "Pas encore mesuré",
+    "results.pendingAllNote": "La catégorie All regroupe les benchmarks, pas leurs scores : chaque mesure garde son protocole et son échelle.",
+    "results.ifbenchPending": "IFBench vérifie 300 consignes avec des validateurs automatiques, sans juge LLM. Les questions et le script de mesure sont présents dans le dépôt, mais aucun modèle de cette page n’a encore été évalué dessus.",
+    "results.hlePending": "HLE utilise un jeu de questions à accès contrôlé et un protocole de jugement séparé. Aucun résultat évalué n’est disponible ici.",
+    "results.livecodebenchPending": "LiveCodeBench mesure le taux de problèmes de code résolus et vérifiés par exécution. Aucun résultat de cette page n’est encore disponible.",
+    "results.automationbenchPending": "AutomationBench évalue des agents sur des tâches métier utilisant des outils simulés. Le jeu complet comporte 600 tâches ; aucun résultat n’est publié ici.",
+    "results.toolsandboxPending": "ToolSandbox évalue l’usage d’outils avec état, sur plusieurs tours et avec des jalons intermédiaires. Aucun résultat n’est publié ici.",
+    "results.openBenchmark": "Protocole officiel ↗",
+    "table.score": "Score du benchmark",
     "results.csv": "CSV ↗",
     "method.title": "Protocole",
     "method.repo": "Détails et données ↗",
@@ -66,6 +86,12 @@ const messages = {
     "details.general": "10 prompts · ROUGE-L F1 comparé à une référence RoleGPT.",
     "details.specific": "10 prompts liés à un rôle · ROUGE-L F1.",
     "details.character": "12 exemples · CharacterRM · note de 1–5 ramenée à 0–100.",
+    "details.ifbench": "300 prompts · validateurs d’instructions automatiques · exactitude souple au niveau du prompt.",
+    "details.hle": "Questions expertes multimodales · sous-ensemble texte · réponses évaluées selon le protocole officiel.",
+    "details.livecodebench": "Problèmes de programmation récents · code exécuté dans des tests · pass@1.",
+    "details.automationbench": "600 tâches d’agents réparties dans six domaines, avec 47 outils SaaS simulés · réussite stricte des tâches.",
+    "details.toolsandbox": "Tâches d’utilisation d’outils à plusieurs tours · environnements avec état · jalons intermédiaires.",
+    "details.allCategory": "All donne accès à tous les benchmarks. Les scores restent séparés, car leurs tâches et leurs échelles sont différentes.",
     "details.personagym": "200 personas · 10 000 questions · action attendue, justification, style linguistique, cohérence et toxicité. PersonaScore et sous-scores de 1 à 5, produits par des modèles-juges. Ce benchmark n’a pas encore été exécuté pour les modèles de cette page.",
     "details.protocol": "Δ = score GGUF quantifié − BF16 du même modèle · 5 runs appariés. Les modèles OpenRouter sont mesurés en score absolu, sans delta BF16 local.",
     "details.sd": "Écart-type d’échantillon s = √[Σ(xᵢ − x̄)² / (5 − 1)], calculé sur les cinq moyennes de run ; pour Δ, sur les cinq différences appariées.",
@@ -81,18 +107,22 @@ const messages = {
     "nav.repo": "Repository ↗",
     "nav.aria": "Primary navigation",
     "metric.aria": "Benchmark to compare",
+    "results.categories.aria": "Benchmark category",
+    "results.categories.roleplay": "Roleplay",
+    "results.categories.code": "Code",
+    "results.categories.all": "All",
     "chart.aria": "Results comparison",
     "view.aria": "Results view",
     "view.delta": "Δ vs BF16",
     "view.score": "Score",
     "page.title": "Quantization Bench — Results",
-    "page.description": "Measured benchmark score changes by quantization, compared with BF16 baselines.",
+    "page.description": "Model results across roleplay, code, and general-purpose benchmarks.",
     "hero.eyebrow": "OPEN MODEL QUANTIZATION",
     "hero.title": "Quantization<br><em>Bench</em>",
     "hero.lede": "Measured loss, benchmark by benchmark.",
     "hero.cta": "View results",
     "hero.scoreLabel": "AVERAGE DELTA · GGUF Q4_K_M VS BF16",
-    "hero.scoreNote": "3 BENCHMARKS SCORED · PERSONAGYM NEXT",
+    "hero.scoreNote": "3 BENCHMARKS SCORED · 6 PENDING",
     "hero.summary": "Δ vs BF16 · 5 paired runs",
     "stats.models": "models",
     "stats.variants": "variants",
@@ -118,6 +148,11 @@ const messages = {
     "results.scoreDescription.rolebench_generalization": "ROUGE-L F1 ×100 over 10 responses, averaged across 5 runs. This measures text similarity, not success rate.",
     "results.scoreDescription.rolebench_role_specific": "ROUGE-L F1 ×100 over 10 role-specific responses, averaged across 5 runs. This measures text similarity, not success rate.",
     "results.scoreDescription.charactereval": "CharacterRM ×100 over 12 examples, averaged across 5 runs.",
+    "results.scoreDescription.ifbench": "Prompt-level loose accuracy on IFBench’s 300 instructions, averaged across 5 runs.",
+    "results.scoreDescription.hle": "Accuracy on the text-only subset of Humanity’s Last Exam using the official judge.",
+    "results.scoreDescription.livecodebench_v6": "Execution-checked pass@1 on LiveCodeBench v6.",
+    "results.scoreDescription.automationbench": "Rate of AutomationBench tasks completed correctly using simulated tools.",
+    "results.scoreDescription.toolsandbox": "Task success in ToolSandbox multi-turn tool-use scenarios.",
     "results.deltaDescription": "Quantized − paired BF16 change. A higher value means better preservation.",
     "table.model": "Model and variant",
     "results.runs": "5 runs · mean ± sample SD",
@@ -129,6 +164,17 @@ const messages = {
     "results.personagymDescription": "The full protocol covers 200 personas and 10,000 questions, with five score dimensions and LLM judges. No result is shown until this evaluation has been run.",
     "results.personagymLink": "Open official benchmark ↗",
     "results.personagymTablePending": "No PersonaGym results are available for these models yet.",
+    "results.pendingHeading": "No results for this benchmark yet",
+    "results.pendingStatus": "No completed measurement has been published for the models on this page.",
+    "results.notRunLabel": "Not measured yet",
+    "results.pendingAllNote": "All lists the benchmarks; it does not combine their scores. Each measure keeps its own protocol and scale.",
+    "results.ifbenchPending": "IFBench checks 300 instructions with automatic verifiers and no LLM judge. Its test data and evaluation script are in this repository, but none of this page’s models has been evaluated on it yet.",
+    "results.hlePending": "HLE uses an access-controlled question set and a separate judging protocol. No evaluated result is available here.",
+    "results.livecodebenchPending": "LiveCodeBench measures code problems solved and verified by execution. No result for this page is available yet.",
+    "results.automationbenchPending": "AutomationBench evaluates agents on business tasks with simulated tools. The full suite has 600 tasks; no result is published here.",
+    "results.toolsandboxPending": "ToolSandbox evaluates stateful, multi-turn tool use with intermediate milestones. No result is published here.",
+    "results.openBenchmark": "Official protocol ↗",
+    "table.score": "Benchmark score",
     "results.csv": "CSV ↗",
     "method.title": "Protocol",
     "method.repo": "Details and data ↗",
@@ -141,6 +187,12 @@ const messages = {
     "details.general": "10 prompts · ROUGE-L F1 against a RoleGPT reference.",
     "details.specific": "10 role-specific prompts · ROUGE-L F1.",
     "details.character": "12 examples · CharacterRM · score mapped from 1–5 to 0–100.",
+    "details.ifbench": "300 prompts · automatic instruction verifiers · prompt-level loose accuracy.",
+    "details.hle": "Expert-level multimodal questions · text-only subset · answers evaluated under the official protocol.",
+    "details.livecodebench": "Recent programming problems · code executed against tests · pass@1.",
+    "details.automationbench": "600 agent tasks across six domains, using 47 simulated SaaS tools · strict task completion.",
+    "details.toolsandbox": "Multi-turn tool-use tasks · stateful environments · intermediate milestones.",
+    "details.allCategory": "All provides access to every benchmark. Scores remain separate because tasks and scales differ.",
     "details.personagym": "200 personas · 10,000 questions · expected action, action justification, linguistic habits, persona consistency, and toxicity. PersonaScore and task scores are on a 1–5 scale and produced by LLM judges. This benchmark has not yet been run on this page’s models.",
     "details.protocol": "Δ = quantized GGUF score − same-model BF16 score · 5 paired runs. OpenRouter models are measured by absolute score, without a local BF16 delta.",
     "details.sd": "Sample standard deviation s = √[Σ(xᵢ − x̄)² / (5 − 1)], across the five run means; for Δ, across the five paired differences.",
@@ -169,14 +221,47 @@ const metrics = {
     sd: "charactereval_sd_100",
     delta: "charactereval_delta_vs_bf16_mean_pp",
     deltaSd: "charactereval_delta_vs_bf16_sd_pp"
+  },
+  ifbench: {
+    mean: "ifbench_prompt_accuracy_mean_100",
+    sd: "ifbench_prompt_accuracy_sd_100"
+  },
+  hle: {
+    mean: "hle_accuracy_mean_100",
+    sd: "hle_accuracy_sd_100"
+  },
+  livecodebench_v6: {
+    mean: "livecodebench_pass_at_1_mean_100",
+    sd: "livecodebench_pass_at_1_sd_100"
   }
 };
 
+const benchmarkCatalog = {
+  rolebench_generalization: { title: "RoleBench Generalization", category: "roleplay" },
+  rolebench_role_specific: { title: "RoleBench Role-Specific", category: "roleplay" },
+  charactereval: { title: "CharacterEval", category: "roleplay" },
+  personagym: { title: "PersonaGym", category: "roleplay", description: "results.personagymDescription", link: "https://github.com/vsamuel2003/PersonaGym" },
+  livecodebench_v6: { title: "LiveCodeBench", category: "code", description: "results.livecodebenchPending", link: "https://livecodebench.github.io/" },
+  automationbench: { title: "AutomationBench", category: "code", description: "results.automationbenchPending", link: "https://github.com/zapier/AutomationBench" },
+  toolsandbox: { title: "ToolSandbox", category: "code", description: "results.toolsandboxPending", link: "https://github.com/apple-aiml-research/ToolSandbox" },
+  ifbench: { title: "IFBench", category: "all", description: "results.ifbenchPending", link: "https://github.com/allenai/IFBench" },
+  hle: { title: "Humanity’s Last Exam", category: "all", description: "results.hlePending", link: "https://github.com/centerforaisafety/hle" }
+};
+const categoryMetrics = {
+  roleplay: ["rolebench_generalization", "rolebench_role_specific", "charactereval", "personagym"],
+  code: ["livecodebench_v6", "automationbench", "toolsandbox"],
+  all: ["rolebench_generalization", "rolebench_role_specific", "charactereval", "personagym", "livecodebench_v6", "automationbench", "toolsandbox", "ifbench", "hle"]
+};
 const benchmarkTabs = {
   rolebench_generalization: "tab-general",
   rolebench_role_specific: "tab-specific",
   charactereval: "tab-character",
-  personagym: "tab-personagym"
+  personagym: "tab-personagym",
+  livecodebench_v6: "tab-livecodebench",
+  automationbench: "tab-automationbench",
+  toolsandbox: "tab-toolsandbox",
+  ifbench: "tab-ifbench",
+  hle: "tab-hle"
 };
 const modelBrands = {
   gemma4_e2b_it: { monogram: "G", css: "brand-gemma", label: "Gemma", src: "assets/model-logos/google-g.png" },
@@ -194,11 +279,15 @@ let activeLanguage = localStorage.getItem("quantization-bench-language") === "en
 let summaryRows = [];
 let selectedModelIds = new Set();
 let activeMetric = "rolebench_generalization";
+let activeCategory = "roleplay";
 let activeView = "score";
 const stdDevVisibility = {
   rolebench_generalization: false,
   rolebench_role_specific: false,
-  charactereval: false
+  charactereval: false,
+  ifbench: false,
+  hle: false,
+  livecodebench_v6: false
 };
 
 function translate() {
@@ -219,21 +308,32 @@ function translate() {
     if (text !== undefined) element.setAttribute("placeholder", text);
   });
   const showStdDev = Boolean(stdDevVisibility[activeMetric]);
-  document.getElementById("result-runs-label").textContent = activeView === "delta"
-    ? words[showStdDev ? "results.pairedRuns" : "results.pairedMeanOnly"]
-    : words[showStdDev ? "results.runs" : "results.meanOnly"];
+  const deltaMode = activeDeltaMode();
+  const pendingBenchmark = isPendingBenchmark();
+  document.getElementById("result-runs-label").textContent = pendingBenchmark
+    ? words["results.notRunLabel"]
+    : deltaMode
+      ? words[showStdDev ? "results.pairedRuns" : "results.pairedMeanOnly"]
+      : words[showStdDev ? "results.runs" : "results.meanOnly"];
   const stdDevButton = document.getElementById("stddev-toggle");
   const stdDevButtonLabel = words[showStdDev ? "results.hideStdDev" : "results.showStdDev"];
   stdDevButton.setAttribute("aria-pressed", String(showStdDev));
   stdDevButton.setAttribute("aria-label", stdDevButtonLabel);
   document.getElementById("stddev-toggle-label").textContent = stdDevButtonLabel;
   document.getElementById("legend-sd").hidden = !showStdDev;
-  const pendingBenchmark = activeMetric === "personagym";
   document.getElementById("model-filter").hidden = pendingBenchmark;
   if (pendingBenchmark) setModelFilterOpen(false);
   document.getElementById("stddev-toggle").hidden = pendingBenchmark;
-  document.querySelector(".view-switch").hidden = pendingBenchmark;
+  document.querySelector(".view-switch").hidden = pendingBenchmark || !metrics[activeMetric] || !metrics[activeMetric].delta;
   document.getElementById("scale-label").hidden = pendingBenchmark;
+  document.querySelectorAll("[data-category]").forEach(function (button) {
+    const active = button.dataset.category === activeCategory;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-pressed", String(active));
+  });
+  document.querySelectorAll("[data-metric]").forEach(function (button) {
+    button.hidden = !categoryMetrics[activeCategory].includes(button.dataset.metric);
+  });
   document.querySelectorAll("[data-language]").forEach(function (button) {
     button.setAttribute("aria-pressed", String(button.dataset.language === activeLanguage));
   });
@@ -246,13 +346,13 @@ function translate() {
     button.setAttribute("aria-pressed", String(button.dataset.view === activeView));
   });
   const caption = pendingBenchmark
-    ? words["results.personagymCaption"]
-    : activeView === "delta" ? words["results.chartCaption"] : words["results.scoreCaption"];
+    ? benchmarkCatalog[activeMetric].title + " · " + words["results.pendingHeading"]
+    : deltaMode ? words["results.chartCaption"] : words["results.scoreCaption"];
   document.querySelector(".chart-caption").textContent = caption;
-  document.getElementById("scale-label").textContent = activeView === "delta" ? "± points" : "0–100";
+  document.getElementById("scale-label").textContent = deltaMode ? "± points" : "0–100";
   document.querySelector(".section-intro").textContent = pendingBenchmark
-    ? words["results.personagymCaption"]
-    : activeView === "delta" ? words["results.caption"] : words["results.scoreCaption"];
+    ? words["results.pendingStatus"]
+    : deltaMode ? words["results.caption"] : words["results.scoreCaption"];
   updateModelFilterCount(words);
 }
 
@@ -444,35 +544,43 @@ function deltaText(row, metricKey, includeStdDev) {
 }
 
 function scoredRows(metricKey) {
+  if (!metrics[metricKey]) return [];
   const metric = metrics[metricKey];
   return summaryRows.filter(function (row) { return typeof row[metric.mean] === "number"; });
 }
 
 function deltaRows(metricKey) {
+  if (!metrics[metricKey]) return [];
   const metric = metrics[metricKey];
   return summaryRows.filter(function (row) { return typeof row[metric.delta] === "number"; });
 }
 
+function isPendingBenchmark(metricKey) {
+  const key = metricKey || activeMetric;
+  return key === "personagym" || !benchmarkCatalog[key] || scoredRows(key).length === 0;
+}
+
+function activeDeltaMode() {
+  return activeView === "delta" && Boolean(metrics[activeMetric] && metrics[activeMetric].delta);
+}
+
 function renderChart() {
   const chart = document.getElementById("bar-chart");
-  if (activeMetric === "personagym") {
-    document.querySelector(".ranking-insight").hidden = false;
+  if (isPendingBenchmark()) {
+    const benchmark = benchmarkCatalog[activeMetric];
+    const words = messages[activeLanguage];
+    document.querySelector(".ranking-insight").hidden = true;
     document.getElementById("metric-panel").setAttribute("aria-labelledby", benchmarkTabs[activeMetric]);
     chart.classList.remove("delta-view", "score-view", "stddev-visible");
     chart.classList.add("is-empty");
-    document.getElementById("insight-logo").className = "insight-logo model-logo brand-other";
-    document.getElementById("insight-logo").textContent = "PG";
-    document.getElementById("insight-label").textContent = messages[activeLanguage]["results.personagymCaption"];
-    document.getElementById("insight-title").textContent = messages[activeLanguage]["results.personagymStatus"];
-    document.getElementById("insight-description").textContent = messages[activeLanguage]["results.personagymDescription"];
-    document.getElementById("insight-value").textContent = "—";
     document.querySelector(".chart-legend").hidden = true;
-    chart.innerHTML = '<div class="benchmark-pending"><strong>' + escapeHtml(messages[activeLanguage]["results.personagymDescription"]) + '</strong><a href="https://personagym.com/">' + escapeHtml(messages[activeLanguage]["results.personagymLink"]) + '</a></div>';
+    const allNote = activeCategory === "all" ? '<p>' + escapeHtml(words["results.pendingAllNote"]) + '</p>' : "";
+    chart.innerHTML = '<div class="benchmark-pending"><div class="benchmark-pending-heading"><strong>' + escapeHtml(benchmark.title) + '</strong><span>' + escapeHtml(words["results.notRunLabel"]) + '</span></div><p>' + escapeHtml(words[benchmark.description] || words["results.pendingStatus"]) + '</p>' + allNote + '<a href="' + escapeHtml(benchmark.link || "#method") + '" target="_blank" rel="noreferrer">' + escapeHtml(words["results.openBenchmark"]) + '</a></div>';
     return;
   }
   document.querySelector(".chart-legend").hidden = false;
   const metric = metrics[activeMetric];
-  const deltaMode = activeView === "delta";
+  const deltaMode = activeDeltaMode();
   const showStdDev = stdDevVisibility[activeMetric];
   const rows = (deltaMode ? deltaRows(activeMetric) : scoredRows(activeMetric)).filter(function (row) {
     return selectedModelIds.has(modelConfigId(row));
@@ -553,12 +661,15 @@ function renderChart() {
 }
 
 function renderTable() {
-  if (activeMetric === "personagym") {
-    document.getElementById("score-table").innerHTML = '<tr><td class="empty-table" colspan="4">' + escapeHtml(messages[activeLanguage]["results.personagymTablePending"]) + '</td></tr>';
+  const benchmark = benchmarkCatalog[activeMetric];
+  document.getElementById("table-metric-heading").textContent = benchmark.title;
+  if (isPendingBenchmark()) {
+    document.getElementById("score-table").innerHTML = '<tr><td class="empty-table" colspan="2">' + escapeHtml(messages[activeLanguage]["results.pendingStatus"]) + '</td></tr>';
     return;
   }
   const metric = metrics[activeMetric];
-  const key = activeView === "delta" ? metric.delta : metric.mean;
+  const deltaMode = activeDeltaMode();
+  const key = deltaMode ? metric.delta : metric.mean;
   const rows = summaryRows.filter(function (row) {
     return selectedModelIds.has(modelConfigId(row)) && typeof row[key] === "number";
   });
@@ -569,7 +680,7 @@ function renderTable() {
     const message = selectedModelIds.size
       ? messages[activeLanguage]["results.noMatchingResults"]
       : messages[activeLanguage]["results.noVisibleModels"];
-    document.getElementById("score-table").innerHTML = '<tr><td class="empty-table" colspan="4">' + escapeHtml(message) + '</td></tr>';
+    document.getElementById("score-table").innerHTML = '<tr><td class="empty-table" colspan="2">' + escapeHtml(message) + '</td></tr>';
     return;
   }
   const ranks = [];
@@ -587,10 +698,10 @@ function renderTable() {
     const displayName = escapeHtml(modelDisplayName(row));
     const variant = escapeHtml(variantLabel(row));
     const rank = ranks[index];
-    const value = activeView === "delta"
-      ? function (item, metricKey) { return deltaText(item, metricKey, stdDevVisibility[metricKey]); }
-      : function (item, metricKey) { return scoreText(item, metricKey, stdDevVisibility[metricKey]); };
-    return '<tr class="' + (index === 0 ? "is-top" : "") + '"><td><div class="table-model">' + modelLogo(row) + '<span><strong class="model-name">' + displayName + '</strong><small>' + variant + ' · ' + label + '</small></span><span class="rank-badge">#' + rank + '</span></div></td><td>' + value(row, "rolebench_generalization") + '</td><td>' + value(row, "rolebench_role_specific") + '</td><td>' + value(row, "charactereval") + '</td></tr>';
+    const value = deltaMode
+      ? deltaText(row, activeMetric, stdDevVisibility[activeMetric])
+      : scoreText(row, activeMetric, stdDevVisibility[activeMetric]);
+    return '<tr class="' + (index === 0 ? "is-top" : "") + '"><td><div class="table-model">' + modelLogo(row) + '<span><strong class="model-name">' + displayName + '</strong><small>' + variant + ' · ' + label + '</small></span><span class="rank-badge">#' + rank + '</span></div></td><td>' + value + '</td></tr>';
   }).join("");
 }
 
@@ -635,6 +746,13 @@ document.querySelectorAll("[data-language]").forEach(function (button) {
   button.addEventListener("click", function () {
     activeLanguage = button.dataset.language;
     localStorage.setItem("quantization-bench-language", activeLanguage);
+    renderAll();
+  });
+});
+document.querySelectorAll("[data-category]").forEach(function (button) {
+  button.addEventListener("click", function () {
+    activeCategory = button.dataset.category;
+    if (!categoryMetrics[activeCategory].includes(activeMetric)) activeMetric = categoryMetrics[activeCategory][0];
     renderAll();
   });
 });
@@ -701,8 +819,8 @@ document.addEventListener("keydown", function (event) {
 });
 
 Promise.all([
-  fetch("site-data/summary.json?v=benchmark-222e4e1").then(function (response) { if (!response.ok) throw new Error("summary"); return response.json(); }),
-  fetch("site-data/environment.json?v=benchmark-222e4e1").then(function (response) { if (!response.ok) throw new Error("environment"); return response.json(); })
+  fetch("site-data/summary.json?v=benchmark-categories").then(function (response) { if (!response.ok) throw new Error("summary"); return response.json(); }),
+  fetch("site-data/environment.json?v=benchmark-categories").then(function (response) { if (!response.ok) throw new Error("environment"); return response.json(); })
 ]).then(function (data) {
   summaryRows = data[0];
   initializeModelSelection();
