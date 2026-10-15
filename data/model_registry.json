@@ -8,7 +8,13 @@
     "display_name": "Gemma 4 E2B IT",
     "parameter_label": "2.3B effectifs (5.1B total)",
     "license": "Gemma Terms of Use",
-    "requires_hf_token": true
+    "requires_hf_token": true,
+    "gguf_source": {
+      "model_id": "bartowski/google_gemma-4-E2B-it-GGUF",
+      "revision": "81012ba3538e061d5ee003f11f25335b17f82e2d",
+      "bf16_file": "google_gemma-4-E2B-it-bf16.gguf",
+      "quantizer": "llama.cpp llama-quantize at the pinned project commit"
+    }
   },
   "gemma4_e4b_it": {
     "model_id": "google/gemma-4-E4B-it",
