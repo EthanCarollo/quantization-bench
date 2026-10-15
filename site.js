@@ -17,7 +17,7 @@ const messages = {
     "hero.lede": "La perte mesurée, benchmark par benchmark.",
     "hero.cta": "Voir les résultats",
     "hero.scoreLabel": "DELTA MOYEN · GGUF Q4_K_M VS BF16",
-    "hero.scoreNote": "5 MODÈLES · 3 BENCHMARKS",
+    "hero.scoreNote": "3 BENCHMARKS MESURÉS · PERSONAGYM À VENIR",
     "hero.summary": "Δ vs BF16 · 5 runs appariés",
     "stats.models": "modèles",
     "stats.variants": "variantes",
@@ -41,6 +41,11 @@ const messages = {
     "results.pairedRuns": "5 runs appariés · moyenne ± écart-type",
     "results.meanOnly": "5 runs · moyenne",
     "results.pairedMeanOnly": "5 runs appariés · moyenne",
+    "results.personagymCaption": "Évaluation de la fidélité aux personas · protocole officiel",
+    "results.personagymStatus": "PersonaGym n’a pas encore été évalué sur les modèles de ce site.",
+    "results.personagymDescription": "Le protocole complet couvre 200 personas et 10 000 questions, avec cinq axes de score et des modèles-juges. Aucun résultat n’est affiché avant d’avoir exécuté cette évaluation.",
+    "results.personagymLink": "Voir le benchmark officiel ↗",
+    "results.personagymTablePending": "Pas encore de résultats PersonaGym pour ces modèles.",
     "results.csv": "CSV ↗",
     "method.title": "Protocole",
     "method.repo": "Détails et données ↗",
@@ -53,6 +58,7 @@ const messages = {
     "details.general": "10 prompts · ROUGE-L F1 comparé à une référence RoleGPT.",
     "details.specific": "10 prompts liés à un rôle · ROUGE-L F1.",
     "details.character": "12 exemples · CharacterRM · note de 1–5 ramenée à 0–100.",
+    "details.personagym": "200 personas · 10 000 questions · action attendue, justification, style linguistique, cohérence et toxicité. PersonaScore et sous-scores de 1 à 5, produits par des modèles-juges. Ce benchmark n’a pas encore été exécuté pour les modèles de cette page.",
     "details.protocol": "Δ = score GGUF quantifié − BF16 du même modèle · 5 runs appariés.",
     "details.sd": "Écart-type d’échantillon s = √[Σ(xᵢ − x̄)² / (5 − 1)], calculé sur les cinq moyennes de run ; pour Δ, sur les cinq différences appariées.",
     "details.reading": "Comparez les modèles à l'intérieur d'un même benchmark : les scores entre colonnes ne sont pas équivalents.",
@@ -78,7 +84,7 @@ const messages = {
     "hero.lede": "Measured loss, benchmark by benchmark.",
     "hero.cta": "View results",
     "hero.scoreLabel": "AVERAGE DELTA · GGUF Q4_K_M VS BF16",
-    "hero.scoreNote": "5 MODELS · 3 BENCHMARKS",
+    "hero.scoreNote": "3 BENCHMARKS SCORED · PERSONAGYM NEXT",
     "hero.summary": "Δ vs BF16 · 5 paired runs",
     "stats.models": "models",
     "stats.variants": "variants",
@@ -102,6 +108,11 @@ const messages = {
     "results.pairedRuns": "5 paired runs · mean ± sample SD",
     "results.meanOnly": "5 runs · mean",
     "results.pairedMeanOnly": "5 paired runs · mean",
+    "results.personagymCaption": "Persona fidelity evaluation · official protocol",
+    "results.personagymStatus": "PersonaGym has not yet been run on this site's models.",
+    "results.personagymDescription": "The full protocol covers 200 personas and 10,000 questions, with five score dimensions and LLM judges. No result is shown until this evaluation has been run.",
+    "results.personagymLink": "Open official benchmark ↗",
+    "results.personagymTablePending": "No PersonaGym results are available for these models yet.",
     "results.csv": "CSV ↗",
     "method.title": "Protocol",
     "method.repo": "Details and data ↗",
@@ -114,6 +125,7 @@ const messages = {
     "details.general": "10 prompts · ROUGE-L F1 against a RoleGPT reference.",
     "details.specific": "10 role-specific prompts · ROUGE-L F1.",
     "details.character": "12 examples · CharacterRM · score mapped from 1–5 to 0–100.",
+    "details.personagym": "200 personas · 10,000 questions · expected action, action justification, linguistic habits, persona consistency, and toxicity. PersonaScore and task scores are on a 1–5 scale and produced by LLM judges. This benchmark has not yet been run on this page’s models.",
     "details.protocol": "Δ = quantized GGUF score − same-model BF16 score · 5 paired runs.",
     "details.sd": "Sample standard deviation s = √[Σ(xᵢ − x̄)² / (5 − 1)], across the five run means; for Δ, across the five paired differences.",
     "details.reading": "Compare models within one benchmark: scores across columns are not equivalent.",
@@ -147,7 +159,8 @@ const metrics = {
 const benchmarkTabs = {
   rolebench_generalization: "tab-general",
   rolebench_role_specific: "tab-specific",
-  charactereval: "tab-character"
+  charactereval: "tab-character",
+  personagym: "tab-personagym"
 };
 const modelBrands = {
   gemma4_e2b_it: { monogram: "G", css: "brand-gemma", label: "Gemma", src: "assets/model-logos/gemma.png" },
@@ -179,7 +192,7 @@ function translate() {
     const text = words[element.dataset.i18nAria];
     if (text !== undefined) element.setAttribute("aria-label", text);
   });
-  const showStdDev = stdDevVisibility[activeMetric];
+  const showStdDev = Boolean(stdDevVisibility[activeMetric]);
   document.getElementById("result-runs-label").textContent = activeView === "delta"
     ? words[showStdDev ? "results.pairedRuns" : "results.pairedMeanOnly"]
     : words[showStdDev ? "results.runs" : "results.meanOnly"];
@@ -189,6 +202,10 @@ function translate() {
   stdDevButton.setAttribute("aria-label", stdDevButtonLabel);
   document.getElementById("stddev-toggle-label").textContent = stdDevButtonLabel;
   document.getElementById("legend-sd").hidden = !showStdDev;
+  const pendingBenchmark = activeMetric === "personagym";
+  document.getElementById("stddev-toggle").hidden = pendingBenchmark;
+  document.querySelector(".view-switch").hidden = pendingBenchmark;
+  document.getElementById("scale-label").hidden = pendingBenchmark;
   document.querySelectorAll("[data-language]").forEach(function (button) {
     button.setAttribute("aria-pressed", String(button.dataset.language === activeLanguage));
   });
@@ -200,10 +217,14 @@ function translate() {
   document.querySelectorAll("[data-view]").forEach(function (button) {
     button.setAttribute("aria-pressed", String(button.dataset.view === activeView));
   });
-  const caption = activeView === "delta" ? words["results.chartCaption"] : words["results.scoreCaption"];
+  const caption = pendingBenchmark
+    ? words["results.personagymCaption"]
+    : activeView === "delta" ? words["results.chartCaption"] : words["results.scoreCaption"];
   document.querySelector(".chart-caption").textContent = caption;
   document.getElementById("scale-label").textContent = activeView === "delta" ? "± points" : "0–100";
-  document.querySelector(".section-intro").textContent = activeView === "delta" ? words["results.caption"] : words["results.scoreCaption"];
+  document.querySelector(".section-intro").textContent = pendingBenchmark
+    ? words["results.personagymCaption"]
+    : activeView === "delta" ? words["results.caption"] : words["results.scoreCaption"];
 }
 
 function pretty(value) {
@@ -281,6 +302,21 @@ function deltaRows(metricKey) {
 }
 
 function renderChart() {
+  const chart = document.getElementById("bar-chart");
+  if (activeMetric === "personagym") {
+    document.getElementById("metric-panel").setAttribute("aria-labelledby", benchmarkTabs[activeMetric]);
+    chart.classList.remove("delta-view", "score-view", "stddev-visible");
+    document.getElementById("insight-logo").className = "insight-logo model-logo brand-other";
+    document.getElementById("insight-logo").textContent = "PG";
+    document.getElementById("insight-label").textContent = messages[activeLanguage]["results.personagymCaption"];
+    document.getElementById("insight-title").textContent = messages[activeLanguage]["results.personagymStatus"];
+    document.getElementById("insight-description").textContent = messages[activeLanguage]["results.personagymDescription"];
+    document.getElementById("insight-value").textContent = "—";
+    document.querySelector(".chart-legend").hidden = true;
+    chart.innerHTML = '<div class="benchmark-pending"><strong>' + escapeHtml(messages[activeLanguage]["results.personagymDescription"]) + '</strong><a href="https://personagym.com/">' + escapeHtml(messages[activeLanguage]["results.personagymLink"]) + '</a></div>';
+    return;
+  }
+  document.querySelector(".chart-legend").hidden = false;
   const metric = metrics[activeMetric];
   const deltaMode = activeView === "delta";
   const showStdDev = stdDevVisibility[activeMetric];
@@ -293,7 +329,6 @@ function renderChart() {
     return deltaMode ? Math.abs(value || 0) + (deviation || 0) : 100;
   }));
   document.getElementById("metric-panel").setAttribute("aria-labelledby", benchmarkTabs[activeMetric]);
-  const chart = document.getElementById("bar-chart");
   chart.classList.toggle("delta-view", deltaMode);
   chart.classList.toggle("score-view", !deltaMode);
   chart.classList.toggle("stddev-visible", showStdDev);
@@ -342,6 +377,10 @@ function renderChart() {
 }
 
 function renderTable() {
+  if (activeMetric === "personagym") {
+    document.getElementById("score-table").innerHTML = '<tr><td class="empty-table" colspan="4">' + escapeHtml(messages[activeLanguage]["results.personagymTablePending"]) + '</td></tr>';
+    return;
+  }
   const metric = metrics[activeMetric];
   const key = activeView === "delta" ? metric.delta : metric.mean;
   const rows = summaryRows.filter(function (row) {

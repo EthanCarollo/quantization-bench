@@ -62,6 +62,7 @@
             <button id="tab-general" class="metric-tab active" type="button" aria-controls="metric-panel" aria-pressed="true" data-metric="rolebench_generalization">RoleBench Generalization</button>
             <button id="tab-specific" class="metric-tab" type="button" aria-controls="metric-panel" aria-pressed="false" data-metric="rolebench_role_specific">RoleBench Role-Specific</button>
             <button id="tab-character" class="metric-tab" type="button" aria-controls="metric-panel" aria-pressed="false" data-metric="charactereval">CharacterEval</button>
+            <button id="tab-personagym" class="metric-tab" type="button" aria-controls="metric-panel" aria-pressed="false" data-metric="personagym">PersonaGym</button>
           </div>
           <div class="view-switch" role="group" aria-label="Data view" data-i18n-aria="view.aria">
             <button type="button" data-view="delta" aria-pressed="true" data-i18n="view.delta">Δ vs BF16</button>
@@ -118,12 +119,13 @@
           <p><strong>RoleBench Generalization</strong> — <span data-i18n="details.general">10 prompts · ROUGE-L F1 comparé à une référence RoleGPT.</span></p>
           <p><strong>RoleBench Role-Specific</strong> — <span data-i18n="details.specific">10 prompts liés à un rôle · ROUGE-L F1.</span></p>
           <p><strong>CharacterEval</strong> — <span data-i18n="details.character">12 exemples · CharacterRM · note de 1–5 ramenée à 0–100.</span></p>
+          <p><strong>PersonaGym</strong> — <span data-i18n="details.personagym">200 personas · 10 000 questions · action attendue, justification, style linguistique, cohérence et toxicité. PersonaScore et sous-scores de 1 à 5, produits par des modèles-juges. Ce benchmark n’a pas encore été exécuté pour les modèles de cette page.</span> <a href="https://github.com/vsamuel2003/PersonaGym">Code et données ↗</a></p>
           <p data-i18n="details.protocol">Δ = quantized GGUF score − same-model BF16 score · 5 paired runs.</p>
           <p data-i18n="details.sd">Écart-type calculé sur cinq moyennes de run ; pour Δ, sur les cinq différences appariées.</p>
           <p data-i18n="details.reading">Comparez les modèles à l'intérieur d'un même benchmark : les scores entre colonnes ne sont pas équivalents.</p>
           <p data-i18n="details.claims">Les pertes annoncées par les éditeurs ne sont pas référencées.</p>
           <p data-i18n="details.brandCredits">Logos des familles Gemma (Google), Qwen, Mistral et Liquid AI : <a href="https://ai.google.dev/gemma/docs">Google</a> · <a href="https://github.com/QwenLM/qwenlm.github.io">Qwen</a> · <a href="https://mistral.ai/brand/">Mistral</a> · <a href="https://www.liquid.ai/">Liquid AI</a>. Marques affichées pour identifier les modèles évalués, sans affiliation ni approbation.</p>
-          <p class="pending-note"><span data-i18n="details.pending">Not run yet:</span> IFBench · Humanity’s Last Exam · LiveCodeBench</p>
+          <p class="pending-note"><span data-i18n="details.pending">Not run yet:</span> IFBench · Humanity’s Last Exam · LiveCodeBench · PersonaGym</p>
           <div class="detail-links"><a href="https://huggingface.co/datasets/ZenMoore/RoleBench">RoleBench ↗</a><a href="https://github.com/morecry/CharacterEval">CharacterEval ↗</a><a href="https://github.com/EthanCarollo/quantization-bench/blob/main/results/summary.json">JSON ↗</a></div>
         </div>
       </details>
