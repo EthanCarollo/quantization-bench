@@ -572,14 +572,25 @@ function renderTable() {
     document.getElementById("score-table").innerHTML = '<tr><td class="empty-table" colspan="4">' + escapeHtml(message) + '</td></tr>';
     return;
   }
+  const ranks = [];
+  let previousScore = null;
+  let previousRank = 0;
+  rows.forEach(function (row, index) {
+    const roundedScore = Math.round(row[key] * 100) / 100;
+    const rank = roundedScore === previousScore ? previousRank : index + 1;
+    ranks.push(rank);
+    previousScore = roundedScore;
+    previousRank = rank;
+  });
   document.getElementById("score-table").innerHTML = rows.map(function (row, index) {
     const label = escapeHtml(modelTag(row));
     const displayName = escapeHtml(modelDisplayName(row));
     const variant = escapeHtml(variantLabel(row));
+    const rank = ranks[index];
     const value = activeView === "delta"
       ? function (item, metricKey) { return deltaText(item, metricKey, stdDevVisibility[metricKey]); }
       : function (item, metricKey) { return scoreText(item, metricKey, stdDevVisibility[metricKey]); };
-    return '<tr class="' + (index === 0 ? "is-top" : "") + '"><td><div class="table-model">' + modelLogo(row) + '<span><strong class="model-name">' + displayName + '</strong><small>' + variant + ' · ' + label + '</small></span>' + (index === 0 ? '<span class="rank-badge">#1</span>' : '') + '</div></td><td>' + value(row, "rolebench_generalization") + '</td><td>' + value(row, "rolebench_role_specific") + '</td><td>' + value(row, "charactereval") + '</td></tr>';
+    return '<tr class="' + (index === 0 ? "is-top" : "") + '"><td><div class="table-model">' + modelLogo(row) + '<span><strong class="model-name">' + displayName + '</strong><small>' + variant + ' · ' + label + '</small></span><span class="rank-badge">#' + rank + '</span></div></td><td>' + value(row, "rolebench_generalization") + '</td><td>' + value(row, "rolebench_role_specific") + '</td><td>' + value(row, "charactereval") + '</td></tr>';
   }).join("");
 }
 
