@@ -622,6 +622,7 @@ document.getElementById("model-filter-options").addEventListener("change", funct
   if (!group) return;
   if (event.target.matches("[data-family-toggle]")) {
     group.querySelectorAll("[data-model-id]").forEach(function (input) {
+      input.checked = event.target.checked;
       if (event.target.checked) selectedModelIds.add(input.value);
       else selectedModelIds.delete(input.value);
     });
