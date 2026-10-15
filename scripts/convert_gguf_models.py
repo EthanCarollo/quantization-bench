@@ -95,6 +95,7 @@ def main() -> None:
                     str(bf16_path),
                     "--outtype",
                     "bf16",
+                    "--use-temp-file",
                 ],
                 check=True,
                 cwd=llama_cpp,
