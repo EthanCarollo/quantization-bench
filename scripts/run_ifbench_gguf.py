@@ -159,7 +159,7 @@ def run_variant(model_key: str, variant: str, args) -> None:
     command = [
         str(server), "--model", str(model_path), "--alias", "local",
         "--host", "127.0.0.1", "--port", str(port), "--ctx-size", str(args.context_size),
-        "--n-gpu-layers", "999", "--threads", str(args.threads),
+        "--fit", "on", "--threads", str(args.threads),
         "--threads-batch", str(args.threads), "--parallel", "1",
         "--flash-attn", "on", "--jinja", "--no-webui",
     ]
