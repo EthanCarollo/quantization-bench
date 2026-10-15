@@ -24,8 +24,15 @@ const messages = {
     "stats.runs": "runs",
     "results.title": "Résultats",
     "results.caption": "Δ vs BF16 · points sur 100",
-    "results.chartCaption": "Δ moyenne appariée · points /100 · négatif = perte",
-    "table.model": "Modèle @ quant.",
+    "results.chartCaption": "Variation moyenne face au BF16 du même modèle · points /100",
+    "results.scoreCaption": "Score moyen du benchmark sélectionné · points /100",
+    "results.legendMean": "Moyenne",
+    "results.legendSpread": "Écart-type (±1σ)",
+    "results.scoreInsight": "Score moyen le plus élevé",
+    "results.deltaInsight": "Meilleure préservation face au BF16",
+    "results.scoreDescription": "Première place dans ce benchmark. Les autres benchmarks mesurent des choses différentes.",
+    "results.deltaDescription": "Variation quantifié − BF16 apparié. Une valeur plus haute signifie une meilleure préservation.",
+    "table.model": "Modèle et version",
     "results.runs": "5 runs · moyenne ± écart-type",
     "results.pairedRuns": "5 runs appariés · moyenne ± écart-type",
     "results.csv": "CSV ↗",
@@ -41,6 +48,8 @@ const messages = {
     "details.specific": "10 prompts liés à un rôle · ROUGE-L F1.",
     "details.character": "12 exemples · CharacterRM · note de 1–5 ramenée à 0–100.",
     "details.protocol": "Δ = score GGUF quantifié − BF16 du même modèle · 5 runs appariés.",
+    "details.sd": "Écart-type d’échantillon s = √[Σ(xᵢ − x̄)² / (5 − 1)], calculé sur les cinq moyennes de run ; pour Δ, sur les cinq différences appariées.",
+    "details.reading": "Comparez les modèles à l'intérieur d'un même benchmark : les scores entre colonnes ne sont pas équivalents.",
     "details.claims": "Les pertes annoncées par les éditeurs ne sont pas référencées.",
     "details.pending": "Pas encore exécutés :"
   },
@@ -69,8 +78,15 @@ const messages = {
     "stats.runs": "runs",
     "results.title": "Results",
     "results.caption": "Δ vs BF16 · points on a 100-point scale",
-    "results.chartCaption": "Mean paired Δ · points /100 · negative = loss",
-    "table.model": "Model @ quant.",
+    "results.chartCaption": "Mean change against the same model's BF16 baseline · points /100",
+    "results.scoreCaption": "Mean score on the selected benchmark · points /100",
+    "results.legendMean": "Mean",
+    "results.legendSpread": "Standard deviation (±1 SD)",
+    "results.scoreInsight": "Highest mean score",
+    "results.deltaInsight": "Best preservation against BF16",
+    "results.scoreDescription": "Ranked within this benchmark. The other benchmarks measure different things.",
+    "results.deltaDescription": "Quantized − paired BF16 change. A higher value means better preservation.",
+    "table.model": "Model and variant",
     "results.runs": "5 runs · mean ± sample SD",
     "results.pairedRuns": "5 paired runs · mean ± sample SD",
     "results.csv": "CSV ↗",
@@ -86,6 +102,8 @@ const messages = {
     "details.specific": "10 role-specific prompts · ROUGE-L F1.",
     "details.character": "12 examples · CharacterRM · score mapped from 1–5 to 0–100.",
     "details.protocol": "Δ = quantized GGUF score − same-model BF16 score · 5 paired runs.",
+    "details.sd": "Sample standard deviation s = √[Σ(xᵢ − x̄)² / (5 − 1)], across the five run means; for Δ, across the five paired differences.",
+    "details.reading": "Compare models within one benchmark: scores across columns are not equivalent.",
     "details.claims": "Publisher-reported loss claims are not included.",
     "details.pending": "Not run yet:"
   }
@@ -116,6 +134,13 @@ const benchmarkTabs = {
   rolebench_generalization: "tab-general",
   rolebench_role_specific: "tab-specific",
   charactereval: "tab-character"
+};
+const modelBrands = {
+  gemma4_e2b_it: { monogram: "G", css: "brand-gemma", label: "Gemma" },
+  qwen3_4b: { monogram: "Q", css: "brand-qwen", label: "Qwen" },
+  qwen3_5_4b: { monogram: "Q", css: "brand-qwen", label: "Qwen" },
+  ministral_3_3b_instruct_2512: { monogram: "M", css: "brand-ministral", label: "Ministral" },
+  lfm2_5_2_6b: { monogram: "L", css: "brand-lfm", label: "LFM" }
 };
 let activeLanguage = localStorage.getItem("quantization-bench-language") === "en" ? "en" : "fr";
 let summaryRows = [];
@@ -149,14 +174,10 @@ function translate() {
   document.querySelectorAll("[data-view]").forEach(function (button) {
     button.setAttribute("aria-pressed", String(button.dataset.view === activeView));
   });
-  const caption = activeView === "delta"
-    ? words["results.chartCaption"]
-    : (activeLanguage === "fr" ? "Moyenne ± écart-type · 5 runs · score /100" : "Mean ± sample SD · 5 runs · score /100");
+  const caption = activeView === "delta" ? words["results.chartCaption"] : words["results.scoreCaption"];
   document.querySelector(".chart-caption").textContent = caption;
   document.getElementById("scale-label").textContent = activeView === "delta" ? "± points" : "0–100";
-  document.querySelector(".section-intro").textContent = activeView === "delta"
-    ? words["results.caption"]
-    : (activeLanguage === "fr" ? "Moyenne ± écart-type · score /100" : "Mean ± sample SD · score /100");
+  document.querySelector(".section-intro").textContent = activeView === "delta" ? words["results.caption"] : words["results.scoreCaption"];
 }
 
 function pretty(value) {
@@ -177,6 +198,31 @@ function modelTag(row) {
   const name = (row.model_name || row.model_key || "model").toLowerCase().replaceAll(" ", "-");
   const quant = row.variant || "unknown";
   return name + "@" + quant.replace(/^gguf_/, "").replace(/^mlx_/, "mlx");
+}
+
+function brandInfo(row) {
+  return modelBrands[row.model_key] || { monogram: "?", css: "brand-other", label: row.model_name || "Model" };
+}
+
+function modelDisplayName(row) {
+  return row.model_name || row.model_key || "Model";
+}
+
+function variantLabel(row) {
+  const variant = row.variant || "";
+  const labels = {
+    gguf_bf16: "GGUF · BF16",
+    gguf_q8_0: "GGUF · Q8_0",
+    gguf_q4_k_m: "GGUF · Q4_K_M",
+    mlx_4bit: "MLX · 4-bit",
+    mlx_8bit: "MLX · 8-bit"
+  };
+  return labels[variant] || row.model_tag || row.quantization || variant;
+}
+
+function modelLogo(row) {
+  const brand = brandInfo(row);
+  return '<span class="model-logo ' + brand.css + '" aria-hidden="true">' + escapeHtml(brand.monogram) + '</span>';
 }
 
 function scoreText(row, metricKey) {
@@ -210,33 +256,71 @@ function renderChart() {
   const metric = metrics[activeMetric];
   const deltaMode = activeView === "delta";
   const rows = (deltaMode ? deltaRows(activeMetric) : scoredRows(activeMetric)).sort(function (a, b) {
-    return deltaMode ? a[metric.delta] - b[metric.delta] : b[metric.mean] - a[metric.mean];
+    return deltaMode ? b[metric.delta] - a[metric.delta] : b[metric.mean] - a[metric.mean];
   });
-  const maxAbs = Math.max(1, ...rows.map(function (row) { return Math.abs(row[metric.delta] || 0); }));
+  const range = Math.max(1, ...rows.map(function (row) {
+    const value = deltaMode ? row[metric.delta] : row[metric.mean];
+    const deviation = deltaMode ? row[metric.deltaSd] : row[metric.sd];
+    return deltaMode ? Math.abs(value || 0) + (deviation || 0) : 100;
+  }));
   document.getElementById("metric-panel").setAttribute("aria-labelledby", benchmarkTabs[activeMetric]);
-  document.getElementById("bar-chart").classList.toggle("delta-view", deltaMode);
+  const chart = document.getElementById("bar-chart");
+  chart.classList.toggle("delta-view", deltaMode);
+  chart.classList.toggle("score-view", !deltaMode);
+  if (rows.length) {
+    const best = rows[0];
+    const brand = brandInfo(best);
+    const insightLogo = document.getElementById("insight-logo");
+    insightLogo.className = "insight-logo model-logo " + brand.css;
+    insightLogo.textContent = brand.monogram;
+    document.getElementById("insight-label").textContent = messages[activeLanguage][deltaMode ? "results.deltaInsight" : "results.scoreInsight"];
+    document.getElementById("insight-title").textContent = modelDisplayName(best) + " · " + variantLabel(best);
+    document.getElementById("insight-description").textContent = messages[activeLanguage][deltaMode ? "results.deltaDescription" : "results.scoreDescription"];
+    document.getElementById("insight-value").textContent = deltaMode ? deltaText(best, activeMetric) : scoreText(best, activeMetric) + " /100";
+  } else {
+    document.getElementById("insight-title").textContent = "—";
+    document.getElementById("insight-value").textContent = "—";
+  }
   document.getElementById("bar-chart").innerHTML = rows.map(function (row, index) {
     const value = deltaMode ? row[metric.delta] : row[metric.mean];
+    const deviation = deltaMode ? row[metric.deltaSd] : row[metric.sd];
     const text = deltaMode ? deltaText(row, activeMetric) : scoreText(row, activeMetric);
-    const fill = deltaMode
-      ? '<div class="bar-fill ' + (value < 0 ? "negative" : value > 0 ? "positive" : "neutral") + '" style="left:' + (value < 0 ? 50 + value / maxAbs * 50 : 50) + '%;width:' + Math.abs(value) / maxAbs * 50 + '%"></div>'
-      : '<div class="bar-fill" style="width:' + Math.max(2, Math.min(100, value)) + '%"></div>';
+    let fill;
+    if (deltaMode) {
+      const low = Math.max(-range, value - (deviation || 0));
+      const high = Math.min(range, value + (deviation || 0));
+      const left = 50 + low / range * 50;
+      const width = (high - low) / range * 50;
+      const valueLeft = value < 0 ? 50 + value / range * 50 : 50;
+      fill = '<div class="bar-fill ' + (value < 0 ? "negative" : value > 0 ? "positive" : "neutral") + '" style="left:' + valueLeft + '%;width:' + Math.abs(value) / range * 50 + '%"></div><span class="uncertainty-range" style="left:' + left + '%;width:' + width + '%"></span>';
+    } else {
+      const low = Math.max(0, value - (deviation || 0));
+      const high = Math.min(100, value + (deviation || 0));
+      fill = '<div class="bar-fill ' + brandInfo(row).css + '" style="width:' + Math.max(0, Math.min(100, value)) + '%"></div><span class="uncertainty-range" style="left:' + low + '%;width:' + Math.max(0, high - low) + '%"></span>';
+    }
     const label = escapeHtml(modelTag(row));
+    const displayName = escapeHtml(modelDisplayName(row));
+    const variant = escapeHtml(variantLabel(row));
     const score = escapeHtml(text);
-    return '<div class="bar-row ' + (deltaMode && value < 0 ? "is-loss" : index === 0 ? "is-best" : "") + '" title="' + label + ': ' + score + '"><span class="bar-label">' + label + '</span><div class="bar-track" role="img" aria-label="' + label + ': ' + score + '">' + fill + '</div><span class="bar-value">' + score + '</span></div>';
+    return '<div class="bar-row ' + (index === 0 ? "is-top " : "") + (deltaMode && value < 0 ? "is-loss" : "") + '"><div class="bar-label">' + modelLogo(row) + '<span class="bar-model-copy"><strong>' + displayName + '</strong><small>' + variant + '</small></span></div><div class="bar-track" role="img" aria-label="' + label + ': ' + score + '">' + fill + '</div><span class="bar-value">' + score + '</span></div>';
   }).join("");
 }
 
 function renderTable() {
+  const metric = metrics[activeMetric];
+  const key = activeView === "delta" ? metric.delta : metric.mean;
   const rows = summaryRows.filter(function (row) {
-    return activeView === "delta"
-      ? typeof row.rolebench_generalization_delta_vs_bf16_mean_pp === "number"
-      : typeof row.rolebench_generalization_mean_100 === "number" || typeof row.charactereval_mean_100 === "number";
+    return typeof row[key] === "number";
   });
-  document.getElementById("score-table").innerHTML = rows.map(function (row) {
+  rows.sort(function (a, b) {
+    return (b[key] ?? -Infinity) - (a[key] ?? -Infinity);
+  });
+  document.getElementById("score-table").innerHTML = rows.map(function (row, index) {
     const label = escapeHtml(modelTag(row));
+    const displayName = escapeHtml(modelDisplayName(row));
+    const variant = escapeHtml(variantLabel(row));
     const value = activeView === "delta" ? deltaText : scoreText;
-    return '<tr><td><span class="model-name">' + label + '</span></td><td>' + value(row, "rolebench_generalization") + '</td><td>' + value(row, "rolebench_role_specific") + '</td><td>' + value(row, "charactereval") + '</td></tr>';
+    return '<tr class="' + (index === 0 ? "is-top" : "") + '"><td><div class="table-model">' + modelLogo(row) + '<span><strong class="model-name">' + displayName + '</strong><small>' + variant + ' · ' + label + '</small></span>' + (index === 0 ? '<span class="rank-badge">#1</span>' : '') + '</div></td><td>' + value(row, "rolebench_generalization") + '</td><td>' + value(row, "rolebench_role_specific") + '</td><td>' + value(row, "charactereval") + '</td></tr>';
   }).join("");
 }
 

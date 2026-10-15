@@ -198,31 +198,65 @@ h1, h2, h3, p { margin-top: 0; }
 .view-switch button[aria-pressed="true"] { background: var(--white); color: var(--ink); box-shadow: 0 1px 3px rgba(23, 35, 44, .12); }
 .scale-label { flex: 0 0 auto; color: #929a98; font: 9px var(--mono); }
 .chart-area { padding: 21px 28px 22px; background: linear-gradient(180deg, #fffefa, #fbfaf6); }
-.chart-caption { margin: 0 0 17px; color: #8b9394; font-size: 10px; }
-.bar-chart { display: grid; gap: 11px; }
-.bar-row { display: grid; grid-template-columns: 180px minmax(100px, 1fr) 128px; align-items: center; gap: 15px; }
-.bar-label { overflow: hidden; color: #424d53; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
-.bar-track { position: relative; height: 9px; background: #ecece5; }
-.bar-fill { width: 0; height: 100%; background: var(--mint); transition: width .5s ease; }
+.chart-caption { margin: 0 0 13px; color: #8b9394; font-size: 10px; }
+.ranking-insight { display: grid; grid-template-columns: 38px minmax(0, 1fr) auto; align-items: center; gap: 13px; padding: 13px 15px; border: 1px solid #e8e9df; background: #f8f9f4; }
+.insight-logo { width: 36px !important; height: 36px !important; border-radius: 10px !important; font-size: 15px !important; }
+.insight-copy { display: grid; min-width: 0; gap: 2px; }
+.insight-kicker { color: #788078; font: 9px var(--mono); letter-spacing: .04em; text-transform: uppercase; }
+.insight-copy strong { overflow: hidden; color: var(--ink); font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+.insight-copy > span:last-child { color: #858d89; font-size: 9px; }
+.insight-value { padding-left: 12px; color: #33463a; font: 11px var(--mono); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+.chart-legend { display: flex; align-items: center; gap: 18px; margin: 15px 2px 7px; color: #848d8c; font-size: 9px; }
+.chart-legend > span { display: inline-flex; align-items: center; gap: 7px; }
+.legend-mean { width: 12px; height: 5px; background: #6c9f7c; }
+.legend-spread { position: relative; width: 16px; height: 2px; background: #3c4945; }
+.legend-spread::before, .legend-spread::after { position: absolute; top: -3px; width: 1px; height: 8px; background: #3c4945; content: ""; }
+.legend-spread::before { left: 0; }
+.legend-spread::after { right: 0; }
+.bar-chart { display: grid; gap: 2px; }
+.bar-row { display: grid; grid-template-columns: 220px minmax(100px, 1fr) 142px; align-items: center; gap: 15px; min-height: 38px; padding: 4px 8px; border-bottom: 1px solid #f0f0ea; }
+.bar-row.is-top { background: #f8f9f4; }
+.bar-label { display: flex; min-width: 0; align-items: center; gap: 9px; }
+.model-logo { display: inline-flex; width: 25px; height: 25px; flex: 0 0 auto; align-items: center; justify-content: center; border: 1px solid transparent; border-radius: 7px; font: 600 10px var(--sans); }
+.brand-gemma { border-color: #d3e1d2; background: #edf4ec; color: #4d7857; }
+.brand-qwen { border-color: #d4ddf4; background: #edf1fc; color: #536cad; }
+.brand-ministral { border-color: #f1d8ca; background: #fbefe8; color: #b96137; }
+.brand-lfm { border-color: #d3e5de; background: #eaf4f0; color: #437d68; }
+.brand-other { border-color: #dfe1df; background: #f1f2f0; color: #68716f; }
+.bar-model-copy { display: grid; min-width: 0; gap: 1px; }
+.bar-model-copy strong { overflow: hidden; color: #354148; font-size: 10px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.bar-model-copy small { color: #929996; font: 8px var(--mono); text-overflow: ellipsis; white-space: nowrap; }
+.bar-track { position: relative; height: 10px; overflow: visible; background: #ecece5; }
+.bar-fill { position: absolute; top: 0; left: 0; z-index: 1; height: 100%; border-radius: 1px; transition: width .35s ease, left .35s ease; }
+.bar-fill.brand-gemma { background: #699677; }
+.bar-fill.brand-qwen { background: #597bc4; }
+.bar-fill.brand-ministral { background: #e18353; }
+.bar-fill.brand-lfm { background: #58a18a; }
+.bar-fill.brand-other { background: #77827e; }
 .bar-chart.delta-view .bar-track { background: #f0efe9; }
-.bar-chart.delta-view .bar-track::before { position: absolute; z-index: 1; top: -3px; bottom: -3px; left: 50%; width: 1px; background: #a8afaa; content: ""; }
-.bar-chart.delta-view .bar-fill { position: absolute; top: 0; height: 100%; }
-.bar-chart.delta-view .bar-fill.negative { background: var(--orange); }
-.bar-chart.delta-view .bar-fill.positive { background: #75a68d; }
+.bar-chart.delta-view .bar-track::before { position: absolute; z-index: 2; top: -4px; bottom: -4px; left: 50%; width: 1px; background: #9ca6a1; content: ""; }
+.bar-chart.delta-view .bar-fill { top: 0; }
+.bar-chart.delta-view .bar-fill.negative { background: #d77b58; }
+.bar-chart.delta-view .bar-fill.positive { background: #70a486; }
 .bar-chart.delta-view .bar-fill.neutral { width: 0 !important; }
-.bar-row:nth-child(2) .bar-fill { background: #8099e9; }
-.bar-row:nth-child(3) .bar-fill { background: #e0a070; }
-.bar-row:nth-child(4) .bar-fill { background: #c5a9cf; }
-.bar-row.is-best .bar-fill { background: #526b53; }
+.uncertainty-range { position: absolute; top: 50%; z-index: 3; height: 2px; min-width: 1px; transform: translateY(-50%); border-radius: 2px; background: #293b35; pointer-events: none; }
+.uncertainty-range::before, .uncertainty-range::after { position: absolute; top: -3px; width: 1px; height: 8px; background: #293b35; content: ""; }
+.uncertainty-range::before { left: 0; }
+.uncertainty-range::after { right: 0; }
 .bar-chart.delta-view .bar-row.is-loss .bar-value { color: #a44e32; }
-.bar-value { color: #39464b; font: 10px var(--mono); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+.bar-value { color: #39464b; font: 9px var(--mono); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
 .table-wrap { overflow-x: auto; border-top: 1px solid #ecebe5; }
 .table-wrap table { width: 100%; min-width: 750px; border-collapse: collapse; }
 .table-wrap th { padding: 12px 15px; background: #fbfaf7; color: #8a9293; font: 9px var(--mono); letter-spacing: .05em; text-align: right; }
 .table-wrap th:first-child, .table-wrap td:first-child { padding-left: 24px; text-align: left; }
 .table-wrap td { padding: 12px 15px; border-top: 1px solid #f0efe9; color: #505a60; font-size: 10px; font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
 .table-wrap tbody tr:hover { background: #faf9f4; }
-.model-name { color: var(--ink); font: 10px var(--mono); }
+.table-wrap tbody tr.is-top { background: #f8f9f4; }
+.table-model { display: flex; min-width: 220px; align-items: center; gap: 9px; }
+.table-model > span:nth-child(2) { display: grid; min-width: 0; gap: 2px; }
+.model-name { color: var(--ink); font-size: 10px; font-weight: 600; }
+.table-model small { color: #929996; font: 8px var(--mono); }
+.rank-badge { margin-left: auto; padding: 2px 5px; border: 1px solid #dde5d8; background: #eff4eb; color: #66805e; font: 8px var(--mono); }
 .table-bottom { display: flex; justify-content: space-between; padding: 12px 24px; color: #858e91; font-size: 10px; }
 .table-bottom > span { display: flex; align-items: center; gap: 8px; }
 .legend-dot { width: 6px; height: 6px; border-radius: 50%; background: #80ad96; }
@@ -290,8 +324,15 @@ h1, h2, h3, p { margin-top: 0; }
   .metric-tab { padding: 0 8px; font-size: 9px; }
   .scale-label { display: none; }
   .chart-area { padding: 17px 13px; }
-  .bar-row { grid-template-columns: minmax(92px, 1fr) minmax(50px, 1.2fr) 112px; gap: 7px; }
-  .bar-label, .bar-value { font-size: 9px; }
+  .ranking-insight { grid-template-columns: 32px minmax(0, 1fr); gap: 9px; padding: 11px; }
+  .insight-logo { width: 30px !important; height: 30px !important; }
+  .insight-value { grid-column: 2; padding: 3px 0 0; text-align: left; }
+  .chart-legend { gap: 11px; font-size: 8px; }
+  .bar-row { grid-template-columns: minmax(95px, 1fr) minmax(35px, 1fr) 91px; gap: 6px; padding-right: 2px; padding-left: 2px; }
+  .bar-label { gap: 5px; }
+  .bar-label .model-logo { width: 21px; height: 21px; border-radius: 6px; font-size: 9px; }
+  .bar-model-copy strong { font-size: 8px; }
+  .bar-model-copy small, .bar-value { font-size: 7px; }
   .table-wrap table { min-width: 700px; }
   .table-wrap th:first-child, .table-wrap td:first-child { padding-left: 14px; }
   .table-bottom { padding: 11px 13px; }

@@ -71,12 +71,25 @@
         </div>
         <div class="chart-area" id="metric-panel" role="region" aria-labelledby="tab-general" tabindex="0">
           <p class="chart-caption" data-i18n="results.chartCaption">Δ moyenne appariée · points /100 · négatif = perte</p>
+          <div class="ranking-insight" aria-live="polite">
+            <span class="insight-logo model-logo" id="insight-logo" aria-hidden="true">Q</span>
+            <div class="insight-copy">
+              <span class="insight-kicker" id="insight-label">Meilleur résultat sur ce benchmark</span>
+              <strong id="insight-title">—</strong>
+              <span id="insight-description">Classement limité au benchmark sélectionné.</span>
+            </div>
+            <strong class="insight-value" id="insight-value">—</strong>
+          </div>
+          <div class="chart-legend" aria-label="Légende du graphique">
+            <span><i class="legend-mean" aria-hidden="true"></i><span data-i18n="results.legendMean">Moyenne</span></span>
+            <span><i class="legend-spread" aria-hidden="true"></i><span data-i18n="results.legendSpread">Écart-type (±1σ)</span></span>
+          </div>
           <div class="bar-chart" id="bar-chart" aria-live="polite" aria-label="Comparaison des scores" data-i18n-aria="chart.aria"></div>
         </div>
         <div class="table-wrap">
           <table>
             <caption class="sr-only">Benchmark results by model and quantization</caption>
-            <thead><tr><th scope="col" data-i18n="table.model">Modèle @ quant.</th><th scope="col">RoleBench Generalization</th><th scope="col">RoleBench Role-Specific</th><th scope="col">CharacterEval</th></tr></thead>
+            <thead><tr><th scope="col" data-i18n="table.model">Modèle et version</th><th scope="col">RoleBench Generalization</th><th scope="col">RoleBench Role-Specific</th><th scope="col">CharacterEval</th></tr></thead>
             <tbody id="score-table"></tbody>
           </table>
         </div>
@@ -102,6 +115,8 @@
           <p><strong>RoleBench Role-Specific</strong> — <span data-i18n="details.specific">10 prompts liés à un rôle · ROUGE-L F1.</span></p>
           <p><strong>CharacterEval</strong> — <span data-i18n="details.character">12 exemples · CharacterRM · note de 1–5 ramenée à 0–100.</span></p>
           <p data-i18n="details.protocol">Δ = quantized GGUF score − same-model BF16 score · 5 paired runs.</p>
+          <p data-i18n="details.sd">Écart-type calculé sur cinq moyennes de run ; pour Δ, sur les cinq différences appariées.</p>
+          <p data-i18n="details.reading">Comparez les modèles à l'intérieur d'un même benchmark : les scores entre colonnes ne sont pas équivalents.</p>
           <p data-i18n="details.claims">Les pertes annoncées par les éditeurs ne sont pas référencées.</p>
           <p class="pending-note"><span data-i18n="details.pending">Not run yet:</span> IFBench · Humanity’s Last Exam · LiveCodeBench</p>
           <div class="detail-links"><a href="https://huggingface.co/datasets/ZenMoore/RoleBench">RoleBench ↗</a><a href="https://github.com/morecry/CharacterEval">CharacterEval ↗</a><a href="https://github.com/EthanCarollo/quantization-bench/blob/main/results/summary.json">JSON ↗</a></div>
