@@ -1,0 +1,31 @@
+{
+  "openai_gpt6_luna": {
+    "model_id": "openai/gpt-6-luna",
+    "revision": null,
+    "slug": "gpt-6-luna-xhigh",
+    "short_name": "gpt-6-luna-xhigh",
+    "display_name": "GPT-6 Luna",
+    "parameter_label": "Modèle hébergé · OpenRouter",
+    "license": "OpenAI API",
+    "requires_hf_token": false,
+    "runtime": "OpenRouter",
+    "reasoning_effort": "xhigh",
+    "variant_label": "OpenRouter · xhigh",
+    "scorecard_variants": ["openrouter"]
+  },
+  "deepseek_v41_flash": {
+    "model_id": "deepseek/deepseek-v4.1-flash",
+    "revision": null,
+    "slug": "deepseek-v4-1-flash",
+    "short_name": "deepseek-v4.1-flash",
+    "display_name": "DeepSeek V4.1 Flash",
+    "parameter_label": "Modèle hébergé · OpenRouter",
+    "license": "DeepSeek API",
+    "requires_hf_token": false,
+    "runtime": "OpenRouter",
+    "reasoning_effort": "none",
+    "variant_label_fr": "OpenRouter · sans raisonnement",
+    "variant_label_en": "OpenRouter · non-reasoning",
+    "scorecard_variants": ["openrouter"]
+  }
+}

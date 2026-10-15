@@ -24,7 +24,9 @@ RoleBench uses ROUGE-L F1 multiplied by 100; CharacterEval uses CharacterRM mapp
 | lfm2.5-2.6b@bf16 | 18.95 ± 3.63 | 11.04 ± 0.62 | 48.13 ± 6.04 | — | — | — | 2.69B total (model card) |
 | lfm2.5-2.6b@q8_0 | 19.24 ± 0.93 | 11.61 ± 0.62 | 45.12 ± 4.88 | — | — | — | 2.69B total (model card) |
 | lfm2.5-2.6b@q4_k_m | 19.56 ± 3.69 | 11.03 ± 0.58 | 42.61 ± 10.99 | — | — | — | 2.69B total (model card) |
+| gpt-6-luna-xhigh@openrouter | 31.24 ± 1.33 | 16.53 ± 1.34 | — | — | — | — | Modèle hébergé · OpenRouter |
+| deepseek-v4.1-flash@openrouter | 24.70 ± 4.75 | 15.02 ± 1.03 | — | — | — | — | Modèle hébergé · OpenRouter |
 
-MLX variants use affine weight quantization with group size 64. GGUF variants use llama.cpp BF16, Q8_0, or Q4_K_M files. Sampling settings and prompts are held fixed across model variants within each benchmark.
+MLX variants use affine weight quantization with group size 64. GGUF variants use llama.cpp BF16, Q8_0, or Q4_K_M files. OpenRouter entries are hosted APIs, not local quantizations; their same-model BF16 delta is unavailable. Sampling settings and prompts are held fixed across model variants within each benchmark.
 
 RoleBench ROUGE-L measures wording overlap with one RoleGPT reference, not role-play quality as a percentage. CharacterEval scores come from the authors' human-annotated CharacterRM; they are averaged equally across the 12 dimensions covered by the fixed subset and linearly mapped from 1–5 to 0–100. IFBench reports official prompt-level loose accuracy; HLE reports the official judge accuracy over the text-only subset; LiveCodeBench reports execution-checked pass@1. These scores use different datasets and evaluators and should be compared only within each column.

@@ -351,5 +351,36 @@
       "gpu_memory_limit": "14GiB",
       "cpu_memory_limit": "14GiB"
     }
+  },
+  "openrouter": {
+    "runtime": "OpenRouter Chat Completions API",
+    "models": [
+      {
+        "id": "openai/gpt-6-luna",
+        "reasoning_effort": "xhigh",
+        "max_output_tokens": {
+          "rolebench": 512
+        }
+      },
+      {
+        "id": "deepseek/deepseek-v4.1-flash",
+        "reasoning_effort": "none",
+        "max_output_tokens": 512
+      }
+    ],
+    "benchmarks": [
+      "rolebench_generalization",
+      "rolebench_role_specific"
+    ],
+    "repetitions": 5,
+    "successful_generations": 200,
+    "api_responses_including_discarded_attempts": 332,
+    "recorded_spend_usd_rounded": 0.0583,
+    "spend_limit_usd": 0.5,
+    "temperature": 1.0,
+    "top_p": 0.95,
+    "top_k": 64,
+    "discarded_charactereval_generations": 120,
+    "spend_scope_note": "Recorded spend includes 120 CharacterEval generations discarded before scoring; published results cover RoleBench only."
   }
 }

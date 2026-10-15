@@ -58,7 +58,7 @@ const messages = {
     "method.title": "Protocole",
     "method.repo": "Détails et données ↗",
     "method.models": "Modèles",
-    "method.modelsSummary": "5 familles de modèles",
+    "method.modelsSummary": "7 familles de modèles",
     "method.formats": "Formats",
     "method.scoring": "Scores",
     "method.environment": "Environnements",
@@ -67,11 +67,11 @@ const messages = {
     "details.specific": "10 prompts liés à un rôle · ROUGE-L F1.",
     "details.character": "12 exemples · CharacterRM · note de 1–5 ramenée à 0–100.",
     "details.personagym": "200 personas · 10 000 questions · action attendue, justification, style linguistique, cohérence et toxicité. PersonaScore et sous-scores de 1 à 5, produits par des modèles-juges. Ce benchmark n’a pas encore été exécuté pour les modèles de cette page.",
-    "details.protocol": "Δ = score GGUF quantifié − BF16 du même modèle · 5 runs appariés.",
+    "details.protocol": "Δ = score GGUF quantifié − BF16 du même modèle · 5 runs appariés. Les modèles OpenRouter sont mesurés en score absolu, sans delta BF16 local.",
     "details.sd": "Écart-type d’échantillon s = √[Σ(xᵢ − x̄)² / (5 − 1)], calculé sur les cinq moyennes de run ; pour Δ, sur les cinq différences appariées.",
     "details.reading": "Comparez les modèles à l'intérieur d'un même benchmark : les scores entre colonnes ne sont pas équivalents.",
     "details.claims": "Les pertes annoncées par les éditeurs ne sont pas référencées.",
-    "details.brandCredits": "Logos des familles Gemma (Google), Qwen, Mistral et Liquid AI : <a href=\"https://partnermarketinghub.withgoogle.com/brands/google/branding-guidelines/how-to-show-googles-brand/\">Google</a> · <a href=\"https://github.com/QwenLM/qwenlm.github.io\">Qwen</a> · <a href=\"https://mistral.ai/brand/\">Mistral</a> · <a href=\"https://www.liquid.ai/\">Liquid AI</a>. Marques affichées pour identifier les modèles évalués, sans affiliation ni approbation.",
+    "details.brandCredits": "Logos des familles Gemma (Google), Qwen, Mistral, Liquid AI, OpenAI et DeepSeek : <a href=\"https://ai.google.dev/gemma/docs\">Google</a> · <a href=\"https://github.com/QwenLM/qwenlm.github.io\">Qwen</a> · <a href=\"https://mistral.ai/brand/\">Mistral</a> · <a href=\"https://www.liquid.ai/\">Liquid AI</a> · <a href=\"https://openai.com/brand/\">OpenAI</a> · <a href=\"https://github.com/deepseek-ai/awesome-deepseek-integration/tree/main/docs/_logo%20svg\">DeepSeek</a>. Marques affichées pour identifier les modèles évalués, sans affiliation ni approbation.",
     "details.pending": "Pas encore exécutés :"
   },
   en: {
@@ -133,7 +133,7 @@ const messages = {
     "method.title": "Protocol",
     "method.repo": "Details and data ↗",
     "method.models": "Models",
-    "method.modelsSummary": "5 model families",
+    "method.modelsSummary": "7 model families",
     "method.formats": "Formats",
     "method.scoring": "Scoring",
     "method.environment": "Runtimes",
@@ -142,11 +142,11 @@ const messages = {
     "details.specific": "10 role-specific prompts · ROUGE-L F1.",
     "details.character": "12 examples · CharacterRM · score mapped from 1–5 to 0–100.",
     "details.personagym": "200 personas · 10,000 questions · expected action, action justification, linguistic habits, persona consistency, and toxicity. PersonaScore and task scores are on a 1–5 scale and produced by LLM judges. This benchmark has not yet been run on this page’s models.",
-    "details.protocol": "Δ = quantized GGUF score − same-model BF16 score · 5 paired runs.",
+    "details.protocol": "Δ = quantized GGUF score − same-model BF16 score · 5 paired runs. OpenRouter models are measured by absolute score, without a local BF16 delta.",
     "details.sd": "Sample standard deviation s = √[Σ(xᵢ − x̄)² / (5 − 1)], across the five run means; for Δ, across the five paired differences.",
     "details.reading": "Compare models within one benchmark: scores across columns are not equivalent.",
     "details.claims": "Publisher-reported loss claims are not included.",
-    "details.brandCredits": "Logos for the Gemma (Google), Qwen, Mistral, and Liquid AI model families: <a href=\"https://partnermarketinghub.withgoogle.com/brands/google/branding-guidelines/how-to-show-googles-brand/\">Google</a> · <a href=\"https://github.com/QwenLM/qwenlm.github.io\">Qwen</a> · <a href=\"https://mistral.ai/brand/\">Mistral</a> · <a href=\"https://www.liquid.ai/\">Liquid AI</a>. Marks identify the evaluated models; this project is not affiliated with or endorsed by these companies.",
+    "details.brandCredits": "Logos for the Gemma (Google), Qwen, Mistral, Liquid AI, OpenAI, and DeepSeek model families: <a href=\"https://ai.google.dev/gemma/docs\">Google</a> · <a href=\"https://github.com/QwenLM/qwenlm.github.io\">Qwen</a> · <a href=\"https://mistral.ai/brand/\">Mistral</a> · <a href=\"https://www.liquid.ai/\">Liquid AI</a> · <a href=\"https://openai.com/brand/\">OpenAI</a> · <a href=\"https://github.com/deepseek-ai/awesome-deepseek-integration/tree/main/docs/_logo%20svg\">DeepSeek</a>. Marks identify the evaluated models; this project is not affiliated with or endorsed by these companies.",
     "details.pending": "Not run yet:"
   }
 };
@@ -183,7 +183,9 @@ const modelBrands = {
   qwen3_4b: { monogram: "Q", css: "brand-qwen", label: "Qwen", src: "assets/model-logos/qwen.png" },
   qwen3_5_4b: { monogram: "Q", css: "brand-qwen", label: "Qwen", src: "assets/model-logos/qwen.png" },
   ministral_3_3b_instruct_2512: { monogram: "M", css: "brand-ministral", label: "Mistral", src: "assets/model-logos/mistral.png" },
-  lfm2_5_2_6b: { monogram: "L", css: "brand-lfm", label: "Liquid AI", src: "assets/model-logos/liquid-icon.svg" }
+  lfm2_5_2_6b: { monogram: "L", css: "brand-lfm", label: "Liquid AI", src: "assets/model-logos/liquid-icon.svg" },
+  openai_gpt6_luna: { monogram: "O", css: "brand-openai", label: "OpenAI", src: "assets/model-logos/openai.svg" },
+  deepseek_v41_flash: { monogram: "D", css: "brand-deepseek", label: "DeepSeek", src: "assets/model-logos/deepseek.svg" }
 };
 let activeLanguage = localStorage.getItem("quantization-bench-language") === "en" ? "en" : "fr";
 let summaryRows = [];
@@ -288,7 +290,7 @@ function variantLabel(row) {
     mlx_4bit: "MLX · 4-bit",
     mlx_8bit: "MLX · 8-bit"
   };
-  return labels[variant] || row.model_tag || row.quantization || variant;
+  return row["variant_label_" + activeLanguage] || row.variant_label || labels[variant] || row.model_tag || row.quantization || variant;
 }
 
 function modelConfigId(row) {
@@ -307,7 +309,7 @@ function modelConfigs() {
 
 function defaultModelIds() {
   return new Set(modelConfigs().filter(function (row) {
-    return row.variant === "gguf_bf16" || row.variant === "gguf_q8_0";
+    return row.variant === "gguf_bf16" || row.variant === "gguf_q8_0" || row.variant === "openrouter";
   }).map(modelConfigId));
 }
 
@@ -594,7 +596,8 @@ function renderEnvironment(environment) {
   const ggufHardware = gguf.hardware || {};
   const values = [
     ["MLX", hardware.chip, hardware.macos ? "macOS " + hardware.macos : ""],
-    ["GGUF", ggufHardware.gpu, ggufHardware.os]
+    ["GGUF", ggufHardware.gpu, ggufHardware.os],
+    environment.openrouter ? ["OpenRouter", activeLanguage === "fr" ? "API hébergée" : "hosted API"] : []
   ].map(function (parts) { return parts.filter(Boolean).join(" · "); }).filter(Boolean);
   document.getElementById("environment-summary").textContent = values.join(" / ") || "MLX · GGUF";
 }

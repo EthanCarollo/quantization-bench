@@ -12,7 +12,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 RESULTS = ROOT / "results"
 SITE_DATA = ROOT / "site-data"
-REGISTRY = json.loads((ROOT / "data" / "model_registry.json").read_text(encoding="utf-8"))
+REGISTRY = {
+    **json.loads((ROOT / "data" / "model_registry.json").read_text(encoding="utf-8")),
+    **json.loads((ROOT / "data" / "openrouter_models.json").read_text(encoding="utf-8")),
+}
 BENCHMARKS = (
     "rolebench_generalization",
     "rolebench_role_specific",
@@ -56,6 +59,14 @@ VARIANTS = (
         "tag": "q4_k_m",
         "method": "GGUF Q4_K_M (llama.cpp)",
         "quantization": {"format": "GGUF", "type": "Q4_K_M"},
+        "required": False,
+    },
+    {
+        "suffix": "openrouter",
+        "label": "OpenRouter",
+        "tag": "openrouter",
+        "method": "OpenRouter hosted model",
+        "quantization": {"format": "OpenRouter", "type": "Hosted"},
         "required": False,
     },
 )
@@ -189,7 +200,10 @@ def main() -> None:
     rows = []
     for model_key, model in REGISTRY.items():
         supported_variants = set(
-            model.get("scorecard_variants", (variant["suffix"] for variant in VARIANTS))
+            model.get(
+                "scorecard_variants",
+                (variant["suffix"] for variant in VARIANTS if variant["suffix"] != "openrouter"),
+            )
         )
         for variant in VARIANTS:
             if variant["suffix"] not in supported_variants:
@@ -198,6 +212,9 @@ def main() -> None:
                 "quantization": f"{model['short_name']}@{variant['tag']}",
                 "model_tag": f"{model['short_name']}@{variant['tag']}",
                 "model_name": model["display_name"],
+                "variant_label": model.get("variant_label"),
+                "variant_label_fr": model.get("variant_label_fr"),
+                "variant_label_en": model.get("variant_label_en"),
                 "method": variant["method"],
                 "rolebench_generalization_mean_100": None,
                 "rolebench_generalization_sd_100": None,
@@ -324,7 +341,7 @@ def main() -> None:
         )
     lines += [
         "",
-        "MLX variants use affine weight quantization with group size 64. GGUF variants use llama.cpp BF16, Q8_0, or Q4_K_M files. Sampling settings and prompts are held fixed across model variants within each benchmark.",
+        "MLX variants use affine weight quantization with group size 64. GGUF variants use llama.cpp BF16, Q8_0, or Q4_K_M files. OpenRouter entries are hosted APIs, not local quantizations; their same-model BF16 delta is unavailable. Sampling settings and prompts are held fixed across model variants within each benchmark.",
         "",
         "RoleBench ROUGE-L measures wording overlap with one RoleGPT reference, not role-play quality as a percentage. CharacterEval scores come from the authors' human-annotated CharacterRM; they are averaged equally across the 12 dimensions covered by the fixed subset and linearly mapped from 1–5 to 0–100. IFBench reports official prompt-level loose accuracy; HLE reports the official judge accuracy over the text-only subset; LiveCodeBench reports execution-checked pass@1. These scores use different datasets and evaluators and should be compared only within each column.",
         "",
