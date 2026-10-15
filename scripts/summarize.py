@@ -176,21 +176,32 @@ def summarize_optional(
         if not item_path.is_file():
             return None
         items = read_jsonl(item_path)
+        repetitions = {run["repetition"] for run in runs}
+        item_keys = {(item.get("repetition"), item.get("item_id")) for item in items}
         if (
-            len(items) != expected_examples
-            or len({item.get("item_id") for item in items}) != expected_examples
+            len(items) != expected_examples * run_count
+            or len(item_keys) != len(items)
             or any(
                 item.get("benchmark") != benchmark
                 or item.get("model_key") != model_key
-                or item.get("repetition") != 1
+                or item.get("repetition") not in repetitions
                 or not isinstance(item.get("prompt_loose_accuracy_100"), (int, float))
                 for item in items
             )
         ):
             return None
-        item_score = statistics.mean(item["prompt_loose_accuracy_100"] for item in items)
-        if not math.isclose(item_score, runs[0][metric], abs_tol=1e-9):
-            return None
+        for run in runs:
+            run_items = [item for item in items if item.get("repetition") == run["repetition"]]
+            if (
+                len(run_items) != expected_examples
+                or len({item.get("item_id") for item in run_items}) != expected_examples
+                or not math.isclose(
+                    statistics.mean(item["prompt_loose_accuracy_100"] for item in run_items),
+                    run[metric],
+                    abs_tol=1e-9,
+                )
+            ):
+                return None
     values = [run.get(metric) for run in sorted(runs, key=lambda run: run["repetition"])]
     if any(not isinstance(value, (int, float)) or not math.isfinite(value) or not 0 <= value <= 100 for value in values):
         return None

@@ -10,6 +10,18 @@
     "license": "Gemma Terms of Use",
     "requires_hf_token": true
   },
+  "gemma4_e4b_it": {
+    "model_id": "google/gemma-4-E4B-it",
+    "revision": "ee0ef6023621cff504d758262d4e04895a5af4a2",
+    "slug": "gemma-4-e4b-it",
+    "snapshot_dir": "google-gemma-4-e4b-it-ee0ef602",
+    "short_name": "gemma4-e4b-it",
+    "display_name": "Gemma 4 E4B IT",
+    "parameter_label": "4.5B effectifs (8B avec embeddings)",
+    "license": "Apache-2.0",
+    "requires_hf_token": false,
+    "scorecard_variants": ["gguf_bf16", "gguf_q8_0", "gguf_q4_k_m"]
+  },
   "qwen3_4b": {
     "model_id": "Qwen/Qwen3-4B",
     "revision": "1cfa9a7208912126459214e8b04321603b3df60c",
