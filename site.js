@@ -24,6 +24,14 @@ const messages = {
     "stats.runs": "runs",
     "results.title": "Résultats",
     "results.caption": "Δ vs BF16 · points sur 100",
+    "results.modelFilter": "Modèles",
+    "results.modelSearch": "Rechercher un modèle ou un format",
+    "results.selectAll": "Tout afficher",
+    "results.selectNone": "Tout masquer",
+    "results.modelOptions": "Sélection des configurations affichées",
+    "results.noSearchResults": "Aucun modèle ne correspond à cette recherche.",
+    "results.noVisibleModels": "Aucun modèle sélectionné. Cochez une configuration pour afficher les résultats.",
+    "results.noMatchingResults": "Aucun résultat pour les configurations sélectionnées dans cette vue.",
     "results.chartCaption": "Variation moyenne face au BF16 du même modèle · points /100",
     "results.scoreCaption": "Score moyen du benchmark sélectionné · points /100",
     "results.legendMean": "Moyenne",
@@ -91,6 +99,14 @@ const messages = {
     "stats.runs": "runs",
     "results.title": "Results",
     "results.caption": "Δ vs BF16 · points on a 100-point scale",
+    "results.modelFilter": "Models",
+    "results.modelSearch": "Search models or formats",
+    "results.selectAll": "Show all",
+    "results.selectNone": "Hide all",
+    "results.modelOptions": "Select visible model configurations",
+    "results.noSearchResults": "No models match this search.",
+    "results.noVisibleModels": "No models selected. Select a configuration to show results.",
+    "results.noMatchingResults": "No results for the selected configurations in this view.",
     "results.chartCaption": "Mean change against the same model's BF16 baseline · points /100",
     "results.scoreCaption": "Mean score on the selected benchmark · points /100",
     "results.legendMean": "Mean",
@@ -171,6 +187,7 @@ const modelBrands = {
 };
 let activeLanguage = localStorage.getItem("quantization-bench-language") === "en" ? "en" : "fr";
 let summaryRows = [];
+let selectedModelIds = new Set();
 let activeMetric = "rolebench_generalization";
 let activeView = "delta";
 const stdDevVisibility = {
@@ -192,6 +209,10 @@ function translate() {
     const text = words[element.dataset.i18nAria];
     if (text !== undefined) element.setAttribute("aria-label", text);
   });
+  document.querySelectorAll("[data-i18n-placeholder]").forEach(function (element) {
+    const text = words[element.dataset.i18nPlaceholder];
+    if (text !== undefined) element.setAttribute("placeholder", text);
+  });
   const showStdDev = Boolean(stdDevVisibility[activeMetric]);
   document.getElementById("result-runs-label").textContent = activeView === "delta"
     ? words[showStdDev ? "results.pairedRuns" : "results.pairedMeanOnly"]
@@ -203,6 +224,8 @@ function translate() {
   document.getElementById("stddev-toggle-label").textContent = stdDevButtonLabel;
   document.getElementById("legend-sd").hidden = !showStdDev;
   const pendingBenchmark = activeMetric === "personagym";
+  document.getElementById("model-filter").hidden = pendingBenchmark;
+  if (pendingBenchmark) setModelFilterOpen(false);
   document.getElementById("stddev-toggle").hidden = pendingBenchmark;
   document.querySelector(".view-switch").hidden = pendingBenchmark;
   document.getElementById("scale-label").hidden = pendingBenchmark;
@@ -225,6 +248,7 @@ function translate() {
   document.querySelector(".section-intro").textContent = pendingBenchmark
     ? words["results.personagymCaption"]
     : activeView === "delta" ? words["results.caption"] : words["results.scoreCaption"];
+  updateModelFilterCount(words);
 }
 
 function pretty(value) {
@@ -267,6 +291,112 @@ function variantLabel(row) {
   return labels[variant] || row.model_tag || row.quantization || variant;
 }
 
+function modelConfigId(row) {
+  return row.model_tag || row.quantization || [row.model_key, row.variant].join("::");
+}
+
+function modelConfigs() {
+  const seen = new Set();
+  return summaryRows.filter(function (row) {
+    const id = modelConfigId(row);
+    if (seen.has(id)) return false;
+    seen.add(id);
+    return true;
+  });
+}
+
+function updateModelFilterCount(words) {
+  const configs = modelConfigs();
+  const selected = configs.filter(function (row) { return selectedModelIds.has(modelConfigId(row)); }).length;
+  const total = configs.length;
+  const status = activeLanguage === "fr"
+    ? selected + " sur " + total + " configurations affichées"
+    : selected + " of " + total + " configurations shown";
+  document.getElementById("model-filter-count").textContent = selected + " / " + total;
+  document.getElementById("model-filter-status").textContent = status;
+  document.getElementById("model-filter-toggle").setAttribute("aria-label", (words || messages[activeLanguage])["results.modelFilter"] + ": " + status);
+}
+
+function renderModelFilterOptions() {
+  const families = new Map();
+  modelConfigs().forEach(function (row) {
+    const family = row.model_key || row.model_name || "other";
+    if (!families.has(family)) families.set(family, []);
+    families.get(family).push(row);
+  });
+  const groups = Array.from(families.values());
+  document.getElementById("model-filter-options").innerHTML = groups.map(function (rows) {
+    const first = rows[0];
+    const name = modelDisplayName(first);
+    const variants = rows.map(function (row) {
+      const id = modelConfigId(row);
+      const searchable = [modelDisplayName(row), variantLabel(row), modelTag(row), row.parameters || ""].join(" ").toLocaleLowerCase();
+      return '<label class="model-filter-option" data-filter-text="' + escapeHtml(searchable) + '"><input type="checkbox" data-model-id value="' + escapeHtml(id) + '"' + (selectedModelIds.has(id) ? " checked" : "") + '><span>' + escapeHtml(variantLabel(row)) + '</span></label>';
+    }).join("");
+    return '<fieldset class="model-filter-family"><legend><label class="model-family-toggle"><input type="checkbox" data-family-toggle><span class="model-family-logo">' + modelLogo(first) + '</span><strong>' + escapeHtml(name) + '</strong><small aria-hidden="true">' + rows.length + '</small></label></legend><div class="model-filter-variants">' + variants + '</div></fieldset>';
+  }).join("");
+  syncFamilyToggles();
+  applyModelFilterSearch();
+  updateModelFilterCount();
+}
+
+function syncFamilyToggles() {
+  document.querySelectorAll(".model-filter-family").forEach(function (group) {
+    const variants = Array.from(group.querySelectorAll("[data-model-id]"));
+    const selectedCount = variants.filter(function (input) { return selectedModelIds.has(input.value); }).length;
+    const familyToggle = group.querySelector("[data-family-toggle]");
+    familyToggle.checked = variants.length > 0 && selectedCount === variants.length;
+    familyToggle.indeterminate = selectedCount > 0 && selectedCount < variants.length;
+  });
+}
+
+function applyModelFilterSearch() {
+  const query = document.getElementById("model-filter-search").value.trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase();
+  let matchingCount = 0;
+  document.querySelectorAll(".model-filter-family").forEach(function (group) {
+    let groupMatches = 0;
+    group.querySelectorAll(".model-filter-option").forEach(function (option) {
+      const searchable = option.dataset.filterText.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      const matches = searchable.includes(query);
+      option.hidden = !matches;
+      if (matches) groupMatches += 1;
+    });
+    group.hidden = groupMatches === 0;
+    matchingCount += groupMatches;
+  });
+  document.getElementById("model-filter-no-results").hidden = matchingCount > 0;
+}
+
+function initializeModelSelection() {
+  const allIds = new Set(modelConfigs().map(modelConfigId));
+  const params = new URLSearchParams(window.location.search);
+  if (params.has("models")) {
+    selectedModelIds = new Set(params.get("models").split(",").filter(function (id) { return allIds.has(id); }));
+  } else {
+    selectedModelIds = allIds;
+  }
+  renderModelFilterOptions();
+}
+
+function updateModelFilterUrl() {
+  const allIds = modelConfigs().map(modelConfigId).sort();
+  const selectedIds = Array.from(selectedModelIds).filter(function (id) { return allIds.includes(id); }).sort();
+  const params = new URLSearchParams(window.location.search);
+  if (selectedIds.length === allIds.length) params.delete("models");
+  else params.set("models", selectedIds.join(","));
+  const query = params.toString();
+  const url = window.location.pathname + (query ? "?" + query : "") + window.location.hash;
+  window.history.replaceState(null, "", url);
+}
+
+function setModelFilterOpen(open) {
+  const button = document.getElementById("model-filter-toggle");
+  const popover = document.getElementById("model-filter-popover");
+  button.setAttribute("aria-expanded", String(open));
+  popover.hidden = !open;
+  if (open) document.getElementById("model-filter-search").focus();
+}
+
 function modelLogo(row) {
   const brand = brandInfo(row);
   const image = brand.src ? '<img src="' + escapeHtml(brand.src) + '" alt="" loading="lazy">' : escapeHtml(brand.monogram);
@@ -304,6 +434,7 @@ function deltaRows(metricKey) {
 function renderChart() {
   const chart = document.getElementById("bar-chart");
   if (activeMetric === "personagym") {
+    document.querySelector(".ranking-insight").hidden = false;
     document.getElementById("metric-panel").setAttribute("aria-labelledby", benchmarkTabs[activeMetric]);
     chart.classList.remove("delta-view", "score-view", "stddev-visible");
     document.getElementById("insight-logo").className = "insight-logo model-logo brand-other";
@@ -320,7 +451,9 @@ function renderChart() {
   const metric = metrics[activeMetric];
   const deltaMode = activeView === "delta";
   const showStdDev = stdDevVisibility[activeMetric];
-  const rows = (deltaMode ? deltaRows(activeMetric) : scoredRows(activeMetric)).sort(function (a, b) {
+  const rows = (deltaMode ? deltaRows(activeMetric) : scoredRows(activeMetric)).filter(function (row) {
+    return selectedModelIds.has(modelConfigId(row));
+  }).sort(function (a, b) {
     return deltaMode ? b[metric.delta] - a[metric.delta] : b[metric.mean] - a[metric.mean];
   });
   const range = Math.max(1, ...rows.map(function (row) {
@@ -332,25 +465,29 @@ function renderChart() {
   chart.classList.toggle("delta-view", deltaMode);
   chart.classList.toggle("score-view", !deltaMode);
   chart.classList.toggle("stddev-visible", showStdDev);
-  if (rows.length) {
-    const best = rows[0];
-    const brand = brandInfo(best);
-    const insightLogo = document.getElementById("insight-logo");
-    insightLogo.className = "insight-logo model-logo " + brand.css + (brand.src ? " has-logo" : "");
-    insightLogo.innerHTML = brand.src
-      ? '<img src="' + escapeHtml(brand.src) + '" alt="">'
-      : escapeHtml(brand.monogram);
-    document.getElementById("insight-label").textContent = messages[activeLanguage][deltaMode ? "results.deltaInsight" : "results.scoreInsight"];
-    document.getElementById("insight-title").textContent = modelDisplayName(best) + " · " + variantLabel(best);
-    const descriptionKey = deltaMode ? "results.deltaDescription" : "results.scoreDescription." + activeMetric;
-    document.getElementById("insight-description").textContent = messages[activeLanguage][descriptionKey];
-    document.getElementById("insight-value").textContent = deltaMode
-      ? deltaText(best, activeMetric, showStdDev)
-      : scoreText(best, activeMetric, showStdDev) + " /100";
-  } else {
-    document.getElementById("insight-title").textContent = "—";
-    document.getElementById("insight-value").textContent = "—";
+  if (!rows.length) {
+    document.querySelector(".ranking-insight").hidden = true;
+    const message = selectedModelIds.size
+      ? messages[activeLanguage]["results.noMatchingResults"]
+      : messages[activeLanguage]["results.noVisibleModels"];
+    chart.innerHTML = '<div class="empty-results">' + escapeHtml(message) + '</div>';
+    return;
   }
+  document.querySelector(".ranking-insight").hidden = false;
+  const best = rows[0];
+  const brand = brandInfo(best);
+  const insightLogo = document.getElementById("insight-logo");
+  insightLogo.className = "insight-logo model-logo " + brand.css + (brand.src ? " has-logo" : "");
+  insightLogo.innerHTML = brand.src
+    ? '<img src="' + escapeHtml(brand.src) + '" alt="">'
+    : escapeHtml(brand.monogram);
+  document.getElementById("insight-label").textContent = messages[activeLanguage][deltaMode ? "results.deltaInsight" : "results.scoreInsight"];
+  document.getElementById("insight-title").textContent = modelDisplayName(best) + " · " + variantLabel(best);
+  const descriptionKey = deltaMode ? "results.deltaDescription" : "results.scoreDescription." + activeMetric;
+  document.getElementById("insight-description").textContent = messages[activeLanguage][descriptionKey];
+  document.getElementById("insight-value").textContent = deltaMode
+    ? deltaText(best, activeMetric, showStdDev)
+    : scoreText(best, activeMetric, showStdDev) + " /100";
   document.getElementById("bar-chart").innerHTML = rows.map(function (row, index) {
     const value = deltaMode ? row[metric.delta] : row[metric.mean];
     const deviation = showStdDev ? (deltaMode ? row[metric.deltaSd] : row[metric.sd]) : 0;
@@ -384,11 +521,18 @@ function renderTable() {
   const metric = metrics[activeMetric];
   const key = activeView === "delta" ? metric.delta : metric.mean;
   const rows = summaryRows.filter(function (row) {
-    return typeof row[key] === "number";
+    return selectedModelIds.has(modelConfigId(row)) && typeof row[key] === "number";
   });
   rows.sort(function (a, b) {
     return (b[key] ?? -Infinity) - (a[key] ?? -Infinity);
   });
+  if (!rows.length) {
+    const message = selectedModelIds.size
+      ? messages[activeLanguage]["results.noMatchingResults"]
+      : messages[activeLanguage]["results.noVisibleModels"];
+    document.getElementById("score-table").innerHTML = '<tr><td class="empty-table" colspan="4">' + escapeHtml(message) + '</td></tr>';
+    return;
+  }
   document.getElementById("score-table").innerHTML = rows.map(function (row, index) {
     const label = escapeHtml(modelTag(row));
     const displayName = escapeHtml(modelDisplayName(row));
@@ -459,12 +603,57 @@ document.getElementById("stddev-toggle").addEventListener("click", function () {
   stdDevVisibility[activeMetric] = !stdDevVisibility[activeMetric];
   renderAll();
 });
+document.getElementById("model-filter-toggle").addEventListener("click", function () {
+  setModelFilterOpen(this.getAttribute("aria-expanded") !== "true");
+});
+document.getElementById("model-filter-search").addEventListener("input", applyModelFilterSearch);
+document.getElementById("model-filter-options").addEventListener("change", function (event) {
+  const group = event.target.closest(".model-filter-family");
+  if (!group) return;
+  if (event.target.matches("[data-family-toggle]")) {
+    group.querySelectorAll("[data-model-id]").forEach(function (input) {
+      if (event.target.checked) selectedModelIds.add(input.value);
+      else selectedModelIds.delete(input.value);
+    });
+  } else if (event.target.matches("[data-model-id]")) {
+    if (event.target.checked) selectedModelIds.add(event.target.value);
+    else selectedModelIds.delete(event.target.value);
+  } else {
+    return;
+  }
+  syncFamilyToggles();
+  updateModelFilterUrl();
+  updateModelFilterCount();
+  renderAll();
+});
+document.getElementById("model-select-all").addEventListener("click", function () {
+  selectedModelIds = new Set(modelConfigs().map(modelConfigId));
+  renderModelFilterOptions();
+  updateModelFilterUrl();
+  renderAll();
+});
+document.getElementById("model-select-none").addEventListener("click", function () {
+  selectedModelIds = new Set();
+  renderModelFilterOptions();
+  updateModelFilterUrl();
+  renderAll();
+});
+document.addEventListener("click", function (event) {
+  if (!document.getElementById("model-filter").contains(event.target)) setModelFilterOpen(false);
+});
+document.addEventListener("keydown", function (event) {
+  if (event.key === "Escape" && document.getElementById("model-filter-toggle").getAttribute("aria-expanded") === "true") {
+    setModelFilterOpen(false);
+    document.getElementById("model-filter-toggle").focus();
+  }
+});
 
 Promise.all([
   fetch("site-data/summary.json").then(function (response) { if (!response.ok) throw new Error("summary"); return response.json(); }),
   fetch("site-data/environment.json").then(function (response) { if (!response.ok) throw new Error("environment"); return response.json(); })
 ]).then(function (data) {
   summaryRows = data[0];
+  initializeModelSelection();
   renderEnvironment(data[1]);
   renderAll();
 }).catch(function () {

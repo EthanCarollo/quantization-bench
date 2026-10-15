@@ -64,6 +64,25 @@
             <button id="tab-character" class="metric-tab" type="button" aria-controls="metric-panel" aria-pressed="false" data-metric="charactereval">CharacterEval</button>
             <button id="tab-personagym" class="metric-tab" type="button" aria-controls="metric-panel" aria-pressed="false" data-metric="personagym">PersonaGym</button>
           </div>
+          <div class="model-filter" id="model-filter">
+            <button class="model-filter-toggle" id="model-filter-toggle" type="button" aria-expanded="false" aria-controls="model-filter-popover">
+              <svg aria-hidden="true" viewBox="0 0 20 20"><path d="M3 4h14l-5.5 6.2v4.1l-3 1.7v-5.8L3 4Z" /></svg>
+              <span data-i18n="results.modelFilter">Modèles</span>
+              <strong id="model-filter-count">—</strong>
+              <span class="model-filter-caret" aria-hidden="true">⌄</span>
+            </button>
+            <div class="model-filter-popover" id="model-filter-popover" hidden>
+              <label class="sr-only" for="model-filter-search" data-i18n="results.modelSearch">Rechercher un modèle ou un format</label>
+              <input id="model-filter-search" class="model-filter-search" type="search" data-i18n-placeholder="results.modelSearch" placeholder="Rechercher un modèle ou un format">
+              <div class="model-filter-actions">
+                <button id="model-select-all" type="button" data-i18n="results.selectAll">Tout afficher</button>
+                <button id="model-select-none" type="button" data-i18n="results.selectNone">Tout masquer</button>
+              </div>
+              <div class="model-filter-options" id="model-filter-options" role="group" aria-label="Configurations affichées" data-i18n-aria="results.modelOptions"></div>
+              <p class="model-filter-no-results" id="model-filter-no-results" data-i18n="results.noSearchResults" hidden>Aucun modèle ne correspond à cette recherche.</p>
+              <p class="model-filter-status" id="model-filter-status" aria-live="polite"></p>
+            </div>
+          </div>
           <div class="view-switch" role="group" aria-label="Data view" data-i18n-aria="view.aria">
             <button type="button" data-view="delta" aria-pressed="true" data-i18n="view.delta">Δ vs BF16</button>
             <button type="button" data-view="score" aria-pressed="false" data-i18n="view.score">Score</button>
