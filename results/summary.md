@@ -28,7 +28,7 @@ RoleBench uses ROUGE-L F1 multiplied by 100; CharacterEval uses CharacterRM mapp
 | deepseek-v4.1-flash@openrouter | 24.70 ± 4.75 | 15.02 ± 1.03 | — | 48.00 | — | — | Modèle hébergé · OpenRouter |
 | muse-spark-1.3-contributor@openrouter | 32.86 ± 2.90 | 14.01 ± 0.69 | — | 78.00 | — | — | Modèle hébergé · OpenRouter |
 | deepseek-v4-flash-0731@openrouter | 28.71 ± 4.73 | 15.68 ± 0.41 | — | — | — | — | Modèle hébergé · OpenRouter |
-| deepseek-v3.2@openrouter | 36.41 ± 6.56 | 15.15 ± 0.61 | — | — | — | — | Modèle hébergé · OpenRouter |
+| deepseek-v3.2@openrouter | 36.41 ± 6.56 | 15.15 ± 0.61 | — | 44.33 | — | — | Modèle hébergé · OpenRouter |
 
 MLX variants use affine weight quantization with group size 64. GGUF variants use llama.cpp BF16, Q8_0, or Q4_K_M files. OpenRouter entries are hosted APIs, not local quantizations; their same-model BF16 delta is unavailable. IFBench uses the same 300 prompts and official verifier for each hosted model at temperature 0; reasoning effort and maximum output tokens vary by model and are recorded with each result.
 
