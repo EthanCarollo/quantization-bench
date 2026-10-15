@@ -701,8 +701,8 @@ document.addEventListener("keydown", function (event) {
 });
 
 Promise.all([
-  fetch("site-data/summary.json?v=benchmark-b88239d").then(function (response) { if (!response.ok) throw new Error("summary"); return response.json(); }),
-  fetch("site-data/environment.json?v=benchmark-b88239d").then(function (response) { if (!response.ok) throw new Error("environment"); return response.json(); })
+  fetch("site-data/summary.json?v=benchmark-222e4e1").then(function (response) { if (!response.ok) throw new Error("summary"); return response.json(); }),
+  fetch("site-data/environment.json?v=benchmark-222e4e1").then(function (response) { if (!response.ok) throw new Error("environment"); return response.json(); })
 ]).then(function (data) {
   summaryRows = data[0];
   initializeModelSelection();
