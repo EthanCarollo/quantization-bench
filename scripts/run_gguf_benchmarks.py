@@ -99,7 +99,13 @@ def wait_for_server(process: subprocess.Popen, base_url: str, log_path: Path) ->
     raise TimeoutError(f"llama-server did not become ready within 15 minutes; log: {log_path}")
 
 
-def post_chat(base_url: str, messages: list[dict], max_tokens: int, seed: int) -> tuple[str, dict]:
+def post_chat(
+    base_url: str,
+    messages: list[dict],
+    max_tokens: int,
+    seed: int,
+    reasoning_budget_tokens: int | None = None,
+) -> tuple[str, dict]:
     payload = {
         "model": "local",
         "messages": messages,
@@ -111,6 +117,9 @@ def post_chat(base_url: str, messages: list[dict], max_tokens: int, seed: int) -
         "chat_template_kwargs": {"enable_thinking": False},
         "stream": False,
     }
+    if reasoning_budget_tokens is not None:
+        payload["reasoning_budget_tokens"] = reasoning_budget_tokens
+        payload["reasoning_control"] = True
     request = urllib.request.Request(
         f"{base_url}/v1/chat/completions",
         data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
@@ -190,7 +199,13 @@ def run_rolebench(
                         {"role": "user", "content": row["question"]},
                     ]
                     started = time.perf_counter()
-                    response, usage = post_chat(base_url, messages, MAX_NEW_TOKENS, seed)
+                    response, usage = post_chat(
+                        base_url,
+                        messages,
+                        MAX_NEW_TOKENS,
+                        seed,
+                        model_info.get("reasoning_budget_tokens"),
+                    )
                     elapsed = time.perf_counter() - started
                     rouge_l_f1 = scorer.score(row["reference"], response)["rougeL"].fmeasure
                     scores.append(rouge_l_f1)
@@ -222,6 +237,7 @@ def run_rolebench(
                         "top_p": TOP_P,
                         "top_k": TOP_K,
                         "thinking": False,
+                        "reasoning_budget_tokens": model_info.get("reasoning_budget_tokens"),
                     }
                     raw_file.write(json.dumps(result, ensure_ascii=False, separators=(",", ":")) + "\n")
                     raw_file.flush()
@@ -243,6 +259,7 @@ def run_rolebench(
                     "seed": seed,
                     "n_examples": len(scores),
                     "macro_rouge_l_f1": statistics.mean(scores),
+                    "reasoning_budget_tokens": model_info.get("reasoning_budget_tokens"),
                 }
                 run_file.write(json.dumps(run_summary, ensure_ascii=False, separators=(",", ":")) + "\n")
                 run_file.flush()
@@ -288,7 +305,13 @@ def run_charactereval(
                 for index, row in enumerate(rows, start=1):
                     response_messages = messages_for_charactereval(row, profiles[row["role"]])
                     started = time.perf_counter()
-                    full_response, usage = post_chat(base_url, response_messages, MAX_NEW_TOKENS, seed)
+                    full_response, usage = post_chat(
+                        base_url,
+                        response_messages,
+                        MAX_NEW_TOKENS,
+                        seed,
+                        model_info.get("reasoning_budget_tokens"),
+                    )
                     elapsed = time.perf_counter() - started
                     response = full_response.splitlines()[0].strip() if full_response else ""
                     record = {
@@ -319,6 +342,7 @@ def run_charactereval(
                         "top_p": TOP_P,
                         "top_k": TOP_K,
                         "thinking": False,
+                        "reasoning_budget_tokens": model_info.get("reasoning_budget_tokens"),
                     }
                     output.write(json.dumps(record, ensure_ascii=False, separators=(",", ":")) + "\n")
                     output.flush()
@@ -417,7 +441,13 @@ def main() -> None:
                         },
                         {"role": "user", "content": first["question"]},
                     ]
-                    post_chat(base_url, warmup_messages, MAX_NEW_TOKENS, SEED_BASE - 1)
+                    post_chat(
+                        base_url,
+                        warmup_messages,
+                        MAX_NEW_TOKENS,
+                        SEED_BASE - 1,
+                        model_info.get("reasoning_budget_tokens"),
+                    )
                     print("Warm-up complete (excluded from measured runs).", flush=True)
                     for benchmark in BENCHMARK_DIRS:
                         run_rolebench(

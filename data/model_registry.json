@@ -55,6 +55,7 @@
     "parameter_label": "2.69B total (model card)",
     "license": "lfm1.0",
     "requires_hf_token": false,
+    "reasoning_budget_tokens": 0,
     "scorecard_variants": ["gguf_bf16", "gguf_q8_0", "gguf_q4_k_m"],
     "gguf_files": {
       "gguf_bf16": "LFM2.5-2.6B-BF16.gguf",
