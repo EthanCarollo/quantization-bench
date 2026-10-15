@@ -71,7 +71,7 @@ const messages = {
     "details.sd": "Écart-type d’échantillon s = √[Σ(xᵢ − x̄)² / (5 − 1)], calculé sur les cinq moyennes de run ; pour Δ, sur les cinq différences appariées.",
     "details.reading": "Comparez les modèles à l'intérieur d'un même benchmark : les scores entre colonnes ne sont pas équivalents.",
     "details.claims": "Les pertes annoncées par les éditeurs ne sont pas référencées.",
-    "details.brandCredits": "Logos des familles Gemma (Google), Qwen, Mistral, Liquid AI, OpenAI et DeepSeek : <a href=\"https://ai.google.dev/gemma/docs\">Google</a> · <a href=\"https://github.com/QwenLM/qwenlm.github.io\">Qwen</a> · <a href=\"https://mistral.ai/brand/\">Mistral</a> · <a href=\"https://www.liquid.ai/\">Liquid AI</a> · <a href=\"https://openai.com/brand/\">OpenAI</a> · <a href=\"https://github.com/deepseek-ai/awesome-deepseek-integration/tree/main/docs/_logo%20svg\">DeepSeek</a>. Marques affichées pour identifier les modèles évalués, sans affiliation ni approbation.",
+    "details.brandCredits": "Logos des familles Gemma (Google), Qwen, Mistral, Liquid AI, OpenAI, DeepSeek et Meta : <a href=\"https://ai.google.dev/gemma/docs\">Google</a> · <a href=\"https://github.com/QwenLM/qwenlm.github.io\">Qwen</a> · <a href=\"https://mistral.ai/brand/\">Mistral</a> · <a href=\"https://www.liquid.ai/\">Liquid AI</a> · <a href=\"https://openai.com/brand/\">OpenAI</a> · <a href=\"https://github.com/deepseek-ai/awesome-deepseek-integration/tree/main/docs/_logo%20svg\">DeepSeek</a> · <a href=\"https://www.meta.com/brand/resources/meta/company-brand/\">Meta</a>. Marques affichées pour identifier les modèles évalués, sans affiliation ni approbation.",
     "details.pending": "Pas encore exécutés :"
   },
   en: {
@@ -146,7 +146,7 @@ const messages = {
     "details.sd": "Sample standard deviation s = √[Σ(xᵢ − x̄)² / (5 − 1)], across the five run means; for Δ, across the five paired differences.",
     "details.reading": "Compare models within one benchmark: scores across columns are not equivalent.",
     "details.claims": "Publisher-reported loss claims are not included.",
-    "details.brandCredits": "Logos for the Gemma (Google), Qwen, Mistral, Liquid AI, OpenAI, and DeepSeek model families: <a href=\"https://ai.google.dev/gemma/docs\">Google</a> · <a href=\"https://github.com/QwenLM/qwenlm.github.io\">Qwen</a> · <a href=\"https://mistral.ai/brand/\">Mistral</a> · <a href=\"https://www.liquid.ai/\">Liquid AI</a> · <a href=\"https://openai.com/brand/\">OpenAI</a> · <a href=\"https://github.com/deepseek-ai/awesome-deepseek-integration/tree/main/docs/_logo%20svg\">DeepSeek</a>. Marks identify the evaluated models; this project is not affiliated with or endorsed by these companies.",
+    "details.brandCredits": "Logos for the Gemma (Google), Qwen, Mistral, Liquid AI, OpenAI, DeepSeek, and Meta model families: <a href=\"https://ai.google.dev/gemma/docs\">Google</a> · <a href=\"https://github.com/QwenLM/qwenlm.github.io\">Qwen</a> · <a href=\"https://mistral.ai/brand/\">Mistral</a> · <a href=\"https://www.liquid.ai/\">Liquid AI</a> · <a href=\"https://openai.com/brand/\">OpenAI</a> · <a href=\"https://github.com/deepseek-ai/awesome-deepseek-integration/tree/main/docs/_logo%20svg\">DeepSeek</a> · <a href=\"https://www.meta.com/brand/resources/meta/company-brand/\">Meta</a>. Marks identify the evaluated models; this project is not affiliated with or endorsed by these companies.",
     "details.pending": "Not run yet:"
   }
 };
@@ -185,7 +185,10 @@ const modelBrands = {
   ministral_3_3b_instruct_2512: { monogram: "M", css: "brand-ministral", label: "Mistral", src: "assets/model-logos/mistral.png" },
   lfm2_5_2_6b: { monogram: "L", css: "brand-lfm", label: "Liquid AI", src: "assets/model-logos/liquid-icon.svg" },
   openai_gpt6_luna: { monogram: "O", css: "brand-openai", label: "OpenAI", src: "assets/model-logos/openai.svg" },
-  deepseek_v41_flash: { monogram: "D", css: "brand-deepseek", label: "DeepSeek", src: "assets/model-logos/deepseek.svg" }
+  deepseek_v41_flash: { monogram: "D", css: "brand-deepseek", label: "DeepSeek", src: "assets/model-logos/deepseek.svg" },
+  deepseek_v4_flash_0731: { monogram: "D", css: "brand-deepseek", label: "DeepSeek", src: "assets/model-logos/deepseek.svg" },
+  deepseek_v3_2: { monogram: "D", css: "brand-deepseek", label: "DeepSeek", src: "assets/model-logos/deepseek.svg" },
+  meta_muse_spark_1_3_contributor: { monogram: "M", css: "brand-meta", label: "Meta", src: "assets/model-logos/meta.svg" }
 };
 let activeLanguage = localStorage.getItem("quantization-bench-language") === "en" ? "en" : "fr";
 let summaryRows = [];
@@ -297,6 +300,8 @@ function chartVariantLabel(row) {
   const label = variantLabel(row);
   if (row.variant !== "openrouter") return label;
   if (/xhigh/i.test(label)) return "xhigh";
+  if (/deepinfra/i.test(label)) return activeLanguage === "fr" ? "DeepInfra · sans rais." : "DeepInfra · no reasoning";
+  if (/google vertex/i.test(label)) return activeLanguage === "fr" ? "Google Vertex · sans rais." : "Google Vertex · no reasoning";
   if (/sans raisonnement|non-reasoning/i.test(label)) {
     return activeLanguage === "fr" ? "sans rais." : "no reasoning";
   }

@@ -11,7 +11,9 @@
     "runtime": "OpenRouter",
     "reasoning_effort": "xhigh",
     "variant_label": "OpenRouter · xhigh",
-    "scorecard_variants": ["openrouter"]
+    "scorecard_variants": [
+      "openrouter"
+    ]
   },
   "deepseek_v41_flash": {
     "model_id": "deepseek/deepseek-v4.1-flash",
@@ -26,6 +28,59 @@
     "reasoning_effort": "none",
     "variant_label_fr": "OpenRouter · sans raisonnement",
     "variant_label_en": "OpenRouter · non-reasoning",
-    "scorecard_variants": ["openrouter"]
+    "scorecard_variants": [
+      "openrouter"
+    ]
+  },
+  "meta_muse_spark_1_3_contributor": {
+    "model_id": "meta/muse-spark-1.3-contributor",
+    "revision": null,
+    "slug": "muse-spark-1-3-contributor",
+    "short_name": "muse-spark-1.3-contributor",
+    "display_name": "Muse Spark 1.3 Contributor",
+    "parameter_label": "Modèle hébergé · OpenRouter",
+    "license": "Meta AI API",
+    "requires_hf_token": false,
+    "runtime": "OpenRouter",
+    "reasoning_effort": "low",
+    "variant_label_fr": "OpenRouter · raisonnement low, 1024 tok.",
+    "variant_label_en": "OpenRouter · low reasoning, 1024 tok.",
+    "scorecard_variants": [
+      "openrouter"
+    ]
+  },
+  "deepseek_v4_flash_0731": {
+    "model_id": "deepseek/deepseek-v4-flash-0731",
+    "revision": null,
+    "slug": "deepseek-v4-flash-0731",
+    "short_name": "deepseek-v4-flash-0731",
+    "display_name": "DeepSeek V4 Flash 0731",
+    "parameter_label": "Modèle hébergé · OpenRouter",
+    "license": "DeepSeek API",
+    "requires_hf_token": false,
+    "runtime": "OpenRouter",
+    "reasoning_effort": "none",
+    "variant_label_fr": "OpenRouter · sans raisonnement",
+    "variant_label_en": "OpenRouter · non-reasoning",
+    "scorecard_variants": [
+      "openrouter"
+    ]
+  },
+  "deepseek_v3_2": {
+    "model_id": "deepseek/deepseek-v3.2",
+    "revision": null,
+    "slug": "deepseek-v3-2",
+    "short_name": "deepseek-v3.2",
+    "display_name": "DeepSeek V3.2",
+    "parameter_label": "Modèle hébergé · OpenRouter",
+    "license": "DeepSeek API",
+    "requires_hf_token": false,
+    "runtime": "OpenRouter",
+    "reasoning_effort": "none",
+    "variant_label_fr": "DeepInfra · sans raisonnement",
+    "variant_label_en": "DeepInfra · non-reasoning",
+    "scorecard_variants": [
+      "openrouter"
+    ]
   }
 }

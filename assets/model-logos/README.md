@@ -8,3 +8,4 @@ These local assets identify the model families measured by the benchmark. They a
 - `liquid-icon.svg` — Liquid AI icon from its [official website](https://www.liquid.ai/), cropped from the icon portion of the site's `liquid-ai-black.svg` wordmark.
 - `openai.svg` — OpenAI mark from the [official brand asset package](https://openai.com/brand/).
 - `deepseek.svg` — DeepSeek icon from the official [DeepSeek integration assets](https://github.com/deepseek-ai/awesome-deepseek-integration/tree/main/docs/_logo%20svg).
+- `meta.svg` — Cropped Meta infinity mark from the [Meta wordmark](https://meta.wikimedia.org/wiki/File:Meta_Platforms_Inc._logo.svg), sourced from Meta’s [brand resource center](https://www.meta.com/brand/resources/meta/company-brand/).
