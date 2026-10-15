@@ -417,7 +417,7 @@ def main() -> None:
                         },
                         {"role": "user", "content": first["question"]},
                     ]
-                    post_chat(base_url, warmup_messages, 32, SEED_BASE - 1)
+                    post_chat(base_url, warmup_messages, MAX_NEW_TOKENS, SEED_BASE - 1)
                     print("Warm-up complete (excluded from measured runs).", flush=True)
                     for benchmark in BENCHMARK_DIRS:
                         run_rolebench(
