@@ -305,6 +305,12 @@ function modelConfigs() {
   });
 }
 
+function defaultModelIds() {
+  return new Set(modelConfigs().filter(function (row) {
+    return row.variant === "gguf_bf16" || row.variant === "gguf_q8_0";
+  }).map(modelConfigId));
+}
+
 function updateModelFilterCount(words) {
   const configs = modelConfigs();
   const selected = configs.filter(function (row) { return selectedModelIds.has(modelConfigId(row)); }).length;
@@ -345,7 +351,7 @@ function syncFamilyToggles() {
     const variants = Array.from(group.querySelectorAll("[data-model-id]"));
     const selectedCount = variants.filter(function (input) { return selectedModelIds.has(input.value); }).length;
     const familyToggle = group.querySelector("[data-family-toggle]");
-    familyToggle.checked = variants.length > 0 && selectedCount === variants.length;
+    familyToggle.checked = selectedCount > 0;
     familyToggle.indeterminate = selectedCount > 0 && selectedCount < variants.length;
   });
 }
@@ -371,9 +377,11 @@ function initializeModelSelection() {
   const allIds = new Set(modelConfigs().map(modelConfigId));
   const params = new URLSearchParams(window.location.search);
   if (params.has("models")) {
-    selectedModelIds = new Set(params.get("models").split(",").filter(function (id) { return allIds.has(id); }));
+    selectedModelIds = params.get("models") === "all"
+      ? allIds
+      : new Set(params.get("models").split(",").filter(function (id) { return allIds.has(id); }));
   } else {
-    selectedModelIds = allIds;
+    selectedModelIds = defaultModelIds();
   }
   renderModelFilterOptions();
 }
@@ -381,8 +389,10 @@ function initializeModelSelection() {
 function updateModelFilterUrl() {
   const allIds = modelConfigs().map(modelConfigId).sort();
   const selectedIds = Array.from(selectedModelIds).filter(function (id) { return allIds.includes(id); }).sort();
+  const defaults = Array.from(defaultModelIds()).sort();
   const params = new URLSearchParams(window.location.search);
-  if (selectedIds.length === allIds.length) params.delete("models");
+  if (selectedIds.length === allIds.length) params.set("models", "all");
+  else if (selectedIds.length === defaults.length && selectedIds.every(function (id, index) { return id === defaults[index]; })) params.delete("models");
   else params.set("models", selectedIds.join(","));
   const query = params.toString();
   const url = window.location.pathname + (query ? "?" + query : "") + window.location.hash;
