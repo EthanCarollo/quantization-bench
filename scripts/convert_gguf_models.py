@@ -3,6 +3,7 @@
 
 import argparse
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -135,6 +136,8 @@ def main() -> None:
         bf16_path = output_root / f"{model_key}_gguf_bf16.gguf"
         if not bf16_path.is_file():
             print(f"Converting {model_key} to GGUF BF16…", flush=True)
+            converter_env = os.environ.copy()
+            converter_env["TMPDIR"] = str(output_root)
             subprocess.run(
                 [
                     sys.executable,
@@ -148,6 +151,7 @@ def main() -> None:
                 ],
                 check=True,
                 cwd=llama_cpp,
+                env=converter_env,
             )
         else:
             print(f"Keeping existing {bf16_path.name}.", flush=True)
