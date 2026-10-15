@@ -141,14 +141,22 @@ def summarize_charactereval(model_key: str, variant: dict) -> tuple[float, float
     return statistics.mean(per_run), statistics.stdev(per_run)
 
 
-def summarize_optional(model_key: str, variant: dict, benchmark: str) -> tuple[float, float] | None:
+def summarize_optional(
+    model_key: str, variant: dict, benchmark: str
+) -> tuple[float, float | None, int, int] | None:
     metric, expected_examples = ADDITIONAL_BENCHMARKS[benchmark]
     stem = f"{model_key}_{benchmark}_{variant['suffix']}"
     path = RESULTS / f"{stem}_runs.jsonl"
     if not path.is_file():
         return None
     runs = read_jsonl(path)
-    if len(runs) != 5 or {run.get("repetition") for run in runs} != {1, 2, 3, 4, 5}:
+    run_count = len(runs)
+    expected_repetitions = (
+        {1} if benchmark == "ifbench" and run_count == 1
+        else {1, 2, 3, 4, 5} if run_count == 5
+        else set()
+    )
+    if not expected_repetitions or {run.get("repetition") for run in runs} != expected_repetitions:
         return None
     if any(
         run.get("benchmark") != benchmark
@@ -163,10 +171,31 @@ def summarize_optional(model_key: str, variant: dict, benchmark: str) -> tuple[f
     n_examples = counts.pop()
     if expected_examples is not None and n_examples != expected_examples:
         return None
+    if benchmark == "ifbench":
+        item_path = RESULTS / f"{stem}.jsonl"
+        if not item_path.is_file():
+            return None
+        items = read_jsonl(item_path)
+        if (
+            len(items) != expected_examples
+            or len({item.get("item_id") for item in items}) != expected_examples
+            or any(
+                item.get("benchmark") != benchmark
+                or item.get("model_key") != model_key
+                or item.get("repetition") != 1
+                or not isinstance(item.get("prompt_loose_accuracy_100"), (int, float))
+                for item in items
+            )
+        ):
+            return None
+        item_score = statistics.mean(item["prompt_loose_accuracy_100"] for item in items)
+        if not math.isclose(item_score, runs[0][metric], abs_tol=1e-9):
+            return None
     values = [run.get(metric) for run in sorted(runs, key=lambda run: run["repetition"])]
     if any(not isinstance(value, (int, float)) or not math.isfinite(value) or not 0 <= value <= 100 for value in values):
         return None
-    return statistics.mean(values), statistics.stdev(values)
+    deviation = statistics.stdev(values) if run_count > 1 else None
+    return statistics.mean(values), deviation, run_count, n_examples
 
 
 def site_run_scores(model_key: str, variant: dict, benchmark: str) -> list[float]:
@@ -188,12 +217,16 @@ def site_run_scores(model_key: str, variant: dict, benchmark: str) -> list[float
     return [run["macro_rouge_l_f1"] * 100.0 for run in sorted(runs, key=lambda run: run["repetition"])]
 
 
-def render_optional(value: tuple[float, float] | None) -> str:
-    return "—" if value is None else f"{value[0]:.2f} ± {value[1]:.2f}"
+def render_optional(value: tuple[float, float | None] | None) -> str:
+    if value is None:
+        return "—"
+    return f"{value[0]:.2f}" if value[1] is None else f"{value[0]:.2f} ± {value[1]:.2f}"
 
 
-def render_score(value: tuple[float, float] | None) -> str:
-    return "—" if value is None else f"{value[0]:.2f} ± {value[1]:.2f}"
+def render_score(value: tuple[float, float | None] | None) -> str:
+    if value is None:
+        return "—"
+    return f"{value[0]:.2f}" if value[1] is None else f"{value[0]:.2f} ± {value[1]:.2f}"
 
 
 def main() -> None:
@@ -224,6 +257,12 @@ def main() -> None:
                 "charactereval_sd_100": None,
                 "ifbench_prompt_accuracy_mean_100": None,
                 "ifbench_prompt_accuracy_sd_100": None,
+                "ifbench_n_runs": None,
+                "ifbench_n_examples": None,
+                "ifbench_truncated_responses": None,
+                "ifbench_max_new_tokens": None,
+                "ifbench_reasoning_effort": None,
+                "ifbench_api_cost_usd": None,
                 "hle_accuracy_mean_100": None,
                 "hle_accuracy_sd_100": None,
                 "livecodebench_pass_at_1_mean_100": None,
@@ -247,7 +286,18 @@ def main() -> None:
                     "livecodebench_v6": "livecodebench_pass_at_1",
                 }[benchmark]
                 if optional is not None:
-                    row[f"{prefix}_mean_100"], row[f"{prefix}_sd_100"] = optional
+                    mean, deviation, run_count, n_examples = optional
+                    row[f"{prefix}_mean_100"] = mean
+                    row[f"{prefix}_sd_100"] = deviation
+                    row[f"{benchmark}_n_runs"] = run_count
+                    row[f"{benchmark}_n_examples"] = n_examples
+                    if benchmark == "ifbench":
+                        run_path = RESULTS / f"{model_key}_{benchmark}_{variant['suffix']}_runs.jsonl"
+                        run = read_jsonl(run_path)[0]
+                        row["ifbench_truncated_responses"] = run.get("truncated_responses")
+                        row["ifbench_max_new_tokens"] = run.get("max_new_tokens")
+                        row["ifbench_reasoning_effort"] = run.get("reasoning_effort")
+                        row["ifbench_api_cost_usd"] = run.get("api_cost_usd")
             rows.append(row)
 
     # Compare GGUF quantizations with the same model's GGUF BF16 runs. MLX rows
@@ -298,7 +348,7 @@ def main() -> None:
     lines = [
         "# Model benchmark scorecard",
         "",
-        "Each populated cell is the mean ± sample standard deviation across five run-level means; a dash means that five-run result is not yet available.",
+        "RoleBench and CharacterEval show the mean ± sample standard deviation across five run-level means. IFBench uses one complete pass over the 300-prompt test split per hosted model; its single-pass score has no run-level standard deviation. A dash means no complete result is available.",
         "RoleBench uses ROUGE-L F1 multiplied by 100; CharacterEval uses CharacterRM mapped to 0–100; IFBench uses loose accuracy; HLE uses text-only judge accuracy; LiveCodeBench uses pass@1.",
         "",
         "| Model variant | RoleBench generalization — ROUGE-L /100 | RoleBench role-specific — ROUGE-L /100 | CharacterEval — CharacterRM /100 | IFBench — loose /100 | HLE text-only — accuracy /100 | LiveCodeBench v6 — pass@1 /100 | Parameters |",
@@ -341,7 +391,7 @@ def main() -> None:
         )
     lines += [
         "",
-        "MLX variants use affine weight quantization with group size 64. GGUF variants use llama.cpp BF16, Q8_0, or Q4_K_M files. OpenRouter entries are hosted APIs, not local quantizations; their same-model BF16 delta is unavailable. Sampling settings and prompts are held fixed across model variants within each benchmark.",
+        "MLX variants use affine weight quantization with group size 64. GGUF variants use llama.cpp BF16, Q8_0, or Q4_K_M files. OpenRouter entries are hosted APIs, not local quantizations; their same-model BF16 delta is unavailable. IFBench uses the same 300 prompts and official verifier for each hosted model at temperature 0; reasoning effort and maximum output tokens vary by model and are recorded with each result.",
         "",
         "RoleBench ROUGE-L measures wording overlap with one RoleGPT reference, not role-play quality as a percentage. CharacterEval scores come from the authors' human-annotated CharacterRM; they are averaged equally across the 12 dimensions covered by the fixed subset and linearly mapped from 1–5 to 0–100. IFBench reports official prompt-level loose accuracy; HLE reports the official judge accuracy over the text-only subset; LiveCodeBench reports execution-checked pass@1. These scores use different datasets and evaluators and should be compared only within each column.",
         "",

@@ -13,7 +13,9 @@
     "variant_label": "OpenRouter · xhigh",
     "scorecard_variants": [
       "openrouter"
-    ]
+    ],
+    "variant_label_fr": "OpenAI · xhigh, 4096 tok.",
+    "variant_label_en": "OpenAI · xhigh, 4096 tokens"
   },
   "deepseek_v41_flash": {
     "model_id": "deepseek/deepseek-v4.1-flash",
@@ -26,8 +28,8 @@
     "requires_hf_token": false,
     "runtime": "OpenRouter",
     "reasoning_effort": "none",
-    "variant_label_fr": "OpenRouter · sans raisonnement",
-    "variant_label_en": "OpenRouter · non-reasoning",
+    "variant_label_fr": "DeepInfra · sans raisonnement",
+    "variant_label_en": "DeepInfra · non-reasoning",
     "scorecard_variants": [
       "openrouter"
     ]
@@ -43,8 +45,8 @@
     "requires_hf_token": false,
     "runtime": "OpenRouter",
     "reasoning_effort": "low",
-    "variant_label_fr": "OpenRouter · raisonnement low, 1024 tok.",
-    "variant_label_en": "OpenRouter · low reasoning, 1024 tok.",
+    "variant_label_fr": "Meta · raisonnement low, 4096 tok.",
+    "variant_label_en": "Meta · low reasoning, 4096 tok.",
     "scorecard_variants": [
       "openrouter"
     ]
@@ -60,8 +62,8 @@
     "requires_hf_token": false,
     "runtime": "OpenRouter",
     "reasoning_effort": "none",
-    "variant_label_fr": "OpenRouter · sans raisonnement",
-    "variant_label_en": "OpenRouter · non-reasoning",
+    "variant_label_fr": "DeepInfra · sans raisonnement",
+    "variant_label_en": "DeepInfra · non-reasoning",
     "scorecard_variants": [
       "openrouter"
     ]

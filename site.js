@@ -21,7 +21,7 @@ const messages = {
     "hero.lede": "La perte mesurée, benchmark par benchmark.",
     "hero.cta": "Voir les résultats",
     "hero.scoreLabel": "DELTA MOYEN · GGUF Q4_K_M VS BF16",
-    "hero.scoreNote": "3 BENCHMARKS MESURÉS · 6 À ÉVALUER",
+    "hero.scoreNote": "4 BENCHMARKS MESURÉS · 5 À ÉVALUER",
     "hero.summary": "Δ vs BF16 · 5 runs appariés",
     "stats.models": "modèles",
     "stats.variants": "variantes",
@@ -38,6 +38,7 @@ const messages = {
     "results.noMatchingResults": "Aucun résultat pour les configurations sélectionnées dans cette vue.",
     "results.chartCaption": "Variation moyenne face au BF16 du même modèle · points /100",
     "results.scoreCaption": "Score moyen du benchmark sélectionné · points /100",
+    "results.ifbenchCaption": "IFBench · exactitude souple sur 300 consignes · points /100",
     "results.legendMean": "Moyenne",
     "results.legendSpread": "Écart-type (±1σ)",
     "results.showStdDev": "Afficher les écarts-types",
@@ -47,7 +48,7 @@ const messages = {
     "results.scoreDescription.rolebench_generalization": "ROUGE-L F1 ×100 sur 10 réponses, moyenné sur 5 runs. C’est une similarité de texte, pas un taux de réussite.",
     "results.scoreDescription.rolebench_role_specific": "ROUGE-L F1 ×100 sur 10 réponses liées à un rôle, moyenné sur 5 runs. C’est une similarité de texte, pas un taux de réussite.",
     "results.scoreDescription.charactereval": "CharacterRM ×100 sur 12 exemples, moyenné sur 5 runs.",
-    "results.scoreDescription.ifbench": "Exactitude souple par prompt sur les 300 consignes IFBench, moyennée sur 5 runs.",
+    "results.scoreDescription.ifbench": "Pourcentage des 300 consignes où toutes les contraintes passent le vérificateur souple officiel, en un passage. Un seul passage ne permet pas de calculer un écart-type entre runs.",
     "results.scoreDescription.hle": "Exactitude sur le sous-ensemble texte de Humanity’s Last Exam, évaluée par le juge officiel.",
     "results.scoreDescription.livecodebench_v6": "Pass@1 vérifié par exécution sur LiveCodeBench v6.",
     "results.scoreDescription.automationbench": "Taux de tâches AutomationBench terminées correctement avec des outils simulés.",
@@ -58,6 +59,7 @@ const messages = {
     "results.pairedRuns": "5 runs appariés · moyenne ± écart-type",
     "results.meanOnly": "5 runs · moyenne",
     "results.pairedMeanOnly": "5 runs appariés · moyenne",
+    "results.singlePass": "1 passage complet · 300 consignes · écart-type non calculable",
     "results.personagymCaption": "Évaluation de la fidélité aux personas · protocole officiel",
     "results.personagymStatus": "PersonaGym n’a pas encore été évalué sur les modèles de ce site.",
     "results.personagymDescription": "Le protocole complet couvre 200 personas et 10 000 questions, avec cinq axes de score et des modèles-juges. Aucun résultat n’est affiché avant d’avoir exécuté cette évaluation.",
@@ -67,7 +69,8 @@ const messages = {
     "results.pendingStatus": "Aucune mesure terminée n’est publiée pour les modèles de cette page.",
     "results.notRunLabel": "Pas encore mesuré",
     "results.pendingAllNote": "La catégorie All regroupe les benchmarks, pas leurs scores : chaque mesure garde son protocole et son échelle.",
-    "results.ifbenchPending": "IFBench vérifie 300 consignes avec des validateurs automatiques, sans juge LLM. Les questions et le script de mesure sont présents dans le dépôt, mais aucun modèle de cette page n’a encore été évalué dessus.",
+    "results.ifbenchPending": "IFBench vérifie 300 consignes avec des validateurs automatiques, sans juge LLM. Les cinq modèles OpenRouter affichés ont chacun effectué un passage complet du jeu de test.",
+    "results.ifbenchOutputDetails": "Raisonnement : {effort} · limite : {tokens} tokens · réponses tronquées : {count}",
     "results.hlePending": "HLE utilise un jeu de questions à accès contrôlé et un protocole de jugement séparé. Aucun résultat évalué n’est disponible ici.",
     "results.livecodebenchPending": "LiveCodeBench mesure le taux de problèmes de code résolus et vérifiés par exécution. Aucun résultat de cette page n’est encore disponible.",
     "results.automationbenchPending": "AutomationBench évalue des agents sur des tâches métier utilisant des outils simulés. Le jeu complet comporte 600 tâches ; aucun résultat n’est publié ici.",
@@ -86,15 +89,15 @@ const messages = {
     "details.general": "10 prompts · ROUGE-L F1 comparé à une référence RoleGPT.",
     "details.specific": "10 prompts liés à un rôle · ROUGE-L F1.",
     "details.character": "12 exemples · CharacterRM · note de 1–5 ramenée à 0–100.",
-    "details.ifbench": "300 prompts · validateurs d’instructions automatiques · exactitude souple au niveau du prompt.",
+    "details.ifbench": "300 prompts · validateurs automatiques · score = pourcentage de prompts où toutes les contraintes sont validées. Un passage par modèle, température 0 ; limite de sortie et raisonnement varient selon le modèle. L’écart-type entre runs n’est pas calculable.",
     "details.hle": "Questions expertes multimodales · sous-ensemble texte · réponses évaluées selon le protocole officiel.",
     "details.livecodebench": "Problèmes de programmation récents · code exécuté dans des tests · pass@1.",
     "details.automationbench": "600 tâches d’agents réparties dans six domaines, avec 47 outils SaaS simulés · réussite stricte des tâches.",
     "details.toolsandbox": "Tâches d’utilisation d’outils à plusieurs tours · environnements avec état · jalons intermédiaires.",
     "details.allCategory": "All donne accès à tous les benchmarks. Les scores restent séparés, car leurs tâches et leurs échelles sont différentes.",
     "details.personagym": "200 personas · 10 000 questions · action attendue, justification, style linguistique, cohérence et toxicité. PersonaScore et sous-scores de 1 à 5, produits par des modèles-juges. Ce benchmark n’a pas encore été exécuté pour les modèles de cette page.",
-    "details.protocol": "Δ = score GGUF quantifié − BF16 du même modèle · 5 runs appariés. Les modèles OpenRouter sont mesurés en score absolu, sans delta BF16 local.",
-    "details.sd": "Écart-type d’échantillon s = √[Σ(xᵢ − x̄)² / (5 − 1)], calculé sur les cinq moyennes de run ; pour Δ, sur les cinq différences appariées.",
+    "details.protocol": "Δ = score GGUF quantifié − BF16 du même modèle · 5 runs appariés. Les scores IFBench OpenRouter sont absolus et issus d’un passage complet unique des 300 consignes.",
+    "details.sd": "Pour les benchmarks répétés cinq fois, l’écart-type d’échantillon s = √[Σ(xᵢ − x̄)² / (5 − 1)] est calculé sur les cinq scores moyens de run ; pour Δ, sur les cinq différences appariées. IFBench n’a qu’un passage : son écart-type entre runs n’est pas calculable.",
     "details.reading": "Comparez les modèles à l'intérieur d'un même benchmark : les scores entre colonnes ne sont pas équivalents.",
     "details.claims": "Les pertes annoncées par les éditeurs ne sont pas référencées.",
     "details.brandCredits": "Logos des familles Gemma (Google), Qwen, Mistral, Liquid AI, OpenAI, DeepSeek et Meta : <a href=\"https://ai.google.dev/gemma/docs\">Google</a> · <a href=\"https://github.com/QwenLM/qwenlm.github.io\">Qwen</a> · <a href=\"https://mistral.ai/brand/\">Mistral</a> · <a href=\"https://www.liquid.ai/\">Liquid AI</a> · <a href=\"https://openai.com/brand/\">OpenAI</a> · <a href=\"https://github.com/deepseek-ai/awesome-deepseek-integration/tree/main/docs/_logo%20svg\">DeepSeek</a> · <a href=\"https://www.meta.com/brand/resources/meta/company-brand/\">Meta</a>. Marques affichées pour identifier les modèles évalués, sans affiliation ni approbation.",
@@ -122,7 +125,7 @@ const messages = {
     "hero.lede": "Measured loss, benchmark by benchmark.",
     "hero.cta": "View results",
     "hero.scoreLabel": "AVERAGE DELTA · GGUF Q4_K_M VS BF16",
-    "hero.scoreNote": "3 BENCHMARKS SCORED · 6 PENDING",
+    "hero.scoreNote": "4 BENCHMARKS SCORED · 5 PENDING",
     "hero.summary": "Δ vs BF16 · 5 paired runs",
     "stats.models": "models",
     "stats.variants": "variants",
@@ -139,6 +142,7 @@ const messages = {
     "results.noMatchingResults": "No results for the selected configurations in this view.",
     "results.chartCaption": "Mean change against the same model's BF16 baseline · points /100",
     "results.scoreCaption": "Mean score on the selected benchmark · points /100",
+    "results.ifbenchCaption": "IFBench · loose accuracy over 300 instructions · points /100",
     "results.legendMean": "Mean",
     "results.legendSpread": "Standard deviation (±1 SD)",
     "results.showStdDev": "Show standard deviations",
@@ -148,7 +152,7 @@ const messages = {
     "results.scoreDescription.rolebench_generalization": "ROUGE-L F1 ×100 over 10 responses, averaged across 5 runs. This measures text similarity, not success rate.",
     "results.scoreDescription.rolebench_role_specific": "ROUGE-L F1 ×100 over 10 role-specific responses, averaged across 5 runs. This measures text similarity, not success rate.",
     "results.scoreDescription.charactereval": "CharacterRM ×100 over 12 examples, averaged across 5 runs.",
-    "results.scoreDescription.ifbench": "Prompt-level loose accuracy on IFBench’s 300 instructions, averaged across 5 runs.",
+    "results.scoreDescription.ifbench": "Percentage of IFBench’s 300 instructions where every constraint passes the official loose verifier, measured in one complete pass. One pass cannot produce a run-level standard deviation.",
     "results.scoreDescription.hle": "Accuracy on the text-only subset of Humanity’s Last Exam using the official judge.",
     "results.scoreDescription.livecodebench_v6": "Execution-checked pass@1 on LiveCodeBench v6.",
     "results.scoreDescription.automationbench": "Rate of AutomationBench tasks completed correctly using simulated tools.",
@@ -159,6 +163,7 @@ const messages = {
     "results.pairedRuns": "5 paired runs · mean ± sample SD",
     "results.meanOnly": "5 runs · mean",
     "results.pairedMeanOnly": "5 paired runs · mean",
+    "results.singlePass": "1 complete pass · 300 instructions · SD unavailable",
     "results.personagymCaption": "Persona fidelity evaluation · official protocol",
     "results.personagymStatus": "PersonaGym has not yet been run on this site's models.",
     "results.personagymDescription": "The full protocol covers 200 personas and 10,000 questions, with five score dimensions and LLM judges. No result is shown until this evaluation has been run.",
@@ -168,7 +173,8 @@ const messages = {
     "results.pendingStatus": "No completed measurement has been published for the models on this page.",
     "results.notRunLabel": "Not measured yet",
     "results.pendingAllNote": "All lists the benchmarks; it does not combine their scores. Each measure keeps its own protocol and scale.",
-    "results.ifbenchPending": "IFBench checks 300 instructions with automatic verifiers and no LLM judge. Its test data and evaluation script are in this repository, but none of this page’s models has been evaluated on it yet.",
+    "results.ifbenchPending": "IFBench checks 300 instructions with automatic verifiers and no LLM judge. The five OpenRouter models shown each completed one full pass of the test split.",
+    "results.ifbenchOutputDetails": "Reasoning: {effort} · limit: {tokens} tokens · truncated responses: {count}",
     "results.hlePending": "HLE uses an access-controlled question set and a separate judging protocol. No evaluated result is available here.",
     "results.livecodebenchPending": "LiveCodeBench measures code problems solved and verified by execution. No result for this page is available yet.",
     "results.automationbenchPending": "AutomationBench evaluates agents on business tasks with simulated tools. The full suite has 600 tasks; no result is published here.",
@@ -187,15 +193,15 @@ const messages = {
     "details.general": "10 prompts · ROUGE-L F1 against a RoleGPT reference.",
     "details.specific": "10 role-specific prompts · ROUGE-L F1.",
     "details.character": "12 examples · CharacterRM · score mapped from 1–5 to 0–100.",
-    "details.ifbench": "300 prompts · automatic instruction verifiers · prompt-level loose accuracy.",
+    "details.ifbench": "300 prompts · automatic verifiers · score = percentage of prompts where every constraint passes. One pass per model at temperature 0; output limits and reasoning settings vary by model. Run-level standard deviation is unavailable.",
     "details.hle": "Expert-level multimodal questions · text-only subset · answers evaluated under the official protocol.",
     "details.livecodebench": "Recent programming problems · code executed against tests · pass@1.",
     "details.automationbench": "600 agent tasks across six domains, using 47 simulated SaaS tools · strict task completion.",
     "details.toolsandbox": "Multi-turn tool-use tasks · stateful environments · intermediate milestones.",
     "details.allCategory": "All provides access to every benchmark. Scores remain separate because tasks and scales differ.",
     "details.personagym": "200 personas · 10,000 questions · expected action, action justification, linguistic habits, persona consistency, and toxicity. PersonaScore and task scores are on a 1–5 scale and produced by LLM judges. This benchmark has not yet been run on this page’s models.",
-    "details.protocol": "Δ = quantized GGUF score − same-model BF16 score · 5 paired runs. OpenRouter models are measured by absolute score, without a local BF16 delta.",
-    "details.sd": "Sample standard deviation s = √[Σ(xᵢ − x̄)² / (5 − 1)], across the five run means; for Δ, across the five paired differences.",
+    "details.protocol": "Δ = quantized GGUF score − same-model BF16 score · 5 paired runs. IFBench OpenRouter scores are absolute and use one complete pass over all 300 instructions.",
+    "details.sd": "For benchmarks repeated five times, sample standard deviation s = √[Σ(xᵢ − x̄)² / (5 − 1)] is calculated across the five run-level mean scores; for Δ, across the five paired differences. IFBench has one pass, so its run-level standard deviation is unavailable.",
     "details.reading": "Compare models within one benchmark: scores across columns are not equivalent.",
     "details.claims": "Publisher-reported loss claims are not included.",
     "details.brandCredits": "Logos for the Gemma (Google), Qwen, Mistral, Liquid AI, OpenAI, DeepSeek, and Meta model families: <a href=\"https://ai.google.dev/gemma/docs\">Google</a> · <a href=\"https://github.com/QwenLM/qwenlm.github.io\">Qwen</a> · <a href=\"https://mistral.ai/brand/\">Mistral</a> · <a href=\"https://www.liquid.ai/\">Liquid AI</a> · <a href=\"https://openai.com/brand/\">OpenAI</a> · <a href=\"https://github.com/deepseek-ai/awesome-deepseek-integration/tree/main/docs/_logo%20svg\">DeepSeek</a> · <a href=\"https://www.meta.com/brand/resources/meta/company-brand/\">Meta</a>. Marks identify the evaluated models; this project is not affiliated with or endorsed by these companies.",
@@ -224,7 +230,9 @@ const metrics = {
   },
   ifbench: {
     mean: "ifbench_prompt_accuracy_mean_100",
-    sd: "ifbench_prompt_accuracy_sd_100"
+    sd: "ifbench_prompt_accuracy_sd_100",
+    runs: "ifbench_n_runs",
+    examples: "ifbench_n_examples"
   },
   hle: {
     mean: "hle_accuracy_mean_100",
@@ -307,14 +315,27 @@ function translate() {
     const text = words[element.dataset.i18nPlaceholder];
     if (text !== undefined) element.setAttribute("placeholder", text);
   });
-  const showStdDev = Boolean(stdDevVisibility[activeMetric]);
   const deltaMode = activeDeltaMode();
+  const hasDeviation = hasStdDev(activeMetric, deltaMode);
+  const showStdDev = Boolean(stdDevVisibility[activeMetric] && hasDeviation);
   const pendingBenchmark = isPendingBenchmark();
+  const captionKey = activeMetric === "ifbench"
+    ? "results.ifbenchCaption"
+    : deltaMode ? "results.caption" : "results.scoreCaption";
+  document.querySelector(".section-intro").textContent = words[captionKey];
+  document.querySelector(".chart-caption").textContent = activeMetric === "ifbench"
+    ? words["results.ifbenchCaption"]
+    : words[deltaMode ? "results.chartCaption" : "results.scoreCaption"];
+  const metricRunCount = metrics[activeMetric] && metrics[activeMetric].runs
+    ? summaryRows.find(function (row) { return typeof row[metrics[activeMetric].runs] === "number"; })?.[metrics[activeMetric].runs]
+    : null;
   document.getElementById("result-runs-label").textContent = pendingBenchmark
     ? words["results.notRunLabel"]
-    : deltaMode
-      ? words[showStdDev ? "results.pairedRuns" : "results.pairedMeanOnly"]
-      : words[showStdDev ? "results.runs" : "results.meanOnly"];
+    : metricRunCount === 1
+      ? words["results.singlePass"]
+      : deltaMode
+        ? words[showStdDev ? "results.pairedRuns" : "results.pairedMeanOnly"]
+        : words[showStdDev ? "results.runs" : "results.meanOnly"];
   const stdDevButton = document.getElementById("stddev-toggle");
   const stdDevButtonLabel = words[showStdDev ? "results.hideStdDev" : "results.showStdDev"];
   stdDevButton.setAttribute("aria-pressed", String(showStdDev));
@@ -323,7 +344,7 @@ function translate() {
   document.getElementById("legend-sd").hidden = !showStdDev;
   document.getElementById("model-filter").hidden = pendingBenchmark;
   if (pendingBenchmark) setModelFilterOpen(false);
-  document.getElementById("stddev-toggle").hidden = pendingBenchmark;
+  document.getElementById("stddev-toggle").hidden = pendingBenchmark || !hasDeviation;
   document.querySelector(".view-switch").hidden = pendingBenchmark || !metrics[activeMetric] || !metrics[activeMetric].delta;
   document.getElementById("scale-label").hidden = pendingBenchmark;
   document.querySelectorAll("[data-category]").forEach(function (button) {
@@ -530,17 +551,27 @@ function scoreText(row, metricKey, includeStdDev) {
   const mean = row[metric.mean];
   if (typeof mean !== "number") return "—";
   if (!includeStdDev) return pretty(mean);
-  const deviation = typeof row[metric.sd] === "number" ? row[metric.sd] : 0;
-  return pretty(mean) + " ± " + pretty(deviation);
+  return typeof row[metric.sd] === "number"
+    ? pretty(mean) + " ± " + pretty(row[metric.sd])
+    : pretty(mean);
 }
 
 function deltaText(row, metricKey, includeStdDev) {
   const metric = metrics[metricKey];
   const value = row[metric.delta];
   if (typeof value !== "number") return "—";
-  const deviation = typeof row[metric.deltaSd] === "number" ? row[metric.deltaSd] : 0;
   const signed = value > 0 ? "+" + pretty(value) : value < 0 ? "−" + pretty(Math.abs(value)) : pretty(0);
-  return signed + (includeStdDev ? " ± " + pretty(deviation) : "") + " pp";
+  const deviation = typeof row[metric.deltaSd] === "number" ? " ± " + pretty(row[metric.deltaSd]) : "";
+  return signed + (includeStdDev ? deviation : "") + " pp";
+}
+
+function hasStdDev(metricKey, deltaMode) {
+  const metric = metrics[metricKey];
+  if (!metric) return false;
+  const deviationKey = deltaMode ? metric.deltaSd : metric.sd;
+  return Boolean(deviationKey && summaryRows.some(function (row) {
+    return typeof row[deltaMode ? metric.delta : metric.mean] === "number" && typeof row[deviationKey] === "number";
+  }));
 }
 
 function scoredRows(metricKey) {
@@ -581,7 +612,7 @@ function renderChart() {
   document.querySelector(".chart-legend").hidden = false;
   const metric = metrics[activeMetric];
   const deltaMode = activeDeltaMode();
-  const showStdDev = stdDevVisibility[activeMetric];
+  const showStdDev = Boolean(stdDevVisibility[activeMetric] && hasStdDev(activeMetric, deltaMode));
   const rows = (deltaMode ? deltaRows(activeMetric) : scoredRows(activeMetric)).filter(function (row) {
     return selectedModelIds.has(modelConfigId(row));
   }).sort(function (a, b) {
@@ -652,11 +683,17 @@ function renderChart() {
     const tooltipVariant = escapeHtml(variantLabel(row));
     const tooltipLabel = escapeHtml(modelDisplayName(row) + " · " + variantLabel(row));
     const fullValue = escapeHtml(text);
+    const ifbenchOutputDetails = activeMetric === "ifbench" && typeof row.ifbench_max_new_tokens === "number"
+      ? '<span>' + escapeHtml(messages[activeLanguage]["results.ifbenchOutputDetails"]
+        .replace("{effort}", String(row.ifbench_reasoning_effort || "none"))
+        .replace("{tokens}", String(row.ifbench_max_new_tokens))
+        .replace("{count}", String(row.ifbench_truncated_responses ?? 0))) + '</span>'
+      : "";
     const chartValue = escapeHtml(deltaMode ? deltaText(row, activeMetric, false).replace(" pp", "") : scoreText(row, activeMetric, false));
     const valueY = Math.max(5, Math.min(95, deltaMode ? (value < 0 ? 50 + size : start) : start));
     const barStyle = ' style="--bar-start:' + start + '%;--bar-size:' + size + '%;--value-y:' + valueY + '%;--error-start:' + errorStart + '%;--error-size:' + errorSize + '%"';
     const errorBar = showStdDev ? '<span class="uncertainty-range"' + barStyle + ' aria-hidden="true"></span>' : "";
-    return '<div class="bar-column ' + (index === 0 ? "is-top " : "") + (deltaMode && value < 0 ? "is-loss" : "") + '"><div class="bar-plot ' + (deltaMode ? "delta-plot" : "score-plot") + '" role="img" tabindex="0" aria-label="' + tooltipLabel + ': ' + fullValue + '" title="' + tooltipLabel + '"><div class="bar-fill ' + fillClass + '"' + barStyle + '></div>' + errorBar + '<span class="bar-value"' + barStyle + '>' + chartValue + '</span><span class="bar-tooltip" aria-hidden="true"><strong>' + displayName + '</strong><span>' + tooltipVariant + '</span><span>' + fullValue + (deltaMode ? "" : " /100") + '</span></span></div><div class="bar-brand">' + modelLogo(row) + '</div><div class="bar-column-label" title="' + tooltipLabel + '"><strong>' + displayName + '</strong><small>' + variant + '</small></div></div>';
+    return '<div class="bar-column ' + (index === 0 ? "is-top " : "") + (deltaMode && value < 0 ? "is-loss" : "") + '"><div class="bar-plot ' + (deltaMode ? "delta-plot" : "score-plot") + '" role="img" tabindex="0" aria-label="' + tooltipLabel + ': ' + fullValue + '" title="' + tooltipLabel + '"><div class="bar-fill ' + fillClass + '"' + barStyle + '></div>' + errorBar + '<span class="bar-value"' + barStyle + '>' + chartValue + '</span><span class="bar-tooltip" aria-hidden="true"><strong>' + displayName + '</strong><span>' + tooltipVariant + '</span><span>' + fullValue + (deltaMode ? "" : " /100") + '</span>' + ifbenchOutputDetails + '</span></div><div class="bar-brand">' + modelLogo(row) + '</div><div class="bar-column-label" title="' + tooltipLabel + '"><strong>' + displayName + '</strong><small>' + variant + '</small></div></div>';
   }).join("");
 }
 
@@ -819,8 +856,8 @@ document.addEventListener("keydown", function (event) {
 });
 
 Promise.all([
-  fetch("site-data/summary.json?v=benchmark-categories").then(function (response) { if (!response.ok) throw new Error("summary"); return response.json(); }),
-  fetch("site-data/environment.json?v=benchmark-categories").then(function (response) { if (!response.ok) throw new Error("environment"); return response.json(); })
+  fetch("site-data/summary.json?v=ifbench-results").then(function (response) { if (!response.ok) throw new Error("summary"); return response.json(); }),
+  fetch("site-data/environment.json?v=ifbench-results").then(function (response) { if (!response.ok) throw new Error("environment"); return response.json(); })
 ]).then(function (data) {
   summaryRows = data[0];
   initializeModelSelection();
