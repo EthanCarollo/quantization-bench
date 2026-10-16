@@ -15,9 +15,9 @@ RoleBench uses ROUGE-L F1 multiplied by 100; CharacterEval uses CharacterRM mapp
 | gemma4-e4b-it@q4_k_m | 26.85 ± 2.16 | 12.21 ± 0.53 | 66.11 ± 6.35 | 37.00 | — | — | 4.5B effectifs (8B avec embeddings) |
 | qwen3-4b@mlx4 | 33.12 ± 1.25 | 12.35 ± 0.61 | 56.27 ± 6.11 | — | — | — | 4.0B total (3.6B hors embeddings) |
 | qwen3-4b@mlx8 | 35.54 ± 1.73 | 13.80 ± 0.42 | 63.80 ± 4.14 | — | — | — | 4.0B total (3.6B hors embeddings) |
-| qwen3-4b@bf16 | 35.61 ± 1.09 | 13.82 ± 0.66 | 60.74 ± 5.09 | — | — | — | 4.0B total (3.6B hors embeddings) |
-| qwen3-4b@q8_0 | 35.83 ± 1.00 | 13.67 ± 0.45 | 59.54 ± 4.21 | — | — | — | 4.0B total (3.6B hors embeddings) |
-| qwen3-4b@q4_k_m | 35.18 ± 1.74 | 13.94 ± 0.33 | 58.31 ± 4.44 | — | — | — | 4.0B total (3.6B hors embeddings) |
+| qwen3-4b@bf16 | 35.61 ± 1.09 | 13.82 ± 0.66 | 60.74 ± 5.09 | 28.33 | — | — | 4.0B total (3.6B hors embeddings) |
+| qwen3-4b@q8_0 | 35.83 ± 1.00 | 13.67 ± 0.45 | 59.54 ± 4.21 | 27.00 | — | — | 4.0B total (3.6B hors embeddings) |
+| qwen3-4b@q4_k_m | 35.18 ± 1.74 | 13.94 ± 0.33 | 58.31 ± 4.44 | 26.00 | — | — | 4.0B total (3.6B hors embeddings) |
 | ministral-3-3b@bf16 | 14.66 ± 5.63 | 10.84 ± 0.35 | 51.69 ± 7.48 | — | — | — | 3.4B language + 0.4B vision |
 | ministral-3-3b@q8_0 | 14.77 ± 5.96 | 10.78 ± 0.58 | 48.27 ± 9.11 | — | — | — | 3.4B language + 0.4B vision |
 | ministral-3-3b@q4_k_m | 13.64 ± 3.62 | 10.71 ± 0.60 | 54.57 ± 3.62 | — | — | — | 3.4B language + 0.4B vision |
