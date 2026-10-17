@@ -10,7 +10,7 @@
   "parquet_snapshot_download_size_bytes": 4334453467,
   "official_repository": "https://github.com/LiveCodeBench/LiveCodeBench",
   "official_repository_revision": "28fef95ea8c9f7a547c8329fcd3d32b92c1fa24",
-  "metric": "Python code-generation pass@1 from five independently seeded one-sample repetitions; execution-based.",
+  "metric": "Python code-generation pass@1 from one generation per problem over the complete release_v6 set; execution-based.",
   "generation": {
     "temperature": 0.2,
     "top_p": 0.95,
@@ -22,7 +22,7 @@
     "timeout_seconds": 6,
     "container_network": "disabled",
     "container_root_filesystem": "read-only",
-    "container_limitations": "Docker resource limits and no host credentials or dataset mounts"
+    "container_limitations": "Docker: 2 GiB memory, 2 CPUs, 64 PIDs and no host credentials or dataset mounts. Local Bubblewrap runs use private user/PID/network namespaces, read-only mounts, 128 MiB tmpfs, RLIMIT_CPU=6s, RLIMIT_AS=2GiB and RLIMIT_NPROC=64; CPU quota is not separately enforced."
   },
-  "upstream_protocol_note": "The upstream runner uses n=10 and reports pass@1/pass@5; this repository's five-repeat protocol averages five one-sample pass rates instead."
+  "upstream_protocol_note": "The upstream runner uses n=10 and reports pass@1/pass@5; this repository records one generation per problem and reports one full-set pass@1 score."
 }

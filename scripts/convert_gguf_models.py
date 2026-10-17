@@ -51,20 +51,23 @@ def main() -> None:
     for model_key in model_keys:
         model = REGISTRY[model_key]
         source_dir = source_root / model_key
-        if model.get("gguf_files"):
+        if model.get("gguf_files") and all(variant in model["gguf_files"] for variant in variants):
+            gguf_repository = model.get("gguf_repository", model)
             for variant in variants:
                 output_path = output_root / f"{model_key}_{variant}.gguf"
                 if not output_path.is_file():
                     filename = model["gguf_files"][variant]
+                    repo_id = gguf_repository["model_id"]
+                    revision = gguf_repository["revision"]
                     print(
-                        f"Downloading {model['model_id']}/{filename}@{model['revision']}…",
+                        f"Downloading {repo_id}/{filename}@{revision}…",
                         flush=True,
                     )
                     source_path = Path(
                         hf_hub_download(
-                            repo_id=model["model_id"],
+                            repo_id=repo_id,
                             filename=filename,
-                            revision=model["revision"],
+                            revision=revision,
                             local_dir=str(source_dir),
                         )
                     )
@@ -123,6 +126,8 @@ def main() -> None:
                 if not path.is_file() or path.stat().st_size < 1_000_000_000:
                     raise SystemExit(f"GGUF output is missing or unexpectedly small: {path}")
                 print(f"Ready: {path.relative_to(ROOT)} ({path.stat().st_size:,} bytes)", flush=True)
+            if "gguf_bf16" not in variants:
+                bf16_path.unlink(missing_ok=True)
             shutil.rmtree(source_dir, ignore_errors=True)
             continue
 
@@ -131,6 +136,7 @@ def main() -> None:
             repo_id=model["model_id"],
             revision=model["revision"],
             local_dir=str(source_dir),
+            allow_patterns=["*.json", "*.safetensors", "*.model", "*.tiktoken", "*.jinja", "*.txt", "*.py"],
         )
 
         bf16_path = output_root / f"{model_key}_gguf_bf16.gguf"
@@ -177,11 +183,14 @@ def main() -> None:
                 cwd=llama_cpp,
             )
 
-        for variant in QUANTIZATIONS:
+        for variant in variants:
             path = output_root / f"{model_key}_{variant}.gguf"
             if not path.is_file() or path.stat().st_size < 1_000_000_000:
                 raise SystemExit(f"GGUF output is missing or unexpectedly small: {path}")
             print(f"Ready: {path.relative_to(ROOT)} ({path.stat().st_size:,} bytes)", flush=True)
+        if "gguf_bf16" not in variants:
+            bf16_path.unlink(missing_ok=True)
+        shutil.rmtree(source_dir, ignore_errors=True)
 
     print(f"Built with llama.cpp {commit}.")
 

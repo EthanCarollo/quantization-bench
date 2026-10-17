@@ -1,0 +1,14 @@
+{
+  "benchmark": "AutomationBench public tasks",
+  "repository": "https://github.com/zapier/AutomationBench",
+  "repository_revision": "4a8e1061254004d9dac807054eed33fad7d1ff14",
+  "version": "1.0.6",
+  "scored_domains": ["sales", "marketing", "operations", "support", "finance", "hr"],
+  "examples": 600,
+  "excluded_examples": 200,
+  "excluded_split": "simple",
+  "metric": "Percentage of scored public tasks with task_completed_correctly = 1.0 (strict; partial credit is retained separately).",
+  "runtime": "OpenAI-compatible local llama-server endpoint",
+  "max_steps": 50,
+  "max_concurrent": 1
+}

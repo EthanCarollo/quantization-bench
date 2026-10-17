@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Apply the pinned LiveCodeBench execution checker in one disposable Docker sandbox per problem."""
+"""Apply the pinned LiveCodeBench execution checker in one disposable sandbox per problem."""
 
 import argparse
 import json
@@ -16,6 +16,11 @@ SOURCE = json.loads((ROOT / "data" / "livecodebench" / "source.json").read_text(
 FILES = ["test.jsonl", "test2.jsonl", "test3.jsonl", "test4.jsonl", "test5.jsonl", "test6.jsonl"]
 RESULT_PREFIX = "__LIVE_CODE_BENCH_RESULT__"
 IMAGE = "roleplay-bench-results/livecodebench-evaluator:28fef95"
+EVALUATOR_VENV = Path.home() / ".cache" / "roleplay-bench" / "livecodebench-evaluator-venv"
+SANDBOXES = {
+    "docker": "docker (read-only, network disabled, 2 GiB memory, 2 CPUs, 64 PIDs)",
+    "bubblewrap": "bubblewrap (user/PID/network namespaces, read-only mounts, 128 MiB tmpfs, RLIMIT_CPU=6s, RLIMIT_AS=2 GiB, RLIMIT_NPROC=64)",
+}
 
 
 def read_jsonl(path: Path) -> list[dict]:
@@ -37,7 +42,65 @@ def source_paths() -> list[Path]:
     ]
 
 
-def run_sandbox(row: dict, codes: list[str]) -> list[bool]:
+def bubblewrap_command() -> list[str]:
+    if not EVALUATOR_VENV.joinpath("bin", "python").is_file():
+        raise RuntimeError(f"Missing pinned LiveCodeBench evaluator environment: {EVALUATOR_VENV}")
+    if not Path("/usr/bin/bwrap").is_file():
+        raise RuntimeError("Bubblewrap is not installed; install bwrap or use --sandbox docker.")
+
+    venv_config = EVALUATOR_VENV / "pyvenv.cfg"
+    python_home = next(
+        (line.split("=", 1)[1].strip() for line in venv_config.read_text(encoding="utf-8").splitlines() if line.startswith("home =")),
+        None,
+    )
+    if not python_home:
+        raise RuntimeError(f"Could not find the base Python path in {venv_config}.")
+    python_root = Path(python_home).parent.parent
+    mount_targets = (
+        Path.home() / ".local" / "share" / "uv" / "python",
+        EVALUATOR_VENV,
+    )
+    directories = {Path("/sandbox"), Path("/opt"), Path("/home")}
+    for target in (*mount_targets, python_root):
+        directories.add(target)
+        parent = target.parent
+        while parent != Path("/"):
+            directories.add(parent)
+            parent = parent.parent
+
+    command = [
+        "prlimit", "--cpu=6", "--as=2147483648", "--nproc=64", "--",
+        "bwrap", "--unshare-user", "--unshare-all", "--disable-userns",
+        "--new-session", "--die-with-parent", "--cap-drop", "ALL",
+        "--ro-bind", "/usr", "/usr",
+        "--ro-bind", "/bin", "/bin",
+        "--ro-bind", "/lib", "/lib",
+        "--ro-bind", "/lib64", "/lib64",
+        "--proc", "/proc", "--dev", "/dev",
+        "--size", "134217728", "--tmpfs", "/tmp", "--chmod", "1777", "/tmp",
+        "--size", "67108864", "--tmpfs", "/dev/shm", "--chmod", "1777", "/dev/shm",
+    ]
+    for directory in sorted(directories, key=lambda path: (len(path.parts), str(path))):
+        command.extend(("--dir", str(directory)))
+    command.extend((
+        "--ro-bind", str(python_root), str(python_root),
+        "--ro-bind", str(EVALUATOR_VENV), str(EVALUATOR_VENV),
+        "--ro-bind", str(ROOT / "vendor" / "livecodebench" / "testing_util.py"), "/sandbox/testing_util.py",
+        "--ro-bind", str(ROOT / "docker" / "livecodebench" / "evaluate_one.py"), "/sandbox/evaluate_one.py",
+        "--chdir", "/sandbox", "--clearenv",
+        "--setenv", "PATH", f"{EVALUATOR_VENV / 'bin'}:/usr/bin:/bin",
+        "--setenv", "HOME", "/tmp",
+        "--setenv", "TMPDIR", "/tmp",
+        "--setenv", "LC_ALL", "C",
+        "--setenv", "OPENBLAS_NUM_THREADS", "1",
+        "--setenv", "PYTHONNOUSERSITE", "1",
+        "--setenv", "PYTHONPATH", "/sandbox",
+        "--", str(EVALUATOR_VENV / "bin" / "python"), "/sandbox/evaluate_one.py",
+    ))
+    return command
+
+
+def run_sandbox(row: dict, codes: list[str], sandbox: str) -> list[bool]:
     job = {
         "question_id": row["question_id"],
         "row": {
@@ -47,18 +110,21 @@ def run_sandbox(row: dict, codes: list[str]) -> list[bool]:
         },
         "codes": codes,
     }
-    command = [
-        "docker", "run", "--rm", "--interactive",
-        "--network=none",
-        "--read-only",
-        "--cap-drop=ALL",
-        "--security-opt=no-new-privileges",
-        "--memory=2g",
-        "--cpus=2",
-        "--pids-limit=64",
-        "--tmpfs=/tmp:rw,noexec,nosuid,nodev,size=128m",
-        IMAGE,
-    ]
+    if sandbox == "docker":
+        command = [
+            "docker", "run", "--rm", "--interactive",
+            "--network=none",
+            "--read-only",
+            "--cap-drop=ALL",
+            "--security-opt=no-new-privileges",
+            "--memory=2g",
+            "--cpus=2",
+            "--pids-limit=64",
+            "--tmpfs=/tmp:rw,noexec,nosuid,nodev,size=128m",
+            IMAGE,
+        ]
+    else:
+        command = bubblewrap_command()
     try:
         completed = subprocess.run(
             command,
@@ -90,10 +156,20 @@ def run_sandbox(row: dict, codes: list[str]) -> list[bool]:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--model", choices=REGISTRY, required=True)
-    parser.add_argument("--bits", type=int, choices=(4, 8), required=True)
+    parser.add_argument("--bits", type=int, choices=(4, 8), default=4)
+    parser.add_argument("--format", choices=("mlx", "gguf"), default="mlx")
+    parser.add_argument("--sandbox", choices=SANDBOXES, default="docker")
     args = parser.parse_args()
 
-    stem = f"{args.model}_livecodebench_v6_mlx_{args.bits}bit"
+    if args.format == "mlx":
+        suffix = f"mlx_{args.bits}bit"
+        quantization = {"format": "MLX", "mode": "affine", "bits": args.bits, "group_size": 64}
+    else:
+        if args.bits != 4:
+            raise SystemExit("This runner currently supports GGUF Q4_K_M only.")
+        suffix = "gguf_q4_k_m"
+        quantization = {"format": "GGUF", "type": "Q4_K_M"}
+    stem = f"{args.model}_livecodebench_v6_{suffix}"
     raw_path = ROOT / "results" / f"{stem}.jsonl"
     scored_path = ROOT / "results" / f"{stem}_scored.jsonl"
     runs_path = ROOT / "results" / f"{stem}_runs.jsonl"
@@ -103,15 +179,21 @@ def main() -> None:
         raise SystemExit(f"Scores already exist for {stem}; archive or remove them explicitly before rerunning.")
 
     generations = read_jsonl(raw_path)
-    if len(generations) != SOURCE["examples"] * 5:
-        raise SystemExit(f"Expected {SOURCE['examples'] * 5} generations in {raw_path.name}; found {len(generations)}.")
+    repetition_ids = {row.get("repetition") for row in generations}
+    if repetition_ids not in ({1}, {1, 2, 3, 4, 5}) or len(generations) != SOURCE["examples"] * len(repetition_ids):
+        raise SystemExit(
+            f"Expected one or five complete passes ({SOURCE['examples']} or {SOURCE['examples'] * 5} generations) "
+            f"in {raw_path.name}; found {len(generations)}."
+        )
     by_question = {}
     for row in generations:
         by_question.setdefault(row["question_id"], {})[row["repetition"]] = row
-    if len(by_question) != SOURCE["examples"] or any(set(reps) != {1, 2, 3, 4, 5} for reps in by_question.values()):
-        raise SystemExit("Expected five generations for every one of the 1,055 unique problem ids.")
+    expected_repetitions = repetition_ids
+    if len(by_question) != SOURCE["examples"] or any(set(reps) != expected_repetitions for reps in by_question.values()):
+        raise SystemExit("Expected the same complete set of one or five generations for each unique problem id.")
 
-    run_scores = {repetition: [] for repetition in range(1, 6)}
+    repetitions = sorted(expected_repetitions)
+    run_scores = {repetition: [] for repetition in repetitions}
     scored_path.parent.mkdir(parents=True, exist_ok=True)
     item_count = 0
     with scored_path.open("w", encoding="utf-8") as output:
@@ -127,9 +209,9 @@ def main() -> None:
                         raise RuntimeError(
                             f"Generation/source alignment mismatch at item {item_count}, question {question_id}."
                         )
-                    codes = [generations_for_item[rep]["extracted_code"] for rep in range(1, 6)]
-                    verdicts = run_sandbox(problem, codes)
-                    for repetition, passed in enumerate(verdicts, start=1):
+                    codes = [generations_for_item[rep]["extracted_code"] for rep in repetitions]
+                    verdicts = run_sandbox(problem, codes, args.sandbox)
+                    for repetition, passed in zip(repetitions, verdicts):
                         result = {
                             "benchmark": "livecodebench_v6",
                             "dataset_revision": SOURCE["dataset_revision"],
@@ -137,7 +219,11 @@ def main() -> None:
                             "model_key": args.model,
                             "model_id": REGISTRY[args.model]["model_id"],
                             "model_revision": REGISTRY[args.model]["revision"],
-                            "quantization": {"format": "MLX", "mode": "affine", "bits": args.bits, "group_size": 64},
+                            "runtime": "llama.cpp" if args.format == "gguf" else "mlx-lm",
+                            "execution_sandbox": SANDBOXES[args.sandbox],
+                            "quantization": quantization,
+                            "context_size": generations_for_item[1].get("context_size"),
+                            "gpu_layers": generations_for_item[1].get("gpu_layers"),
                             "item_id": item_count,
                             "question_id": problem["question_id"],
                             "repetition": repetition,
@@ -160,7 +246,11 @@ def main() -> None:
                 "model_key": args.model,
                 "model_id": REGISTRY[args.model]["model_id"],
                 "model_revision": REGISTRY[args.model]["revision"],
-                "quantization": {"format": "MLX", "mode": "affine", "bits": args.bits, "group_size": 64},
+                "runtime": "llama.cpp" if args.format == "gguf" else "mlx-lm",
+                "execution_sandbox": SANDBOXES[args.sandbox],
+                "quantization": quantization,
+                "context_size": generations[0].get("context_size"),
+                "gpu_layers": generations[0].get("gpu_layers"),
                 "repetition": repetition,
                 "n_examples": len(scores),
                 "pass_at_1_100": statistics.mean(scores),

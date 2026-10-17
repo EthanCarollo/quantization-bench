@@ -418,5 +418,57 @@
         "published_route": "DeepInfra"
       }
     }
+  },
+  "local_q4_benchmarks": {
+    "captured_at_utc": "2026-10-17T08:14:24Z",
+    "hardware": {
+      "gpu": "NVIDIA GeForce RTX 5060 Laptop GPU",
+      "gpu_vram_mib": 8151,
+      "system_ram_gib": 15.0,
+      "os": "Ubuntu 26.04 on WSL2"
+    },
+    "software": {
+      "python": "3.12.15",
+      "llama_cpp": "529ac893e754e95a50469b2122f5efe28dfc08a0",
+      "cuda_toolkit": "12.8",
+      "nvidia_driver": "610.88"
+    },
+    "build": {
+      "ggml_cuda": true,
+      "gpu_layers": "99 by default; 24 for model files at least 4.5 GB to fit available VRAM",
+      "quantization": "GGUF Q4_K_M"
+    },
+    "benchmark_settings": {
+      "livecodebench_v6": {
+        "context_size": 8192,
+        "repetitions": 1,
+        "temperature": 0.2,
+        "top_p": 0.95,
+        "max_new_tokens": 2000,
+        "thinking": false,
+        "execution_sandbox": "Bubblewrap 0.11.1",
+        "sandbox_limits": "Private user/PID/network namespaces, read-only filesystem mounts, 128 MiB tmpfs, RLIMIT_CPU=6s, RLIMIT_AS=2 GiB, RLIMIT_NPROC=64; no separate CPU quota"
+      },
+      "automationbench": {
+        "context_size": 16384,
+        "max_steps": 50,
+        "max_concurrent": 1
+      },
+      "toolsandbox": {
+        "context_size": 8192,
+        "agent": "local OpenAI-compatible tool-call API",
+        "user_simulator": "GPT-4o (2024-05-13)",
+        "processes": 1
+      },
+      "personagym": {
+        "context_size": 8192,
+        "agent": "local OpenAI-compatible chat API",
+        "judge_models": [
+          "gpt-4o-2024-05-13",
+          "meta-llama/Llama-3-70b-chat-hf via Together"
+        ]
+      },
+      "gpu_layer_policy": "Auto-selected per model to avoid CUDA out-of-memory failures; the selected layer count is recorded in each result."
+    }
   }
 }

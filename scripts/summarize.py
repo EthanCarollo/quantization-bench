@@ -71,9 +71,12 @@ VARIANTS = (
     },
 )
 ADDITIONAL_BENCHMARKS = {
-    "ifbench": ("prompt_loose_accuracy_100", 300),
-    "hle": ("accuracy_100", None),
-    "livecodebench_v6": ("pass_at_1_100", 1055),
+    "ifbench": ("prompt_loose_accuracy_100", 300, "prompt_loose_accuracy_100"),
+    "hle": ("accuracy_100", None, None),
+    "livecodebench_v6": ("pass_at_1_100", 1055, None),
+    "automationbench": ("task_success_mean_100", 600, "task_success_100"),
+    "toolsandbox": ("similarity_mean_100", 1032, "scenario_similarity_100"),
+    "personagym": ("persona_score_mean_100", 200, "persona_score_mean_100"),
 }
 
 
@@ -144,7 +147,7 @@ def summarize_charactereval(model_key: str, variant: dict) -> tuple[float, float
 def summarize_optional(
     model_key: str, variant: dict, benchmark: str
 ) -> tuple[float, float | None, int, int] | None:
-    metric, expected_examples = ADDITIONAL_BENCHMARKS[benchmark]
+    metric, expected_examples, item_metric = ADDITIONAL_BENCHMARKS[benchmark]
     stem = f"{model_key}_{benchmark}_{variant['suffix']}"
     path = RESULTS / f"{stem}_runs.jsonl"
     if not path.is_file():
@@ -152,7 +155,7 @@ def summarize_optional(
     runs = read_jsonl(path)
     run_count = len(runs)
     expected_repetitions = (
-        {1} if benchmark == "ifbench" and run_count == 1
+        {1} if benchmark in {"ifbench", "livecodebench_v6", "automationbench", "toolsandbox", "personagym"} and run_count == 1
         else {1, 2, 3, 4, 5} if run_count == 5
         else set()
     )
@@ -171,7 +174,7 @@ def summarize_optional(
     n_examples = counts.pop()
     if expected_examples is not None and n_examples != expected_examples:
         return None
-    if benchmark == "ifbench":
+    if item_metric is not None:
         item_path = RESULTS / f"{stem}.jsonl"
         if not item_path.is_file():
             return None
@@ -179,13 +182,14 @@ def summarize_optional(
         repetitions = {run["repetition"] for run in runs}
         item_keys = {(item.get("repetition"), item.get("item_id")) for item in items}
         if (
-            len(items) != expected_examples * run_count
+            not items
+            or (expected_examples is not None and len(items) != expected_examples * run_count)
             or len(item_keys) != len(items)
             or any(
                 item.get("benchmark") != benchmark
                 or item.get("model_key") != model_key
                 or item.get("repetition") not in repetitions
-                or not isinstance(item.get("prompt_loose_accuracy_100"), (int, float))
+                or not isinstance(item.get(item_metric), (int, float))
                 for item in items
             )
         ):
@@ -193,10 +197,11 @@ def summarize_optional(
         for run in runs:
             run_items = [item for item in items if item.get("repetition") == run["repetition"]]
             if (
-                len(run_items) != expected_examples
-                or len({item.get("item_id") for item in run_items}) != expected_examples
+                not run_items
+                or (expected_examples is not None and len(run_items) != expected_examples)
+                or len({item.get("item_id") for item in run_items}) != len(run_items)
                 or not math.isclose(
-                    statistics.mean(item["prompt_loose_accuracy_100"] for item in run_items),
+                    statistics.mean(item[item_metric] for item in run_items),
                     run[metric],
                     abs_tol=1e-9,
                 )
@@ -278,6 +283,18 @@ def main() -> None:
                 "hle_accuracy_sd_100": None,
                 "livecodebench_pass_at_1_mean_100": None,
                 "livecodebench_pass_at_1_sd_100": None,
+                "automationbench_task_success_mean_100": None,
+                "automationbench_task_success_sd_100": None,
+                "automationbench_n_runs": None,
+                "automationbench_n_examples": None,
+                "toolsandbox_similarity_mean_100": None,
+                "toolsandbox_similarity_sd_100": None,
+                "toolsandbox_n_runs": None,
+                "toolsandbox_n_examples": None,
+                "personagym_persona_score_mean_100": None,
+                "personagym_persona_score_sd_100": None,
+                "personagym_n_runs": None,
+                "personagym_n_examples": None,
                 "parameters": model["parameter_label"],
                 "model_key": model_key,
                 "variant": variant["suffix"],
@@ -295,6 +312,9 @@ def main() -> None:
                     "ifbench": "ifbench_prompt_accuracy",
                     "hle": "hle_accuracy",
                     "livecodebench_v6": "livecodebench_pass_at_1",
+                    "automationbench": "automationbench_task_success",
+                    "toolsandbox": "toolsandbox_similarity",
+                    "personagym": "personagym_persona_score",
                 }[benchmark]
                 if optional is not None:
                     mean, deviation, run_count, n_examples = optional
@@ -359,11 +379,11 @@ def main() -> None:
     lines = [
         "# Model benchmark scorecard",
         "",
-        "RoleBench and CharacterEval show the mean ± sample standard deviation across five run-level means. IFBench uses one complete pass over the 300-prompt test split per hosted model; its single-pass score has no run-level standard deviation. A dash means no complete result is available.",
-        "RoleBench uses ROUGE-L F1 multiplied by 100; CharacterEval uses CharacterRM mapped to 0–100; IFBench uses loose accuracy; HLE uses text-only judge accuracy; LiveCodeBench uses pass@1.",
+        "RoleBench and CharacterEval show the mean ± sample standard deviation across five run-level means. IFBench, LiveCodeBench, AutomationBench, ToolSandbox, and PersonaGym use one complete pass per model; their single-pass scores have no run-level standard deviation. A dash means no complete result is available.",
+        "RoleBench uses ROUGE-L F1 multiplied by 100; CharacterEval uses CharacterRM mapped to 0–100; IFBench uses loose accuracy; HLE uses text-only judge accuracy; LiveCodeBench uses execution-checked pass@1; AutomationBench uses strict task completion; ToolSandbox uses official scenario similarity, including minefield constraints; PersonaGym uses average PersonaScore mapped from 1–5 to 0–100.",
         "",
-        "| Model variant | RoleBench generalization — ROUGE-L /100 | RoleBench role-specific — ROUGE-L /100 | CharacterEval — CharacterRM /100 | IFBench — loose /100 | HLE text-only — accuracy /100 | LiveCodeBench v6 — pass@1 /100 | Parameters |",
-        "|---|---:|---:|---:|---:|---:|---:|---:|",
+        "| Model variant | RoleBench generalization — ROUGE-L /100 | RoleBench role-specific — ROUGE-L /100 | CharacterEval — CharacterRM /100 | IFBench — loose /100 | HLE text-only — accuracy /100 | LiveCodeBench v6 — pass@1 /100 | AutomationBench — strict completion /100 | ToolSandbox — scenario similarity /100 | PersonaGym — PersonaScore /100 | Parameters |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for row in rows:
         general = render_score(
@@ -396,15 +416,30 @@ def main() -> None:
                 row["livecodebench_pass_at_1_mean_100"], row["livecodebench_pass_at_1_sd_100"]
             )
         )
+        automationbench = render_optional(
+            None if row["automationbench_task_success_mean_100"] is None else (
+                row["automationbench_task_success_mean_100"], row["automationbench_task_success_sd_100"]
+            )
+        )
+        toolsandbox = render_optional(
+            None if row["toolsandbox_similarity_mean_100"] is None else (
+                row["toolsandbox_similarity_mean_100"], row["toolsandbox_similarity_sd_100"]
+            )
+        )
+        personagym = render_optional(
+            None if row["personagym_persona_score_mean_100"] is None else (
+                row["personagym_persona_score_mean_100"], row["personagym_persona_score_sd_100"]
+            )
+        )
         lines.append(
             f"| {row['model_tag']} | {general} | {specific} | {charactereval} | "
-            f"{ifbench} | {hle} | {livecodebench} | {row['parameters']} |"
+            f"{ifbench} | {hle} | {livecodebench} | {automationbench} | {toolsandbox} | {personagym} | {row['parameters']} |"
         )
     lines += [
         "",
         "MLX variants use affine weight quantization with group size 64. GGUF variants use llama.cpp BF16, Q8_0, or Q4_K_M files. OpenRouter entries are hosted APIs, not local quantizations; their same-model BF16 delta is unavailable. IFBench uses the same 300 prompts and official verifier for each hosted model at temperature 0; reasoning effort and maximum output tokens vary by model and are recorded with each result.",
         "",
-        "RoleBench ROUGE-L measures wording overlap with one RoleGPT reference, not role-play quality as a percentage. CharacterEval scores come from the authors' human-annotated CharacterRM; they are averaged equally across the 12 dimensions covered by the fixed subset and linearly mapped from 1–5 to 0–100. IFBench reports official prompt-level loose accuracy; HLE reports the official judge accuracy over the text-only subset; LiveCodeBench reports execution-checked pass@1. These scores use different datasets and evaluators and should be compared only within each column.",
+        "RoleBench ROUGE-L measures wording overlap with one RoleGPT reference, not role-play quality as a percentage. CharacterEval scores come from the authors' human-annotated CharacterRM; they are averaged equally across the 12 dimensions covered by the fixed subset and linearly mapped from 1–5 to 0–100. IFBench reports official prompt-level loose accuracy; HLE reports the official judge accuracy over the text-only subset; LiveCodeBench reports one full execution-checked pass@1 score; AutomationBench reports strict task completion; ToolSandbox reports the official scenario similarity; PersonaGym reports the official PersonaScore. These scores use different datasets and evaluators and should be compared only within each column.",
         "",
     ]
     summary_md.write_text("\n".join(lines), encoding="utf-8")

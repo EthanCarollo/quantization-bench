@@ -52,7 +52,8 @@ const messages = {
     "results.scoreDescription.hle": "Exactitude sur le sous-ensemble texte de Humanity’s Last Exam, évaluée par le juge officiel.",
     "results.scoreDescription.livecodebench_v6": "Pass@1 vérifié par exécution sur LiveCodeBench v6.",
     "results.scoreDescription.automationbench": "Taux de tâches AutomationBench terminées correctement avec des outils simulés.",
-    "results.scoreDescription.toolsandbox": "Réussite aux tâches ToolSandbox dans des scénarios d’utilisation d’outils à plusieurs tours.",
+    "results.scoreDescription.toolsandbox": "Score de similarité officiel par scénario ToolSandbox, jalons et contraintes minefield compris.",
+    "results.scoreDescription.personagym": "PersonaScore officiel, moyenné sur 200 personas et converti de l’échelle 1–5 vers 0–100.",
     "results.deltaDescription": "Variation quantifié − BF16 apparié. Une valeur plus haute signifie une meilleure préservation.",
     "table.model": "Modèle et version",
     "results.runs": "5 runs · moyenne ± écart-type",
@@ -60,6 +61,10 @@ const messages = {
     "results.meanOnly": "5 runs · moyenne",
     "results.pairedMeanOnly": "5 runs appariés · moyenne",
     "results.singlePass": "1 passage complet · 300 consignes · écart-type non calculable",
+    "results.singlePassLivecodebench": "1 passage complet · 1 055 problèmes · écart-type non calculable",
+    "results.singlePassAutomationbench": "1 passage complet · 600 tâches · écart-type non calculable",
+    "results.singlePassToolSandbox": "1 passage complet · écart-type non calculable",
+    "results.singlePassPersonaGym": "1 protocole complet · 200 personas · écart-type non calculable",
     "results.personagymCaption": "Évaluation de la fidélité aux personas · protocole officiel",
     "results.personagymStatus": "PersonaGym n’a pas encore été évalué sur les modèles de ce site.",
     "results.personagymDescription": "Le protocole complet couvre 200 personas et 10 000 questions, avec cinq axes de score et des modèles-juges. Aucun résultat n’est affiché avant d’avoir exécuté cette évaluation.",
@@ -95,8 +100,8 @@ const messages = {
     "details.automationbench": "600 tâches d’agents réparties dans six domaines, avec 47 outils SaaS simulés · réussite stricte des tâches.",
     "details.toolsandbox": "Tâches d’utilisation d’outils à plusieurs tours · environnements avec état · jalons intermédiaires.",
     "details.allCategory": "All donne accès à tous les benchmarks. Les scores restent séparés, car leurs tâches et leurs échelles sont différentes.",
-    "details.personagym": "200 personas · 10 000 questions · action attendue, justification, style linguistique, cohérence et toxicité. PersonaScore et sous-scores de 1 à 5, produits par des modèles-juges. Ce benchmark n’a pas encore été exécuté pour les modèles de cette page.",
-    "details.protocol": "Δ = score GGUF quantifié − BF16 du même modèle · 5 runs appariés. Les scores IFBench OpenRouter sont absolus et issus d’un passage complet unique des 300 consignes.",
+    "details.personagym": "200 personas · 10 000 questions · action attendue, justification, style linguistique, cohérence et toxicité. PersonaScore et sous-scores issus du jugement officiel sont ramenés sur 100.",
+    "details.protocol": "Δ = score GGUF quantifié − BF16 du même modèle · 5 runs appariés. LiveCodeBench publie un passage complet de 1 055 problèmes, sans écart-type entre runs. Les scores IFBench OpenRouter sont absolus et issus d’un passage complet unique des 300 consignes.",
     "details.sd": "Pour les benchmarks répétés cinq fois, l’écart-type d’échantillon s = √[Σ(xᵢ − x̄)² / (5 − 1)] est calculé sur les cinq scores moyens de run ; pour Δ, sur les cinq différences appariées. IFBench n’a qu’un passage : son écart-type entre runs n’est pas calculable.",
     "details.reading": "Comparez les modèles à l'intérieur d'un même benchmark : les scores entre colonnes ne sont pas équivalents.",
     "details.claims": "Les pertes annoncées par les éditeurs ne sont pas référencées.",
@@ -156,7 +161,8 @@ const messages = {
     "results.scoreDescription.hle": "Accuracy on the text-only subset of Humanity’s Last Exam using the official judge.",
     "results.scoreDescription.livecodebench_v6": "Execution-checked pass@1 on LiveCodeBench v6.",
     "results.scoreDescription.automationbench": "Rate of AutomationBench tasks completed correctly using simulated tools.",
-    "results.scoreDescription.toolsandbox": "Task success in ToolSandbox multi-turn tool-use scenarios.",
+    "results.scoreDescription.toolsandbox": "Official ToolSandbox scenario similarity, including milestones and minefield constraints.",
+    "results.scoreDescription.personagym": "Official PersonaScore, averaged over 200 personas and mapped from 1–5 to 0–100.",
     "results.deltaDescription": "Quantized − paired BF16 change. A higher value means better preservation.",
     "table.model": "Model and variant",
     "results.runs": "5 runs · mean ± sample SD",
@@ -164,6 +170,10 @@ const messages = {
     "results.meanOnly": "5 runs · mean",
     "results.pairedMeanOnly": "5 paired runs · mean",
     "results.singlePass": "1 complete pass · 300 instructions · SD unavailable",
+    "results.singlePassLivecodebench": "1 complete pass · 1,055 problems · SD unavailable",
+    "results.singlePassAutomationbench": "1 complete pass · 600 tasks · SD unavailable",
+    "results.singlePassToolSandbox": "1 complete pass · SD unavailable",
+    "results.singlePassPersonaGym": "1 complete protocol · 200 personas · SD unavailable",
     "results.personagymCaption": "Persona fidelity evaluation · official protocol",
     "results.personagymStatus": "PersonaGym has not yet been run on this site's models.",
     "results.personagymDescription": "The full protocol covers 200 personas and 10,000 questions, with five score dimensions and LLM judges. No result is shown until this evaluation has been run.",
@@ -199,8 +209,8 @@ const messages = {
     "details.automationbench": "600 agent tasks across six domains, using 47 simulated SaaS tools · strict task completion.",
     "details.toolsandbox": "Multi-turn tool-use tasks · stateful environments · intermediate milestones.",
     "details.allCategory": "All provides access to every benchmark. Scores remain separate because tasks and scales differ.",
-    "details.personagym": "200 personas · 10,000 questions · expected action, action justification, linguistic habits, persona consistency, and toxicity. PersonaScore and task scores are on a 1–5 scale and produced by LLM judges. This benchmark has not yet been run on this page’s models.",
-    "details.protocol": "Δ = quantized GGUF score − same-model BF16 score · 5 paired runs. IFBench OpenRouter scores are absolute and use one complete pass over all 300 instructions.",
+    "details.personagym": "200 personas · 10,000 questions · expected action, action justification, linguistic habits, persona consistency, and toxicity. Officially judged PersonaScore and task scores are mapped to a 0–100 scale.",
+    "details.protocol": "Δ = quantized GGUF score − same-model BF16 score · 5 paired runs. LiveCodeBench reports one complete pass over 1,055 problems, without a run-level standard deviation. IFBench OpenRouter scores are absolute and use one complete pass over all 300 instructions.",
     "details.sd": "For benchmarks repeated five times, sample standard deviation s = √[Σ(xᵢ − x̄)² / (5 − 1)] is calculated across the five run-level mean scores; for Δ, across the five paired differences. IFBench has one pass, so its run-level standard deviation is unavailable.",
     "details.reading": "Compare models within one benchmark: scores across columns are not equivalent.",
     "details.claims": "Publisher-reported loss claims are not included.",
@@ -228,6 +238,27 @@ const metrics = {
     delta: "charactereval_delta_vs_bf16_mean_pp",
     deltaSd: "charactereval_delta_vs_bf16_sd_pp"
   },
+  personagym: {
+    mean: "personagym_persona_score_mean_100",
+    sd: "personagym_persona_score_sd_100",
+    runs: "personagym_n_runs",
+    examples: "personagym_n_examples",
+    passLabel: "results.singlePassPersonaGym"
+  },
+  automationbench: {
+    mean: "automationbench_task_success_mean_100",
+    sd: "automationbench_task_success_sd_100",
+    runs: "automationbench_n_runs",
+    examples: "automationbench_n_examples",
+    passLabel: "results.singlePassAutomationbench"
+  },
+  toolsandbox: {
+    mean: "toolsandbox_similarity_mean_100",
+    sd: "toolsandbox_similarity_sd_100",
+    runs: "toolsandbox_n_runs",
+    examples: "toolsandbox_n_examples",
+    passLabel: "results.singlePassToolSandbox"
+  },
   ifbench: {
     mean: "ifbench_prompt_accuracy_mean_100",
     sd: "ifbench_prompt_accuracy_sd_100",
@@ -240,7 +271,10 @@ const metrics = {
   },
   livecodebench_v6: {
     mean: "livecodebench_pass_at_1_mean_100",
-    sd: "livecodebench_pass_at_1_sd_100"
+    sd: "livecodebench_pass_at_1_sd_100",
+    runs: "livecodebench_n_runs",
+    examples: "livecodebench_n_examples",
+    passLabel: "results.singlePassLivecodebench"
   }
 };
 
@@ -332,7 +366,7 @@ function translate() {
   document.getElementById("result-runs-label").textContent = pendingBenchmark
     ? words["results.notRunLabel"]
     : metricRunCount === 1
-      ? words["results.singlePass"]
+      ? words[metrics[activeMetric].passLabel || "results.singlePass"]
       : deltaMode
         ? words[showStdDev ? "results.pairedRuns" : "results.pairedMeanOnly"]
         : words[showStdDev ? "results.runs" : "results.meanOnly"];
@@ -588,7 +622,7 @@ function deltaRows(metricKey) {
 
 function isPendingBenchmark(metricKey) {
   const key = metricKey || activeMetric;
-  return key === "personagym" || !benchmarkCatalog[key] || scoredRows(key).length === 0;
+  return !metrics[key] || !benchmarkCatalog[key] || scoredRows(key).length === 0;
 }
 
 function activeDeltaMode() {
@@ -764,9 +798,12 @@ function renderEnvironment(environment) {
   const hardware = environment.hardware || {};
   const gguf = environment.gguf_evaluation || {};
   const ggufHardware = gguf.hardware || {};
+  const q4 = environment.local_q4_benchmarks || {};
+  const q4Hardware = q4.hardware || {};
   const values = [
     ["MLX", hardware.chip, hardware.macos ? "macOS " + hardware.macos : ""],
     ["GGUF", ggufHardware.gpu, ggufHardware.os],
+    ["Q4 local", q4Hardware.gpu, q4Hardware.os],
     environment.openrouter ? ["OpenRouter", activeLanguage === "fr" ? "API hébergée" : "hosted API"] : []
   ].map(function (parts) { return parts.filter(Boolean).join(" · "); }).filter(Boolean);
   document.getElementById("environment-summary").textContent = values.join(" / ") || "MLX · GGUF";
