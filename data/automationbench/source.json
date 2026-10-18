@@ -8,7 +8,7 @@
   "excluded_examples": 200,
   "excluded_split": "simple",
   "metric": "Percentage of scored public tasks with task_completed_correctly = 1.0 (strict; partial credit is retained separately).",
-  "runtime": "OpenAI-compatible local llama-server endpoint",
+  "runtime": "Local llama-server endpoint using the OpenAI Chat Completions protocol",
   "max_steps": 50,
   "max_concurrent": 1
 }

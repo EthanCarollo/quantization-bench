@@ -1,2 +1,0 @@
-# Pinned scientific dependency used by LiveCodeBench's upstream testing_util.py.
-numpy==2.2.6

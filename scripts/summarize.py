@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build one scorecard for both RoleBench tracks and all model quantizations."""
+"""Build the scorecard from local model evaluations with complete results."""
 
 import csv
 import json
@@ -12,10 +12,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 RESULTS = ROOT / "results"
 SITE_DATA = ROOT / "site-data"
-REGISTRY = {
-    **json.loads((ROOT / "data" / "model_registry.json").read_text(encoding="utf-8")),
-    **json.loads((ROOT / "data" / "openrouter_models.json").read_text(encoding="utf-8")),
-}
+REGISTRY = json.loads((ROOT / "data" / "model_registry.json").read_text(encoding="utf-8"))
 BENCHMARKS = (
     "rolebench_generalization",
     "rolebench_role_specific",
@@ -61,22 +58,10 @@ VARIANTS = (
         "quantization": {"format": "GGUF", "type": "Q4_K_M"},
         "required": False,
     },
-    {
-        "suffix": "openrouter",
-        "label": "OpenRouter",
-        "tag": "openrouter",
-        "method": "OpenRouter hosted model",
-        "quantization": {"format": "OpenRouter", "type": "Hosted"},
-        "required": False,
-    },
 )
 ADDITIONAL_BENCHMARKS = {
     "ifbench": ("prompt_loose_accuracy_100", 300, "prompt_loose_accuracy_100"),
-    "hle": ("accuracy_100", None, None),
-    "livecodebench_v6": ("pass_at_1_100", 1055, None),
     "automationbench": ("task_success_mean_100", 600, "task_success_100"),
-    "toolsandbox": ("similarity_mean_100", 1032, "scenario_similarity_100"),
-    "personagym": ("persona_score_mean_100", 200, "persona_score_mean_100"),
 }
 
 
@@ -144,74 +129,47 @@ def summarize_charactereval(model_key: str, variant: dict) -> tuple[float, float
     return statistics.mean(per_run), statistics.stdev(per_run)
 
 
-def summarize_optional(
+def summarize_single_pass(
     model_key: str, variant: dict, benchmark: str
-) -> tuple[float, float | None, int, int] | None:
+) -> tuple[float, int, int] | None:
     metric, expected_examples, item_metric = ADDITIONAL_BENCHMARKS[benchmark]
     stem = f"{model_key}_{benchmark}_{variant['suffix']}"
-    path = RESULTS / f"{stem}_runs.jsonl"
-    if not path.is_file():
+    run_path = RESULTS / f"{stem}_runs.jsonl"
+    item_path = RESULTS / f"{stem}.jsonl"
+    if not run_path.is_file() and not item_path.is_file():
         return None
-    runs = read_jsonl(path)
-    run_count = len(runs)
-    expected_repetitions = (
-        {1} if benchmark in {"ifbench", "livecodebench_v6", "automationbench", "toolsandbox", "personagym"} and run_count == 1
-        else {1, 2, 3, 4, 5} if run_count == 5
-        else set()
-    )
-    if not expected_repetitions or {run.get("repetition") for run in runs} != expected_repetitions:
-        return None
-    if any(
+    if not run_path.is_file() or not item_path.is_file():
+        raise SystemExit(f"Incomplete local results for {stem}")
+    runs = read_jsonl(run_path)
+    items = read_jsonl(item_path)
+    if len(runs) != 1 or runs[0].get("repetition") != 1:
+        raise SystemExit(f"Expected one complete local pass for {stem}")
+    run = runs[0]
+    if (
         run.get("benchmark") != benchmark
         or run.get("model_key") != model_key
         or run.get("quantization") != variant["quantization"]
-        for run in runs
+        or run.get("n_examples") != expected_examples
+        or len(items) != expected_examples
     ):
-        return None
-    counts = {run.get("n_examples") for run in runs}
-    if len(counts) != 1 or None in counts:
-        return None
-    n_examples = counts.pop()
-    if expected_examples is not None and n_examples != expected_examples:
-        return None
-    if item_metric is not None:
-        item_path = RESULTS / f"{stem}.jsonl"
-        if not item_path.is_file():
-            return None
-        items = read_jsonl(item_path)
-        repetitions = {run["repetition"] for run in runs}
-        item_keys = {(item.get("repetition"), item.get("item_id")) for item in items}
-        if (
-            not items
-            or (expected_examples is not None and len(items) != expected_examples * run_count)
-            or len(item_keys) != len(items)
-            or any(
-                item.get("benchmark") != benchmark
-                or item.get("model_key") != model_key
-                or item.get("repetition") not in repetitions
-                or not isinstance(item.get(item_metric), (int, float))
-                for item in items
-            )
-        ):
-            return None
-        for run in runs:
-            run_items = [item for item in items if item.get("repetition") == run["repetition"]]
-            if (
-                not run_items
-                or (expected_examples is not None and len(run_items) != expected_examples)
-                or len({item.get("item_id") for item in run_items}) != len(run_items)
-                or not math.isclose(
-                    statistics.mean(item[item_metric] for item in run_items),
-                    run[metric],
-                    abs_tol=1e-9,
-                )
-            ):
-                return None
-    values = [run.get(metric) for run in sorted(runs, key=lambda run: run["repetition"])]
-    if any(not isinstance(value, (int, float)) or not math.isfinite(value) or not 0 <= value <= 100 for value in values):
-        return None
-    deviation = statistics.stdev(values) if run_count > 1 else None
-    return statistics.mean(values), deviation, run_count, n_examples
+        raise SystemExit(f"Model, format, or example count does not match the local protocol for {stem}")
+    if any(
+        item.get("benchmark") != benchmark
+        or item.get("model_key") != model_key
+        or item.get("quantization") != variant["quantization"]
+        or item.get("repetition") != 1
+        or not isinstance(item.get(item_metric), (int, float))
+        for item in items
+    ):
+        raise SystemExit(f"Invalid local result rows for {stem}")
+    if len({item.get("item_id") for item in items}) != expected_examples:
+        raise SystemExit(f"Duplicate or missing examples in {stem}")
+    mean = statistics.mean(item[item_metric] for item in items)
+    if not math.isclose(mean, run[metric], abs_tol=1e-9):
+        raise SystemExit(f"Run summary does not match raw item scores for {stem}")
+    if not isinstance(mean, (int, float)) or not math.isfinite(mean) or not 0 <= mean <= 100:
+        raise SystemExit(f"Invalid score in {stem}")
+    return mean, 1, expected_examples
 
 
 def site_run_scores(model_key: str, variant: dict, benchmark: str) -> list[float]:
@@ -233,12 +191,6 @@ def site_run_scores(model_key: str, variant: dict, benchmark: str) -> list[float
     return [run["macro_rouge_l_f1"] * 100.0 for run in sorted(runs, key=lambda run: run["repetition"])]
 
 
-def render_optional(value: tuple[float, float | None] | None) -> str:
-    if value is None:
-        return "—"
-    return f"{value[0]:.2f}" if value[1] is None else f"{value[0]:.2f} ± {value[1]:.2f}"
-
-
 def render_score(value: tuple[float, float | None] | None) -> str:
     if value is None:
         return "—"
@@ -249,10 +201,7 @@ def main() -> None:
     rows = []
     for model_key, model in REGISTRY.items():
         supported_variants = set(
-            model.get(
-                "scorecard_variants",
-                (variant["suffix"] for variant in VARIANTS if variant["suffix"] != "openrouter"),
-            )
+            model.get("scorecard_variants", (variant["suffix"] for variant in VARIANTS))
         )
         for variant in VARIANTS:
             if variant["suffix"] not in supported_variants:
@@ -277,24 +226,10 @@ def main() -> None:
                 "ifbench_n_examples": None,
                 "ifbench_truncated_responses": None,
                 "ifbench_max_new_tokens": None,
-                "ifbench_reasoning_effort": None,
-                "ifbench_api_cost_usd": None,
-                "hle_accuracy_mean_100": None,
-                "hle_accuracy_sd_100": None,
-                "livecodebench_pass_at_1_mean_100": None,
-                "livecodebench_pass_at_1_sd_100": None,
                 "automationbench_task_success_mean_100": None,
                 "automationbench_task_success_sd_100": None,
                 "automationbench_n_runs": None,
                 "automationbench_n_examples": None,
-                "toolsandbox_similarity_mean_100": None,
-                "toolsandbox_similarity_sd_100": None,
-                "toolsandbox_n_runs": None,
-                "toolsandbox_n_examples": None,
-                "personagym_persona_score_mean_100": None,
-                "personagym_persona_score_sd_100": None,
-                "personagym_n_runs": None,
-                "personagym_n_examples": None,
                 "parameters": model["parameter_label"],
                 "model_key": model_key,
                 "variant": variant["suffix"],
@@ -306,34 +241,24 @@ def main() -> None:
             charactereval = summarize_charactereval(model_key, variant)
             if charactereval is not None:
                 row["charactereval_mean_100"], row["charactereval_sd_100"] = charactereval
-            for benchmark in ADDITIONAL_BENCHMARKS:
-                optional = summarize_optional(model_key, variant, benchmark)
-                prefix = {
-                    "ifbench": "ifbench_prompt_accuracy",
-                    "hle": "hle_accuracy",
-                    "livecodebench_v6": "livecodebench_pass_at_1",
-                    "automationbench": "automationbench_task_success",
-                    "toolsandbox": "toolsandbox_similarity",
-                    "personagym": "personagym_persona_score",
-                }[benchmark]
+            for benchmark, (prefix, metric) in {
+                "ifbench": ("ifbench_prompt_accuracy", "prompt_loose_accuracy_100"),
+                "automationbench": ("automationbench_task_success", "task_success_mean_100"),
+            }.items():
+                optional = summarize_single_pass(model_key, variant, benchmark)
                 if optional is not None:
-                    mean, deviation, run_count, n_examples = optional
+                    mean, run_count, n_examples = optional
                     row[f"{prefix}_mean_100"] = mean
-                    row[f"{prefix}_sd_100"] = deviation
+                    row[f"{prefix}_sd_100"] = None
                     row[f"{benchmark}_n_runs"] = run_count
                     row[f"{benchmark}_n_examples"] = n_examples
+                    run_path = RESULTS / f"{model_key}_{benchmark}_{variant['suffix']}_runs.jsonl"
+                    run = read_jsonl(run_path)[0]
                     if benchmark == "ifbench":
-                        run_path = RESULTS / f"{model_key}_{benchmark}_{variant['suffix']}_runs.jsonl"
-                        run = read_jsonl(run_path)[0]
                         row["ifbench_truncated_responses"] = run.get("truncated_responses")
                         row["ifbench_max_new_tokens"] = run.get("max_new_tokens")
-                        row["ifbench_reasoning_effort"] = run.get("reasoning_effort")
-                        row["ifbench_api_cost_usd"] = run.get("api_cost_usd")
             rows.append(row)
 
-    # Compare GGUF quantizations with the same model's GGUF BF16 runs. MLX rows
-    # stay blank: this dataset has no MLX BF16 reference, so that delta would
-    # mix quantization and runtime/format changes.
     variants_by_suffix = {variant["suffix"]: variant for variant in VARIANTS}
     site_benchmarks = (*BENCHMARKS, "charactereval")
     for row in rows:
@@ -379,11 +304,11 @@ def main() -> None:
     lines = [
         "# Model benchmark scorecard",
         "",
-        "RoleBench and CharacterEval show the mean ± sample standard deviation across five run-level means. IFBench, LiveCodeBench, AutomationBench, ToolSandbox, and PersonaGym use one complete pass per model; their single-pass scores have no run-level standard deviation. A dash means no complete result is available.",
-        "RoleBench uses ROUGE-L F1 multiplied by 100; CharacterEval uses CharacterRM mapped to 0–100; IFBench uses loose accuracy; HLE uses text-only judge accuracy; LiveCodeBench uses execution-checked pass@1; AutomationBench uses strict task completion; ToolSandbox uses official scenario similarity, including minefield constraints; PersonaGym uses average PersonaScore mapped from 1–5 to 0–100.",
+        "All rows are local model evaluations. RoleBench and CharacterEval report the mean ± sample standard deviation across five runs; IFBench and AutomationBench report one complete pass, so no run-level standard deviation is available. A dash means that model variant has no complete result for that benchmark.",
+        "RoleBench uses ROUGE-L F1 × 100; CharacterEval uses CharacterRM mapped from 1–5 to 0–100; IFBench uses official loose accuracy; AutomationBench uses strict task completion. Scores belong to separate benchmarks and should be compared only within the same column.",
         "",
-        "| Model variant | RoleBench generalization — ROUGE-L /100 | RoleBench role-specific — ROUGE-L /100 | CharacterEval — CharacterRM /100 | IFBench — loose /100 | HLE text-only — accuracy /100 | LiveCodeBench v6 — pass@1 /100 | AutomationBench — strict completion /100 | ToolSandbox — scenario similarity /100 | PersonaGym — PersonaScore /100 | Parameters |",
-        "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
+        "| Model variant | RoleBench generalization — ROUGE-L /100 | RoleBench role-specific — ROUGE-L /100 | CharacterEval — CharacterRM /100 | IFBench — loose /100 | AutomationBench — strict completion /100 | Parameters |",
+        "|---|---:|---:|---:|---:|---:|---:|",
     ]
     for row in rows:
         general = render_score(
@@ -401,45 +326,25 @@ def main() -> None:
                 row["charactereval_mean_100"], row["charactereval_sd_100"]
             )
         )
-        ifbench = render_optional(
+        ifbench = render_score(
             None if row["ifbench_prompt_accuracy_mean_100"] is None else (
                 row["ifbench_prompt_accuracy_mean_100"], row["ifbench_prompt_accuracy_sd_100"]
             )
         )
-        hle = render_optional(
-            None if row["hle_accuracy_mean_100"] is None else (
-                row["hle_accuracy_mean_100"], row["hle_accuracy_sd_100"]
-            )
-        )
-        livecodebench = render_optional(
-            None if row["livecodebench_pass_at_1_mean_100"] is None else (
-                row["livecodebench_pass_at_1_mean_100"], row["livecodebench_pass_at_1_sd_100"]
-            )
-        )
-        automationbench = render_optional(
+        automationbench = render_score(
             None if row["automationbench_task_success_mean_100"] is None else (
                 row["automationbench_task_success_mean_100"], row["automationbench_task_success_sd_100"]
             )
         )
-        toolsandbox = render_optional(
-            None if row["toolsandbox_similarity_mean_100"] is None else (
-                row["toolsandbox_similarity_mean_100"], row["toolsandbox_similarity_sd_100"]
-            )
-        )
-        personagym = render_optional(
-            None if row["personagym_persona_score_mean_100"] is None else (
-                row["personagym_persona_score_mean_100"], row["personagym_persona_score_sd_100"]
-            )
-        )
         lines.append(
             f"| {row['model_tag']} | {general} | {specific} | {charactereval} | "
-            f"{ifbench} | {hle} | {livecodebench} | {automationbench} | {toolsandbox} | {personagym} | {row['parameters']} |"
+            f"{ifbench} | {automationbench} | {row['parameters']} |"
         )
     lines += [
         "",
-        "MLX variants use affine weight quantization with group size 64. GGUF variants use llama.cpp BF16, Q8_0, or Q4_K_M files. OpenRouter entries are hosted APIs, not local quantizations; their same-model BF16 delta is unavailable. IFBench uses the same 300 prompts and official verifier for each hosted model at temperature 0; reasoning effort and maximum output tokens vary by model and are recorded with each result.",
+        "MLX variants use affine weight quantization with group size 64. GGUF variants use llama.cpp BF16, Q8_0, or Q4_K_M files. IFBench scores use the official verifier over all 300 prompts at temperature 0. AutomationBench scores use the strict completion flag over all 600 scored public tasks.",
         "",
-        "RoleBench ROUGE-L measures wording overlap with one RoleGPT reference, not role-play quality as a percentage. CharacterEval scores come from the authors' human-annotated CharacterRM; they are averaged equally across the 12 dimensions covered by the fixed subset and linearly mapped from 1–5 to 0–100. IFBench reports official prompt-level loose accuracy; HLE reports the official judge accuracy over the text-only subset; LiveCodeBench reports one full execution-checked pass@1 score; AutomationBench reports strict task completion; ToolSandbox reports the official scenario similarity; PersonaGym reports the official PersonaScore. These scores use different datasets and evaluators and should be compared only within each column.",
+        "RoleBench ROUGE-L measures wording overlap with one RoleGPT reference, not role-play quality as a percentage. CharacterEval scores use the authors' BaichuanCharRM reward model and weight the 12 covered dimensions equally. These metrics have different datasets and evaluators; do not compare scores across columns.",
         "",
     ]
     summary_md.write_text("\n".join(lines), encoding="utf-8")

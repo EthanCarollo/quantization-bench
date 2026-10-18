@@ -117,7 +117,7 @@
     }
   ],
   "benchmark": {
-    "name": "RoleBench and CharacterEval fixed-subset comparison",
+    "name": "Local model benchmark suite",
     "tracks": [
       {
         "name": "RoleBench generalization",
@@ -352,73 +352,6 @@
       "cpu_memory_limit": "14GiB"
     }
   },
-  "openrouter": {
-    "runtime": "OpenRouter Chat Completions API",
-    "models": [
-      {
-        "id": "openai/gpt-6-luna",
-        "reasoning_effort": "xhigh",
-        "max_output_tokens": {
-          "rolebench": 512
-        }
-      },
-      {
-        "id": "deepseek/deepseek-v4.1-flash",
-        "reasoning_effort": "none",
-        "max_output_tokens": 512
-      },
-      {
-        "id": "meta/muse-spark-1.3-contributor",
-        "provider": "Meta",
-        "reasoning_effort": "low",
-        "max_output_tokens": {
-          "rolebench": 1024
-        },
-        "seed_sent": false,
-        "notes": "Reasoning low; API does not accept seed. Empty responses are scored as returned."
-      },
-      {
-        "id": "deepseek/deepseek-v4-flash-0731",
-        "provider": "Alibaba",
-        "reasoning_effort": "none",
-        "max_output_tokens": {
-          "rolebench": 512
-        },
-        "seed_sent": true
-      },
-      {
-        "id": "deepseek/deepseek-v3.2",
-        "provider": "DeepInfra",
-        "provider_routing": "Pinned to DeepInfra with fallbacks disabled for all 100 published generations.",
-        "reasoning_effort": "none",
-        "max_output_tokens": {
-          "rolebench": 512
-        },
-        "seed_sent": true
-      }
-    ],
-    "benchmarks": [
-      "rolebench_generalization",
-      "rolebench_role_specific"
-    ],
-    "repetitions": 5,
-    "successful_generations": 500,
-    "api_responses_including_discarded_attempts": 685,
-    "recorded_spend_usd_rounded": 0.111,
-    "spend_limit_usd": 0.5,
-    "temperature": 1.0,
-    "top_p": 0.95,
-    "top_k": 64,
-    "discarded_charactereval_generations": 120,
-    "spend_scope_note": "Recorded spend includes 120 CharacterEval generations discarded before scoring, all 500 published RoleBench generations, and discarded preliminary provider-route responses. The DeepSeek V3.2 published results use a single pinned DeepInfra route; failed 429 retries that returned no generation are excluded from api_responses_including_discarded_attempts.",
-    "discarded_provider_route_generations": {
-      "deepseek/deepseek-v3.2": {
-        "google_vertex_mixed_routes": 38,
-        "google_vertex_discarded_before_deepinfra_rerun": 15,
-        "published_route": "DeepInfra"
-      }
-    }
-  },
   "local_q4_benchmarks": {
     "captured_at_utc": "2026-10-17T08:14:24Z",
     "hardware": {
@@ -439,36 +372,38 @@
       "quantization": "GGUF Q4_K_M"
     },
     "benchmark_settings": {
-      "livecodebench_v6": {
-        "context_size": 8192,
-        "repetitions": 1,
-        "temperature": 0.2,
-        "top_p": 0.95,
-        "max_new_tokens": 2000,
-        "thinking": false,
-        "execution_sandbox": "Bubblewrap 0.11.1",
-        "sandbox_limits": "Private user/PID/network namespaces, read-only filesystem mounts, 128 MiB tmpfs, RLIMIT_CPU=6s, RLIMIT_AS=2 GiB, RLIMIT_NPROC=64; no separate CPU quota"
-      },
       "automationbench": {
         "context_size": 16384,
         "max_steps": 50,
         "max_concurrent": 1
       },
-      "toolsandbox": {
+      "gpu_layer_policy": "Auto-selected per model to avoid CUDA out-of-memory failures; the selected layer count is recorded in each result.",
+      "ifbench": {
         "context_size": 8192,
-        "agent": "local OpenAI-compatible tool-call API",
-        "user_simulator": "GPT-4o (2024-05-13)",
-        "processes": 1
-      },
-      "personagym": {
-        "context_size": 8192,
-        "agent": "local OpenAI-compatible chat API",
-        "judge_models": [
-          "gpt-4o-2024-05-13",
-          "meta-llama/Llama-3-70b-chat-hf via Together"
-        ]
-      },
-      "gpu_layer_policy": "Auto-selected per model to avoid CUDA out-of-memory failures; the selected layer count is recorded in each result."
+        "repetitions": 1,
+        "temperature": 0.0,
+        "max_new_tokens": 4096,
+        "thinking": false
+      }
+    }
+  },
+  "additional_local_evaluations": {
+    "ifbench": {
+      "dataset_revision": "2e8a48de45ff3bf41242f927254ca81b59ca3ae2",
+      "verifier_revision": "1c40f0c10d9b5c5c2f10a175a28007ebb64f7f4d",
+      "examples": 300,
+      "passes_per_variant": 1,
+      "runtime": "llama.cpp / mlx-lm",
+      "temperature": 0.0,
+      "max_new_tokens": 4096
+    },
+    "automationbench": {
+      "source_revision": "4a8e1061254004d9dac807054eed33fad7d1ff14",
+      "examples": 600,
+      "passes_per_variant": 1,
+      "runtime": "local llama-server",
+      "max_steps": 50,
+      "max_concurrent": 1
     }
   }
 }

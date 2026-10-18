@@ -6,4 +6,6 @@ The test prompts are distributed under ODC-BY-1.0; cite the benchmark authors an
 
 IFBench reports prompt-level loose accuracy by default. This is an exact verifier score on a 0–100 scale, not a human rating. The official paper evaluates at temperature 0.
 
+All model evaluations published here run locally. Hosted API results are not included.
+
 Source: [allenai/IFBench](https://github.com/allenai/IFBench) and [allenai/IFBench_test](https://huggingface.co/datasets/allenai/IFBench_test).
