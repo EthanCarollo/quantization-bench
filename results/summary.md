@@ -27,6 +27,7 @@ RoleBench uses ROUGE-L F1 × 100; CharacterEval uses CharacterRM mapped from 1�
 | lfm2.5-2.6b@bf16 | 18.95 ± 3.63 | 11.04 ± 0.62 | 48.13 ± 6.04 | — | — | 2.69B total (model card) |
 | lfm2.5-2.6b@q8_0 | 19.24 ± 0.93 | 11.61 ± 0.62 | 45.12 ± 4.88 | — | — | 2.69B total (model card) |
 | lfm2.5-2.6b@q4_k_m | 19.56 ± 3.69 | 11.03 ± 0.58 | 42.61 ± 10.99 | — | — | 2.69B total (model card) |
+| mellum2.1-12b-a2.5b@q4_k_m | 17.18 ± 5.73 | 12.81 ± 0.82 | — | 30.33 | — | 12B total (2.5B active per token) |
 
 MLX variants use affine weight quantization with group size 64. GGUF variants use llama.cpp BF16, Q8_0, or Q4_K_M files. IFBench scores use the official verifier over all 300 prompts at temperature 0. AutomationBench scores use the strict completion flag over all 600 scored public tasks.
 

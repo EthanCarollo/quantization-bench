@@ -22,7 +22,9 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--model", choices=REGISTRY, required=True)
     parser.add_argument("--port", type=int, default=8080)
-    parser.add_argument("--context-size", type=int, default=16384)
+    parser.add_argument("--context-size", type=int, default=32768)
+    parser.add_argument("--parallel", type=int, default=2, help="Concurrent local inference requests.")
+    parser.add_argument("--max-concurrent", type=int, default=2, help="AutomationBench tasks evaluated concurrently.")
     args = parser.parse_args()
 
     model_info = REGISTRY[args.model]
@@ -44,7 +46,7 @@ def main() -> None:
     raw_path.parent.mkdir(parents=True, exist_ok=True)
     results_path.parent.mkdir(parents=True, exist_ok=True)
 
-    with LlamaServer(model_path, port=args.port, context_size=args.context_size) as server:
+    with LlamaServer(model_path, port=args.port, context_size=args.context_size, parallel=args.parallel) as server:
         subprocess.run(
             [
                 str(executable),
@@ -54,7 +56,7 @@ def main() -> None:
                 "--num-examples", "-1",
                 "--domains", ",".join(SOURCE["scored_domains"]),
                 "--max-steps", str(SOURCE["max_steps"]),
-                "--max-concurrent", str(SOURCE["max_concurrent"]),
+                "--max-concurrent", str(args.max_concurrent),
                 "--save-every", "1",
                 "--export-json", str(raw_path),
             ],
@@ -81,6 +83,8 @@ def main() -> None:
                 "runtime": "llama.cpp",
                 "quantization": QUANTIZATION,
                 "context_size": args.context_size,
+                "parallel_requests": args.parallel,
+                "max_concurrent": args.max_concurrent,
                 "gpu_layers": server.gpu_layers,
                 "repetition": 1,
                 "item_id": index,
@@ -106,7 +110,8 @@ def main() -> None:
         "context_size": args.context_size,
         "gpu_layers": server.gpu_layers,
         "max_steps": SOURCE["max_steps"],
-        "max_concurrent": SOURCE["max_concurrent"],
+        "max_concurrent": args.max_concurrent,
+        "parallel_requests": args.parallel,
         "repetition": 1,
         "n_examples": len(item_rows),
         "task_success_mean_100": score,

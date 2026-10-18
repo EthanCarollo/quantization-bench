@@ -2,6 +2,7 @@
 """Run the five-repeat RoleBench and CharacterEval scorecard for pinned GGUF models."""
 
 import argparse
+from concurrent.futures import ThreadPoolExecutor
 import json
 import os
 import socket
@@ -138,6 +139,18 @@ def post_chat(
     return content.strip(), result.get("usage", {})
 
 
+def timed_post_chat(
+    base_url: str,
+    messages: list[dict],
+    max_tokens: int,
+    seed: int,
+    reasoning_budget_tokens: int | None = None,
+) -> tuple[str, dict, float]:
+    started = time.perf_counter()
+    response, usage = post_chat(base_url, messages, max_tokens, seed, reasoning_budget_tokens)
+    return response, usage, time.perf_counter() - started
+
+
 def item_filename(model_key: str, benchmark: str, variant: str) -> Path:
     return ROOT / "results" / f"{model_key}_{benchmark}_{variant}.jsonl"
 
@@ -164,6 +177,8 @@ def run_rolebench(
     base_url: str,
     model_size_gib: float,
     scorer: RougeScorer,
+    parallel: int,
+    context_size: int,
 ) -> None:
     dataset_dir = ROOT / "data" / BENCHMARK_DIRS[benchmark]
     data_path = dataset_dir / "rolebench.jsonl"
@@ -187,32 +202,72 @@ def run_rolebench(
     output_path.parent.mkdir(parents=True, exist_ok=True)
     try:
         with tmp_output.open("w", encoding="utf-8") as raw_file, tmp_run.open("w", encoding="utf-8") as run_file:
-            for repetition in range(1, 6):
-                seed = SEED_BASE + repetition - 1
-                scores = []
-                for index, row in enumerate(rows, start=1):
-                    messages = [
-                        {
-                            "role": "system",
-                            "content": SYSTEM_TEMPLATE.format(role=row["role"], description=row["description"]),
-                        },
-                        {"role": "user", "content": row["question"]},
+            with ThreadPoolExecutor(max_workers=parallel) as executor:
+                for repetition in range(1, 6):
+                    seed = SEED_BASE + repetition - 1
+                    scores = []
+                    messages_by_row = [
+                        [
+                            {
+                                "role": "system",
+                                "content": SYSTEM_TEMPLATE.format(role=row["role"], description=row["description"]),
+                            },
+                            {"role": "user", "content": row["question"]},
+                        ]
+                        for row in rows
                     ]
-                    started = time.perf_counter()
-                    response, usage = post_chat(
-                        base_url,
-                        messages,
-                        MAX_NEW_TOKENS,
-                        seed,
-                        model_info.get("reasoning_budget_tokens"),
+                    responses = executor.map(
+                        lambda messages: timed_post_chat(
+                            base_url, messages, MAX_NEW_TOKENS, seed, model_info.get("reasoning_budget_tokens")
+                        ),
+                        messages_by_row,
                     )
-                    elapsed = time.perf_counter() - started
-                    rouge_l_f1 = scorer.score(row["reference"], response)["rougeL"].fmeasure
-                    scores.append(rouge_l_f1)
-                    generation_tokens = usage.get("completion_tokens")
-                    result = {
+                    for index, (row, (response, usage, elapsed)) in enumerate(zip(rows, responses), start=1):
+                        rouge_l_f1 = scorer.score(row["reference"], response)["rougeL"].fmeasure
+                        scores.append(rouge_l_f1)
+                        generation_tokens = usage.get("completion_tokens")
+                        result = {
+                            "benchmark": benchmark,
+                            "dataset_revision": "a57ed54f9613921e4a5f1b63601a558cd5acf971",
+                            "model_key": model_key,
+                            "model_id": model_info["model_id"],
+                            "model_revision": model_info["revision"],
+                            "gguf_source": model_info.get("gguf_source"),
+                            "runtime": "llama.cpp",
+                            "runtime_version": LLAMA_CPP_COMMIT,
+                            "quantization": quantization,
+                            "repetition": repetition,
+                            "seed": seed,
+                            "item_id": row["id"],
+                            "role": row["role"],
+                            "question": row["question"],
+                            "reference": row["reference"],
+                            "response": response,
+                            "rouge_l_f1": rouge_l_f1,
+                            "prompt_tokens": usage.get("prompt_tokens"),
+                            "generation_tokens": generation_tokens,
+                            "decode_tps": generation_tokens / elapsed if generation_tokens and elapsed else None,
+                            "latency_seconds_including_prefill": elapsed,
+                            "model_size_gib": model_size_gib,
+                            "max_new_tokens": MAX_NEW_TOKENS,
+                            "temperature": TEMPERATURE,
+                            "top_p": TOP_P,
+                            "top_k": TOP_K,
+                            "thinking": False,
+                            "reasoning_budget_tokens": model_info.get("reasoning_budget_tokens"),
+                            "parallel_requests": parallel,
+                            "server_context_size": context_size,
+                        }
+                        raw_file.write(json.dumps(result, ensure_ascii=False, separators=(",", ":")) + "\n")
+                        raw_file.flush()
+                        print(
+                            f"{model_key}@{variant} {benchmark} run {repetition}/5, "
+                            f"item {index}/10: ROUGE-L={rouge_l_f1:.4f}, "
+                            f"{generation_tokens or '?'} tokens, {elapsed:.1f}s",
+                            flush=True,
+                        )
+                    run_summary = {
                         "benchmark": benchmark,
-                        "dataset_revision": "a57ed54f9613921e4a5f1b63601a558cd5acf971",
                         "model_key": model_key,
                         "model_id": model_info["model_id"],
                         "model_revision": model_info["revision"],
@@ -222,54 +277,19 @@ def run_rolebench(
                         "quantization": quantization,
                         "repetition": repetition,
                         "seed": seed,
-                        "item_id": row["id"],
-                        "role": row["role"],
-                        "question": row["question"],
-                        "reference": row["reference"],
-                        "response": response,
-                        "rouge_l_f1": rouge_l_f1,
-                        "prompt_tokens": usage.get("prompt_tokens"),
-                        "generation_tokens": generation_tokens,
-                        "decode_tps": generation_tokens / elapsed if generation_tokens and elapsed else None,
-                        "latency_seconds_including_prefill": elapsed,
-                        "model_size_gib": model_size_gib,
-                        "max_new_tokens": MAX_NEW_TOKENS,
-                        "temperature": TEMPERATURE,
-                        "top_p": TOP_P,
-                        "top_k": TOP_K,
-                        "thinking": False,
+                        "n_examples": len(scores),
+                        "macro_rouge_l_f1": statistics.mean(scores),
                         "reasoning_budget_tokens": model_info.get("reasoning_budget_tokens"),
+                        "parallel_requests": parallel,
+                        "server_context_size": context_size,
                     }
-                    raw_file.write(json.dumps(result, ensure_ascii=False, separators=(",", ":")) + "\n")
-                    raw_file.flush()
+                    run_file.write(json.dumps(run_summary, ensure_ascii=False, separators=(",", ":")) + "\n")
+                    run_file.flush()
                     print(
-                        f"{model_key}@{variant} {benchmark} run {repetition}/5, "
-                        f"item {index}/10: ROUGE-L={rouge_l_f1:.4f}, "
-                        f"{generation_tokens or '?'} tokens, {elapsed:.1f}s",
+                        f"Completed {model_key}@{variant} {benchmark} run {repetition}/5: "
+                        f"macro ROUGE-L={run_summary['macro_rouge_l_f1']:.4f}",
                         flush=True,
                     )
-                run_summary = {
-                    "benchmark": benchmark,
-                    "model_key": model_key,
-                    "model_id": model_info["model_id"],
-                    "model_revision": model_info["revision"],
-                    "gguf_source": model_info.get("gguf_source"),
-                    "runtime": "llama.cpp",
-                    "runtime_version": LLAMA_CPP_COMMIT,
-                    "quantization": quantization,
-                    "repetition": repetition,
-                    "seed": seed,
-                    "n_examples": len(scores),
-                    "macro_rouge_l_f1": statistics.mean(scores),
-                    "reasoning_budget_tokens": model_info.get("reasoning_budget_tokens"),
-                }
-                run_file.write(json.dumps(run_summary, ensure_ascii=False, separators=(",", ":")) + "\n")
-                run_file.flush()
-                print(
-                    f"Completed {model_key}@{variant} {benchmark} run {repetition}/5: "
-                    f"macro ROUGE-L={run_summary['macro_rouge_l_f1']:.4f}",
-                    flush=True,
-                )
         tmp_output.replace(output_path)
         tmp_run.replace(run_path)
     finally:
@@ -284,6 +304,8 @@ def run_charactereval(
     quantization: dict,
     base_url: str,
     model_size_gib: float,
+    parallel: int,
+    context_size: int,
 ) -> None:
     data_dir = ROOT / "data" / "charactereval-mini"
     data_path = data_dir / "charactereval.jsonl"
@@ -301,20 +323,17 @@ def run_charactereval(
     tmp_output = output_path.with_name(f".{output_path.name}.partial")
     output_path.parent.mkdir(parents=True, exist_ok=True)
     try:
-        with tmp_output.open("w", encoding="utf-8") as output:
+        with tmp_output.open("w", encoding="utf-8") as output, ThreadPoolExecutor(max_workers=parallel) as executor:
             for repetition in range(1, 6):
                 seed = CHARACTEREVAL_SEED_BASE + repetition - 1
-                for index, row in enumerate(rows, start=1):
-                    response_messages = messages_for_charactereval(row, profiles[row["role"]])
-                    started = time.perf_counter()
-                    full_response, usage = post_chat(
-                        base_url,
-                        response_messages,
-                        MAX_NEW_TOKENS,
-                        seed,
-                        model_info.get("reasoning_budget_tokens"),
-                    )
-                    elapsed = time.perf_counter() - started
+                messages_by_row = [messages_for_charactereval(row, profiles[row["role"]]) for row in rows]
+                responses = executor.map(
+                    lambda messages: timed_post_chat(
+                        base_url, messages, MAX_NEW_TOKENS, seed, model_info.get("reasoning_budget_tokens")
+                    ),
+                    messages_by_row,
+                )
+                for index, (row, (full_response, usage, elapsed)) in enumerate(zip(rows, responses), start=1):
                     response = full_response.splitlines()[0].strip() if full_response else ""
                     record = {
                         "benchmark": "charactereval",
@@ -346,6 +365,8 @@ def run_charactereval(
                         "top_k": TOP_K,
                         "thinking": False,
                         "reasoning_budget_tokens": model_info.get("reasoning_budget_tokens"),
+                        "parallel_requests": parallel,
+                        "server_context_size": context_size,
                     }
                     output.write(json.dumps(record, ensure_ascii=False, separators=(",", ":")) + "\n")
                     output.flush()
@@ -366,6 +387,8 @@ def main() -> None:
     parser.add_argument("--llama-cpp", type=Path, default=DEFAULT_LLAMA_CPP)
     parser.add_argument("--context-size", type=int, default=8192)
     parser.add_argument("--threads", type=int, default=6)
+    parser.add_argument("--parallel", type=int, default=1, help="Concurrent local inference requests.")
+    parser.add_argument("--skip-charactereval", action="store_true", help="Run only the two RoleBench tracks.")
     parser.add_argument("--server-log-dir", type=Path, default=Path(tempfile.gettempdir()) / "roleplay-bench-llama")
     args = parser.parse_args()
 
@@ -417,7 +440,7 @@ def main() -> None:
                 "--threads-batch",
                 str(args.threads),
                 "--parallel",
-                "1",
+                str(args.parallel),
                 "--flash-attn",
                 "on",
                 "--jinja",
@@ -462,15 +485,20 @@ def main() -> None:
                             base_url,
                             model_size_gib,
                             scorer,
+                            args.parallel,
+                            args.context_size,
                         )
-                    run_charactereval(
-                        model_key,
-                        model_info,
-                        variant,
-                        QUANTIZATIONS[variant],
-                        base_url,
-                        model_size_gib,
-                    )
+                    if not args.skip_charactereval:
+                        run_charactereval(
+                            model_key,
+                            model_info,
+                            variant,
+                            QUANTIZATIONS[variant],
+                            base_url,
+                            model_size_gib,
+                            args.parallel,
+                            args.context_size,
+                        )
                 finally:
                     process.terminate()
                     try:

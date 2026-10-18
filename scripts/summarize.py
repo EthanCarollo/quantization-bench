@@ -265,6 +265,10 @@ def main() -> None:
         variant = variants_by_suffix[row["variant"]]
         is_gguf = variant["suffix"].startswith("gguf_")
         baseline = variants_by_suffix["gguf_bf16"]
+        model = REGISTRY[row["model_key"]]
+        supported_variants = set(
+            model.get("scorecard_variants", (item["suffix"] for item in VARIANTS))
+        )
         for benchmark in site_benchmarks:
             prefix = f"{benchmark}_delta_vs_bf16"
             mean_key, sd_key = f"{prefix}_mean_pp", f"{prefix}_sd_pp"
@@ -274,6 +278,8 @@ def main() -> None:
                 continue
             if variant["suffix"] == "gguf_bf16":
                 row[mean_key], row[sd_key] = 0.0, 0.0
+                continue
+            if baseline["suffix"] not in supported_variants:
                 continue
             if row[f"{benchmark}_mean_100"] is None:
                 continue

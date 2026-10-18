@@ -2,6 +2,7 @@
 """Run the pinned IFBench test split against local llama.cpp GGUF models."""
 
 import argparse
+from concurrent.futures import ThreadPoolExecutor
 import json
 import os
 import socket
@@ -103,6 +104,13 @@ def post_chat(base_url: str, prompt: str, seed: int) -> tuple[str, dict, str | N
     return content.strip(), result.get("usage", {}), choice.get("finish_reason")
 
 
+def timed_post_chat(base_url: str, row: dict, seed: int) -> tuple[str, dict, str | None, list[bool], float]:
+    started = time.perf_counter()
+    response, usage, finish_reason = post_chat(base_url, row["prompt"], seed)
+    checks = loose_following(row, response)
+    return response, usage, finish_reason, checks, time.perf_counter() - started
+
+
 def wait_for_server(process: subprocess.Popen, base_url: str, log_path: Path) -> None:
     deadline = time.monotonic() + 900
     while time.monotonic() < deadline:
@@ -163,7 +171,7 @@ def run_variant(model_key: str, variant: str, args) -> None:
         str(server), "--model", str(model_path), "--alias", "local",
         "--host", "127.0.0.1", "--port", str(port), "--ctx-size", str(args.context_size),
         "--fit", "on", "--threads", str(args.threads),
-        "--threads-batch", str(args.threads), "--parallel", "1",
+        "--threads-batch", str(args.threads), "--parallel", str(args.parallel),
         "--flash-attn", "on", "--jinja", "--no-webui",
     ]
     tmp_output = output_path.with_name(f".{output_path.name}.partial")
@@ -184,17 +192,14 @@ def run_variant(model_key: str, variant: str, args) -> None:
                 first_prompt = rows[0]["prompt"]
                 post_chat(base_url, first_prompt, SEED_BASE - 1)
                 print(f"Warm-up complete for {model_key}@{variant}.", flush=True)
-                with tmp_output.open("w", encoding="utf-8") as output, tmp_run.open("w", encoding="utf-8") as runs_file:
+                with tmp_output.open("w", encoding="utf-8") as output, tmp_run.open("w", encoding="utf-8") as runs_file, ThreadPoolExecutor(max_workers=args.parallel) as executor:
                     for repetition in range(1, args.repetitions + 1):
                         seed = SEED_BASE + repetition - 1
                         prompt_scores = []
                         instruction_scores = []
                         truncated = 0
-                        for index, row in enumerate(rows, start=1):
-                            started = time.perf_counter()
-                            response, usage, finish_reason = post_chat(base_url, row["prompt"], seed)
-                            elapsed = time.perf_counter() - started
-                            checks = loose_following(row, response)
+                        responses = executor.map(lambda row: timed_post_chat(base_url, row, seed), rows)
+                        for index, (row, (response, usage, finish_reason, checks, elapsed)) in enumerate(zip(rows, responses), start=1):
                             score = float(all(checks))
                             prompt_scores.append(score)
                             instruction_scores.extend(checks)
@@ -227,6 +232,8 @@ def run_variant(model_key: str, variant: str, args) -> None:
                                 "max_new_tokens": MAX_NEW_TOKENS,
                                 "temperature": 0.0,
                                 "thinking": False,
+                                "parallel_requests": args.parallel,
+                                "server_context_size": args.context_size,
                             }
                             output.write(json.dumps(result, ensure_ascii=False, separators=(",", ":")) + "\n")
                             output.flush()
@@ -256,6 +263,8 @@ def run_variant(model_key: str, variant: str, args) -> None:
                             "instruction_loose_accuracy_100": statistics.mean(instruction_scores) * 100.0,
                             "truncated_responses": truncated,
                             "max_new_tokens": MAX_NEW_TOKENS,
+                            "parallel_requests": args.parallel,
+                            "server_context_size": args.context_size,
                         }
                         runs_file.write(json.dumps(run, separators=(",", ":")) + "\n")
                         runs_file.flush()
@@ -287,6 +296,7 @@ def main() -> None:
     parser.add_argument("--llama-cpp", type=Path, default=DEFAULT_LLAMA_CPP)
     parser.add_argument("--context-size", type=int, default=8192)
     parser.add_argument("--threads", type=int, default=6)
+    parser.add_argument("--parallel", type=int, default=1, help="Concurrent local inference requests.")
     parser.add_argument("--server-log-dir", type=Path, default=Path(tempfile.gettempdir()) / "roleplay-bench-llama")
     args = parser.parse_args()
     args.llama_cpp = args.llama_cpp.resolve()

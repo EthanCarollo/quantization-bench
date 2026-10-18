@@ -100,5 +100,25 @@
       "gguf_q8_0": "LFM2.5-2.6B-Q8_0.gguf",
       "gguf_q4_k_m": "LFM2.5-2.6B-Q4_K_M.gguf"
     }
+  },
+  "mellum2_1_12b_a2_5b_thinking": {
+    "model_id": "JetBrains/Mellum2.1-12B-A2.5B-Thinking",
+    "revision": "92ddae9fc7665e9f801d141d2e5a6b2caf2460c4",
+    "slug": "mellum2.1-12b-a2.5b-thinking",
+    "short_name": "mellum2.1-12b-a2.5b",
+    "display_name": "Mellum2.1 12B A2.5B Thinking",
+    "parameter_label": "12B total (2.5B active per token)",
+    "license": "Apache-2.0",
+    "requires_hf_token": false,
+    "gguf_source": {
+      "model_id": "JetBrains/Mellum2.1-12B-A2.5B-Thinking-GGUF",
+      "revision": "20b439426f1e997ba575eaccaf4856ac0f76f5d5",
+      "q4_k_m_file": "Mellum2.1-12B-A2.5B-Thinking-Q4_K_M.gguf",
+      "quantizer": "JetBrains official Q4_K_M GGUF release"
+    },
+    "gguf_files": {
+      "gguf_q4_k_m": "Mellum2.1-12B-A2.5B-Thinking-Q4_K_M.gguf"
+    },
+    "scorecard_variants": ["gguf_q4_k_m"]
   }
 }

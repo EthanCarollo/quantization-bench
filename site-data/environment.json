@@ -405,5 +405,80 @@
       "max_steps": 50,
       "max_concurrent": 1
     }
+  },
+  "mellum2_1_local_q4_evaluation": {
+    "captured_at_utc": "2026-10-18T15:31:54Z",
+    "status": "in_progress",
+    "hardware": {
+      "gpu": "NVIDIA GeForce RTX 5060 Ti",
+      "gpu_vram_mib": 16311,
+      "system_ram_gib": 15.2,
+      "os": "Ubuntu 26.04 LTS x86_64 on WSL2"
+    },
+    "software": {
+      "python": "3.14.6",
+      "torch": "2.14.0+cu130",
+      "pytorch_cuda": "13.0",
+      "cuda_toolkit": "13.3.73",
+      "transformers": "5.17.0",
+      "accelerate": "1.15.0",
+      "llama_cpp": "529ac893e754e95a50469b2122f5efe28dfc08a0"
+    },
+    "model": {
+      "model_id": "JetBrains/Mellum2.1-12B-A2.5B-Thinking",
+      "revision": "92ddae9fc7665e9f801d141d2e5a6b2caf2460c4",
+      "gguf_source": "JetBrains/Mellum2.1-12B-A2.5B-Thinking-GGUF",
+      "gguf_revision": "20b439426f1e997ba575eaccaf4856ac0f76f5d5",
+      "file": "Mellum2.1-12B-A2.5B-Thinking-Q4_K_M.gguf",
+      "quantization": "GGUF Q4_K_M",
+      "file_size_bytes": 8071295264,
+      "sha256": "ecc4d5b8107fc219e23c494b2d107552137637b6c6002ee713e0ba8af7fa2755"
+    },
+    "build": {
+      "ggml_cuda": true,
+      "gpu_layer_policy": "llama.cpp fit on; auto-select layers based on available VRAM",
+      "generation_threads": 6
+    },
+    "benchmark_settings": {
+      "rolebench": {
+        "tracks": [
+          "generalization",
+          "role_specific"
+        ],
+        "examples_per_track": 10,
+        "repetitions": 5,
+        "parallel_requests": 2,
+        "context_size": 16384,
+        "max_new_tokens": 512,
+        "temperature": 1.0,
+        "top_p": 0.95,
+        "top_k": 64,
+        "thinking": false
+      },
+      "ifbench": {
+        "examples": 300,
+        "passes": 1,
+        "parallel_requests": 4,
+        "context_size": 32768,
+        "temperature": 0.0,
+        "max_new_tokens": 4096,
+        "thinking": false,
+        "truncated_responses": 64
+      },
+      "automationbench": {
+        "source_revision": "4a8e1061254004d9dac807054eed33fad7d1ff14",
+        "examples": 600,
+        "passes": 1,
+        "max_steps": 50,
+        "parallel_requests": 2,
+        "max_concurrent": 4,
+        "context_size": 65536,
+        "runtime": "local llama-server with local in-memory tool state",
+        "status": "in_progress"
+      },
+      "charactereval": {
+        "status": "deferred at user request; no Mellum result"
+      }
+    }
   }
 }

@@ -22,12 +22,14 @@ class LlamaServer:
         *,
         port: int = 8080,
         context_size: int = 8192,
-        gpu_layers: int | None = None,
+        parallel: int = 1,
+        gpu_layers: int | str | None = None,
         log_path: Path | None = None,
     ) -> None:
         self.model_path = model_path.resolve()
         self.port = port
         self.context_size = context_size
+        self.parallel = parallel
         self.gpu_layers = gpu_layers
         self.log_path = log_path or Path.home() / ".cache" / "quantization-bench" / f"llama-server-{port}.log"
         self.process: subprocess.Popen | None = None
@@ -43,7 +45,9 @@ class LlamaServer:
         if not self.model_path.is_file():
             raise SystemExit(f"Missing GGUF model: {self.model_path}")
         if self.gpu_layers is None:
-            self.gpu_layers = 24 if self.model_path.stat().st_size >= 4_500_000_000 else 99
+            # Let llama.cpp choose the largest layer count that fits the local GPU.
+            # A size-based layer limit went stale across machines with different VRAM.
+            self.gpu_layers = "auto"
         self.log_path.parent.mkdir(parents=True, exist_ok=True)
         self._log_file = self.log_path.open("w", encoding="utf-8")
         command = [
@@ -53,7 +57,8 @@ class LlamaServer:
             "--port", str(self.port),
             "--n-gpu-layers", str(self.gpu_layers),
             "--ctx-size", str(self.context_size),
-            "--parallel", "1",
+            "--parallel", str(self.parallel),
+            "--fit", "on",
             "--batch-size", "512",
             "--ubatch-size", "512",
             "--reasoning", "off",
